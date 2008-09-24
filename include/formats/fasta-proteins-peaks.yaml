@@ -1,0 +1,17 @@
+extensions: ['.fasta', '.fas']
+detection: |
+  lk_File = File.open(as_Filename, 'r')
+  ls_Line = lk_File.readline.strip
+  return false if ls_Line[0, 1] != '>' 
+  lk_Line = ls_Line.split(' ')
+  Integer(lk_Line[lk_Line.size - 1].strip) rescue return false
+  Float(lk_Line[lk_Line.size - 2].strip) rescue return false
+  Integer(lk_Line[lk_Line.size - 3].strip) rescue return false
+  ls_Line = lk_File.readline.strip
+  ls_Chars = 'ARNDCEQGHILKMFPSTWYV$*.'
+  (0...ls_Line.length).each do |i|
+    lc_Char = ls_Line[i, 1]
+    return false if !ls_Chars.include?(lc_Char)
+  end
+  return true
+description: FASTA (PEAKS de novo predicted peptides)

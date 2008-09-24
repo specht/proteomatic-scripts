@@ -1,0 +1,13 @@
+extensions: ['.fasta', '.fas']
+detection: |
+  lk_File = File.open(as_Filename, 'r')
+  ls_Line = lk_File.readline.strip
+  return false if ls_Line[0, 1] != '>' 
+  ls_Line = lk_File.readline.strip
+  ls_Chars = 'ACTGUN.'
+  (0...ls_Line.length).each do |i|
+    lc_Char = ls_Line[i, 1]
+    return false if !ls_Chars.include?(lc_Char)
+  end
+  return true
+description: FASTA (nucleotides)

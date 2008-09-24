@@ -1,0 +1,7 @@
+# ===================================
+# Configuration file for run-peaks.rb
+# ===================================
+# In order to use run-peaks.rb, please adjust the following values to your 
+# system and save this file with the '.template' part removed.
+
+peaksBatchJar: '/some/path/to/peaksbatch.jar'

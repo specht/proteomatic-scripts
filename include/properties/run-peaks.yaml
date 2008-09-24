@@ -1,0 +1,45 @@
+group: PEAKS
+
+title: Run PEAKS
+
+description: >
+  Run PEAKS on a set of MS/MS spectra.
+
+type: processor
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+    min: 1
+
+defaultOutputDirectory: spectra
+
+output:
+  - key: fasFile
+    label: PEAKS peptides
+    format: fasta-proteins
+    filename: peaks-results.fas
+    default: yes
+  - key: annFile
+    label: PEAKS annotation
+    format: xml-peaks-ann
+    filename: peaks-results.ann
+    default: no
+
+parameters:
+  - key: precursorIonTolerance
+    label: Precursor ion mass tolerance
+    type: float
+    default: 1.5
+    suffix: Da
+    min: 0.0
+  - key: productIonTolerance
+    label: Procuct ion mass tolerance
+    type: float
+    default: 1.0
+    suffix: Da
+    min: 0.0
+
+needs:
+  - config

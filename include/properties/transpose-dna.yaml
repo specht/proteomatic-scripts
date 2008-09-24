@@ -1,0 +1,14 @@
+group: AK Hippler
+
+title: Transpose DNA
+
+description: >
+  Transpose a piece of DNA.
+
+type: processor
+
+parameters:
+  - key: nucleotides
+    type: string
+    label: DNA
+    default: ''

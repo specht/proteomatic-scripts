@@ -1,0 +1,24 @@
+group: FASTA
+
+title: Merge FASTA databases
+
+description: >
+  Merge multiple FASTA databases into one. Redundancy is not being checked for.
+
+type: processor
+
+input:
+  - key: databases
+    label: FASTA database
+    formats: [fasta-proteins, fasta-nucleotides]
+    min: 2
+
+defaultOutputDirectory: databases
+
+output:
+  - key: merged
+    label: merged database
+    format: fasta-proteins
+    filename: out.fasta
+    default: yes
+    force: yes

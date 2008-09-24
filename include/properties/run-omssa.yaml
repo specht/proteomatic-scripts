@@ -1,0 +1,44 @@
+group: OMSSA
+
+title: Run OMSSA
+
+type: processor
+
+description: >
+  This script runs OMSSA on a given set of spectra files and databases. 
+  A target-decoy approach is used.
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+    min: 1
+  - key: databases
+    label: database
+    formats: [fasta-proteins]
+    min: 1
+
+defaultOutputDirectory: spectra
+    
+output:
+  - key: resultFile
+    label: OMSSA result file
+    format: csv
+    filename: omssa-results.csv
+    default: yes
+
+parameters:
+  - key: batchSize
+    group: Tweaks
+    label: Spectrum batch size
+    type: int
+    default: 2000
+    min: 1
+    
+externalParameters: 
+  - omssa.omssacl
+
+needs:
+  - ext.omssa
+  - ext.blast
+  - ext.xml2mgf

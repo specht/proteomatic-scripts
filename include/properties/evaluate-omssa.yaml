@@ -1,0 +1,48 @@
+group: OMSSA
+
+title: Evaluate OMSSA results
+
+description: >
+  Evaluate an OMSSA search at a certain target false positive ratio and create a HTML report.
+  If you specify multiple OMSSA result files, they will be merged before evaluation.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: spectra
+    label: spectra
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: omssa-report.html
+    default: yes
+  - key: identifiedPeptides
+    label: identified peptides
+    format: fasta-proteins
+    filename: identified-peptides.fasta
+    default: no
+  - key: amsFile
+    label: 2DB import file
+    format: ams
+    filename: 2db-import.ams
+    default: no
+
+parameters:
+  - key: targetFpr
+    group: Evaluation options
+    label: Target FPR
+    type: float
+    default: 0.1
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+    step: 0.1

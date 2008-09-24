@@ -1,0 +1,42 @@
+group: OMSSA
+
+title: Compare OMSSA Runs
+
+description: >
+  Compare OMSSA runs at a certain target false positive ratio.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: spectra
+    label: spectra
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: compare-omssa-report.html
+    default: no
+  - key: csvReport
+    label: CSV report
+    format: csv
+    filename: compare-omssa-report.csv
+    default: yes
+
+parameters:
+  - key: targetFpr
+    group: Evaluation options
+    label: Target FPR
+    type: float
+    default: 0.1
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+    step: 0.1

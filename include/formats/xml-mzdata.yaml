@@ -1,0 +1,9 @@
+extensions: ['.mzData', '.xml']
+detection: |
+  lk_File = File.open(as_Filename, 'r')
+  ls_Line = '<?'
+  while ls_Line[0, 2] == '<?'
+    ls_Line = lk_File.readline
+  end
+  return ls_Line[0, 7] == '<mzData'
+description: mzData

@@ -1,0 +1,13 @@
+title: GPF
+
+version: 0.1.1
+
+link: http://gpf.origo.ethz.ch/
+
+download:
+  linux: ftp://gpf.uni-muenster.de/gpf/gpf-0.1.1-linux.tar.bz2
+  windows: ftp://gpf.uni-muenster.de/gpf/gpf-0.1.1-windows.zip
+
+path:
+  linux: gpf-0.1.1-linux
+  windows: gpf-0.1.1-windows

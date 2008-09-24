@@ -1,0 +1,11 @@
+title: 7Zip
+
+version: 4.57
+
+link: http://www.7-zip.org
+
+download:
+  windows: 'http://mesh.dl.sourceforge.net/sourceforge/sevenzip/7za457.zip'
+
+path:
+  windows: 7za457

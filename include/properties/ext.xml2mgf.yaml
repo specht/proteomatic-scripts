@@ -1,0 +1,9 @@
+title: XML2MGF
+
+version: trunk
+
+link: ''
+
+path:
+  linux: xml2mgf-trunk
+  windows: xml2mgf-trunk

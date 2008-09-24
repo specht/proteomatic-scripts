@@ -1,0 +1,61 @@
+group: AK Hippler
+
+title: SIM Quantitation
+
+description: >
+   Perform quantitation on SIM scans. <br />All specified spots are searched against all specified peptides. Peptides may be specified via text files and additionally in the peptides input field.
+
+type: processor
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+    min: 1
+  - key: peptidesFile
+    label: peptides
+    formats: [txt]
+
+defaultOutputDirectory: spectra
+
+output:
+  - key: xhtmlReport
+    label: XHTML report
+    format: xhtml
+    filename: quantitation-results.xhtml
+    default: yes
+
+parameters:
+  - key: peptides
+    label: Peptides
+    description: Multiple peptides can be separated by spaces or commas.
+    default: ''
+    type: string
+  - key: modification
+    label: Modification
+    type: enum
+    default: argc13
+    choices: [argc13: 'heavy arginine']
+  - key: minCharge
+    label: Minimum charge
+    type: int
+    default: 2
+    min: 1
+    max: 10
+  - key: maxCharge
+    label: Maximum charge
+    type: int
+    default: 3
+    min: 1
+    max: 10
+  - key: cropUpper
+    label: Crop upper
+    type: float
+    default: 25.0
+    suffix: %
+    min: 0.0
+    max: 100.0
+    
+needs:
+  - ext.simquant
+  

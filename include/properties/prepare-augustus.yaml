@@ -1,0 +1,40 @@
+group: AUGUSTUS
+
+title: Prepare AUGUSTUS
+
+description: >
+  Prepare OMSSA results for use in the AUGUSTUS ab initio gene prediction program.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: peptides
+    label: Peptides
+    format: txt
+    filename: peptides.txt
+    default: yes
+
+parameters:
+  - key: genome
+    label: Genome
+    type: enum
+    valuesFromConfig: { tool: gpf.gpfbatch, key: indexFiles }
+  - key: targetFpr
+    label: Target FPR
+    type: float
+    default: 0.1
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+    step: 0.1
+
+needs:
+  - ext.gpf

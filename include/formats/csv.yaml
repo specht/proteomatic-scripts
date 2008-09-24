@@ -1,0 +1,3 @@
+extensions: ['.csv']
+detection: return true
+description: Comma separated values

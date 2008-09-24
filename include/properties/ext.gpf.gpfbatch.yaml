@@ -1,0 +1,3 @@
+binary:
+  windows: gpfbatch.exe
+  linux: gpfbatch

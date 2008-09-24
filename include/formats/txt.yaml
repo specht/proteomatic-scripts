@@ -1,0 +1,3 @@
+extensions: ['.txt']
+detection: return true
+description: Plain text

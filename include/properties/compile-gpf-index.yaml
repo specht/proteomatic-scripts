@@ -1,0 +1,28 @@
+group: GPF
+
+title: Compile GPF index
+
+description: >
+  Compile a GPF index file from a nucleotide fasta file.
+  Currently, the default (and still fixed) options are:
+  tryptic cleavage, monoisotopic masses, no missed cleavage sites
+
+type: converter
+
+input:
+  - key: genome
+    label: genome
+    formats: [fasta-nucleotides]
+    min: 1
+
+defaultOutputDirectory: genome
+
+output:
+  - key: genome
+    label: GPF index
+    format: gpfindex
+    filename: '#{basename}#{extension}.trypsin-monoisotopic.gpfindex'
+
+needs:
+  - ext.gpf
+  

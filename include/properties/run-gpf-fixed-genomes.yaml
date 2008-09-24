@@ -1,0 +1,76 @@
+# This version of Run GPF does not require a genome. Instead, the user can
+# choose from a list of predefined genomes.
+
+group: GPF
+
+title: Run GPF
+
+description: >
+  Run GPF on de novo predicted peptides.  
+
+type: processor
+
+input:
+  - key: predictions
+    label: de novo predictions
+    formats: [fasta-proteins]
+    min: 1
+
+defaultOutputDirectory: predictions
+
+output:
+  - key: gpfPeptides
+    label: GPF peptides
+    format: fasta-proteins-peaks
+    filename: gpf-peptides.fasta
+    default: yes
+  - key: gpfResults
+    label: GPF results
+    format: yaml
+    filename: gpf-results.yaml
+    default: yes
+
+parameters:
+  - key: genome
+    label: Genome
+    type: enum
+    choices: [{'/ssd/cre4.fasta.monoisotopic-trypsin.gpfindex': 
+'Chlamydomonas 4.0'}]
+  - key: masses
+    label: Masses
+    type: enum
+    choices: [monoisotopic]
+  - key: searchSimilar
+    label: Similarity search
+    type: enum
+    default: yes
+    choices: ['yes', 'no']
+  - key: massError
+    label: Mass tolerance
+    type: int
+    default: 700
+    min: 0
+    suffix: ppm
+  - key: searchIntrons
+    type: enum
+    default: yes
+    choices: ['yes', 'no']
+    label: Search introns
+  - key: maxIntronLength
+    type: int
+    default: 2100
+    suffix: nucl.
+    min: 1
+    label: Max intron length
+  - key: protease
+    label: Enzyme
+    type: enum
+    choices: [{trypsin: Trypsin}]
+  - key: minChainLength
+    type: int
+    min: 1
+    default: 5
+    label: Minimum amino acid chain length
+    
+needs:
+  - ext.gpf
