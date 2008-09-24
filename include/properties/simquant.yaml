@@ -1,6 +1,6 @@
 group: AK Hippler
 
-title: SIM Quantitation
+title: SimQuant
 
 description: >
    Perform quantitation on SIM scans. <br />All specified spots are searched against all specified peptides. Peptides may be specified via text files and additionally in the peptides input field.
@@ -35,7 +35,19 @@ parameters:
     label: Modification
     type: enum
     default: argc13
-    choices: [argc13: 'heavy arginine']
+    choices: [{argc13: 'heavy arginine'}]
+  - key: scanType
+    label: Scans to analyze
+    type: csvString
+    choices: [{sim: SIM scans}, {full: Full scans}]
+    default: 'sim'
+    display: row
+  - key: isotopeCount
+    label: Isotope count
+    type: int
+    default: 3
+    min: 1
+    max: 10
   - key: minCharge
     label: Minimum charge
     type: int

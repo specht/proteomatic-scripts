@@ -51,7 +51,7 @@ class SimQuant < ProteomaticScript
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 		
-		ls_Command = "#{ExternalTools::binaryPath('simquant.simquant')} --cropUpper #{@param[:cropUpper] / 100.0} --textOutput no --yamlOutput yes --yamlOutputTarget #{ls_YamlPath} --svgOutPath #{ls_SvgPath} --files #{@input[:spectra].join(' ')} --peptides #{lk_Peptides.join(' ')}"
+		ls_Command = "#{ExternalTools::binaryPath('simquant.simquant')} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --textOutput no --yamlOutput yes --yamlOutputTarget #{ls_YamlPath} --svgOutPath #{ls_SvgPath} --files #{@input[:spectra].join(' ')} --peptides #{lk_Peptides.join(' ')}"
 		puts 'There was an error while executing simquant.' unless system(ls_Command)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
@@ -96,7 +96,8 @@ class SimQuant < ProteomaticScript
 				lk_Out.puts '<body>'
 				lk_Out.puts "<h1>SimQuant Report</h1>"
 				lk_Out.puts '<p>'
-				lk_FoundPeptides = lk_Results['results'].keys
+				lk_FoundPeptides = Array.new
+				lk_FoundPeptides = lk_Results['results'].keys if lk_Results['results']
 				lk_NotFoundPeptides = lk_Peptides.reject { |x| lk_FoundPeptides.include?(x) }
 				lk_Out.puts "Searched for #{lk_Peptides.size} peptide#{lk_Peptides.size != 1 ? 's' : ''} in #{@input[:spectra].size} file#{@input[:spectra].size != 1 ? 's' : ''}, trying charge states #{@param[:minCharge]} to #{@param[:maxCharge]} and merging the upper #{@param[:cropUpper]}% of all scans in which a peptide was found.<br />"
 				lk_Out.puts "#{lk_FoundPeptides.size} of these peptides were quantified, #{lk_NotFoundPeptides.size} have not been found."
