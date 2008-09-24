@@ -26,6 +26,7 @@ output:
 needs:
   - ext.readw
   - ext.7zip
+  - config
 
 externalParameters: 
   - readw.readw

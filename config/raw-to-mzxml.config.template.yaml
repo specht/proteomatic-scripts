@@ -1,0 +1,11 @@
+# ======================================
+# Configuration file for raw-to-mzxml.rb
+# ======================================
+# In order to use raw-to-xml.rb, please adjust the following values to your 
+# system and save this file with the '.template' part removed.
+
+# Actually, nothing must be adjusted here. This is just to prevent 
+# the RAW to mzXML converter from showing up in Proteomatic on a 
+# Linux or Mac machine that doesn't have the Thermo XDK installed.
+
+inSovietRussiaRawFileConverts: you
