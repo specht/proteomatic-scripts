@@ -10,6 +10,6 @@ download:
   mac: ''
 
 path:
-  linux: simquant-0.1.1
-  windows: simquant-0.1.1
-  mac: simquant-0.1.1
+  linux: simquant-0.1.1-linux
+  windows: simquant-0.1.1-windows
+  mac: simquant-0.1.1-mac
