@@ -24,8 +24,8 @@ require 'yaml'
 require 'fileutils'
 
 class SimQuant < ProteomaticScript
-	def cutMax(af_Value, af_Max)
-		return af_Value > af_Max ? "> #{af_Max}" : af_Value
+	def cutMax(af_Value, ai_Max, ai_Places = 2)
+		return af_Value > ai_Max.to_f ? "> #{ai_Max}" : sprintf("%1.#{ai_Places}f", af_Value)
 	end
 	
 	def run()
@@ -55,7 +55,7 @@ class SimQuant < ProteomaticScript
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 		
-		ls_Command = "#{ExternalTools::binaryPath('simquant.simquant')} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --textOutput no --yamlOutput yes --yamlOutputTarget #{ls_YamlPath} --svgOutPath #{ls_SvgPath} --files #{@input[:spectra].join(' ')} --peptides #{lk_Peptides.join(' ')}"
+		ls_Command = "#{ExternalTools::binaryPath('simquant.simquant')} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget #{ls_YamlPath} --svgOutPath #{ls_SvgPath} --files #{@input[:spectra].join(' ')} --peptides #{lk_Peptides.join(' ')}"
 		puts 'There was an error while executing simquant.' unless system(ls_Command)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
@@ -145,12 +145,12 @@ class SimQuant < ProteomaticScript
 						lk_SubRows.sort! { |a, b| a['retentionTime'] <=> b['retentionTime'] }
 						ls_Name = "scan-#{li_StaticToggleCounter}"
 						li_StaticToggleCounter += 1
-						lk_Out.puts "<tr><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f (%1.2f)", lk_Row['ratioMean'].to_f, lk_Row['ratioStandardDeviation'].to_f)}</td><td>#{sprintf("%1.2f (%1.2f)", cutMax(lk_Row['snrMean'].to_f, 10000.0), cutMax(lk_Row['snrStandardDeviation'].to_f, 10000.0))}</td><td><span class='toggle' onclick=\"toggle('#{ls_Name}')\">#{lk_SubRows.size} scans</span></td></tr>"
+						lk_Out.puts "<tr><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f (%1.2f)", lk_Row['ratioMean'].to_f, lk_Row['ratioStandardDeviation'].to_f)}</td><td>#{cutMax(lk_Row['snrMean'].to_f, 10000, 2)} (#{cutMax(lk_Row['snrStandardDeviation'].to_f, 10000, 2)})</td><td><span class='toggle' onclick=\"toggle('#{ls_Name}')\">#{lk_SubRows.size} scans</span></td></tr>"
 						lk_SubRows.each do |lk_SubRow|
 							ls_Svg = File::read(File::join(ls_SvgPath, lk_SubRow['svg'] + '.svg'))
 							ls_Svg.sub!(/<\?xml.+\?>/, '')
 							ls_Svg.sub!(/<svg width=\".+\" height=\".+\"/, "<svg ")
-							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f", lk_SubRow['ratio'].to_f)}</td><td>#{sprintf("%1.2f", cutMax(lk_SubRow['snr'].to_f, 10000.0))}</td><td></td></tr>"
+							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f", lk_SubRow['ratio'].to_f)}</td><td>#{cutMax(lk_SubRow['snr'].to_f, 10000, 2)}</td><td></td></tr>"
 							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td colspan='5'>"
 							lk_Out.puts "<div>#{lk_Row['file']} ##{lk_SubRow['id']} @ #{sprintf("%1.2f", lk_SubRow['retentionTime'].to_f)} minutes: #{lk_SubRow['filterLine']}</div>"
 							lk_Out.puts ls_Svg

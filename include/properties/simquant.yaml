@@ -67,6 +67,24 @@ parameters:
     suffix: %
     min: 0.0
     max: 100.0
+  - key: minSnr
+    label: Minimum SNR
+    type: float
+    default: 2.0
+    min: 0.0
+  - key: maxOffCenter
+    label: Maximum off center
+    type: float
+    suffix: %
+    default: 25.0
+    min: 0.0
+    max: 100.0
+  - key: maxTimeDifference
+    label: Maximum scan time difference
+    type: float
+    suffix: seconds
+    default: 60.0
+    min: 0.0
     
 needs:
   - ext.simquant
