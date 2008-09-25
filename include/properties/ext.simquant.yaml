@@ -1,6 +1,6 @@
 title: SIMQuant
 
-version: 0.1.1
+version: trunk
 
 link: http://simquant.origo.ethz.ch/
 
@@ -10,6 +10,6 @@ download:
   mac: ''
 
 path:
-  linux: simquant-0.1.1-linux
-  windows: simquant-0.1.1-windows
-  mac: simquant-0.1.1-mac
+  linux: simquant-trunk-linux
+  windows: simquant-trunk-win32
+  mac: simquant-trunk-macx

@@ -24,6 +24,10 @@ require 'yaml'
 require 'fileutils'
 
 class SimQuant < ProteomaticScript
+	def cutMax(af_Value, af_Max)
+		return af_Value > af_Max ? "> #{af_Max}" : af_Value
+	end
+	
 	def run()
 		lk_Peptides = @param[:peptides].split(%r{[,;\s/]+})
 		lk_Peptides.reject! { |x| x.strip.empty? }
@@ -110,7 +114,7 @@ class SimQuant < ProteomaticScript
 				lk_FoundPeptides = lk_Results['results'].keys if lk_Results['results']
 				lk_NotFoundPeptides = lk_Peptides.reject { |x| lk_FoundPeptides.include?(x) }
 				lk_Out.puts "Searched for #{lk_Peptides.size} peptide#{lk_Peptides.size != 1 ? 's' : ''} in #{@input[:spectra].size} file#{@input[:spectra].size != 1 ? 's' : ''}, trying charge states #{@param[:minCharge]} to #{@param[:maxCharge]} and merging the upper #{@param[:cropUpper]}% (SNR) of all scans in which a peptide was found.<br />"
-				lk_Out.puts "Quantitation has been attempted in all #{@param[:scanType].split(',').collect { |x| x == 'sim' ? 'SIM' : (x == 'full' ? 'FULL' : 'unknown')}.join(' and ')} scans, considering #{@param[:isotopeCount]} isotope peaks for both the unlabeled and the labeled ions.<br />"
+				lk_Out.puts "Quantitation has been attempted in all #{@param[:scanType].split(',').collect { |x| x == 'sim' ? 'SIM' : (x == 'full' ? 'Full' : 'unknown')}.join(' and ')} scans, considering #{@param[:isotopeCount]} isotope peaks for both the unlabeled and the labeled ions.<br />"
 				lk_Out.puts "#{lk_FoundPeptides.size} of these peptides were quantified, #{lk_NotFoundPeptides.size} have not been found."
 				lk_Out.puts '</p>'
 				lk_Out.puts '<h2>Contents</h2>'
@@ -141,12 +145,12 @@ class SimQuant < ProteomaticScript
 						lk_SubRows.sort! { |a, b| a['retentionTime'] <=> b['retentionTime'] }
 						ls_Name = "scan-#{li_StaticToggleCounter}"
 						li_StaticToggleCounter += 1
-						lk_Out.puts "<tr><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f (%1.2f)", lk_Row['ratioMean'].to_f, lk_Row['ratioStandardDeviation'].to_f)}</td><td>#{sprintf("%1.2f (%1.2f)", lk_Row['snrMean'].to_f, lk_Row['snrStandardDeviation'].to_f)}</td><td><span class='toggle' onclick=\"toggle('#{ls_Name}')\">#{lk_SubRows.size} scans</span></td></tr>"
+						lk_Out.puts "<tr><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f (%1.2f)", lk_Row['ratioMean'].to_f, lk_Row['ratioStandardDeviation'].to_f)}</td><td>#{sprintf("%1.2f (%1.2f)", cutMax(lk_Row['snrMean'].to_f, 10000.0), cutMax(lk_Row['snrStandardDeviation'].to_f, 10000.0))}</td><td><span class='toggle' onclick=\"toggle('#{ls_Name}')\">#{lk_SubRows.size} scans</span></td></tr>"
 						lk_SubRows.each do |lk_SubRow|
 							ls_Svg = File::read(File::join(ls_SvgPath, lk_SubRow['svg'] + '.svg'))
 							ls_Svg.sub!(/<\?xml.+\?>/, '')
 							ls_Svg.sub!(/<svg width=\".+\" height=\".+\"/, "<svg ")
-							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f", lk_SubRow['ratio'].to_f)}</td><td>#{sprintf("%1.2f", lk_SubRow['snr'].to_f)}</td><td></td></tr>"
+							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td>#{lk_Row['file']}</td><td>#{lk_Row['charge']}</td><td>#{sprintf("%1.2f", lk_SubRow['ratio'].to_f)}</td><td>#{sprintf("%1.2f", cutMax(lk_SubRow['snr'].to_f, 10000.0))}</td><td></td></tr>"
 							lk_Out.puts "<tr class='sub #{ls_Name} scans-all' style='display: none;'><td colspan='5'>"
 							lk_Out.puts "<div>#{lk_Row['file']} ##{lk_SubRow['id']} @ #{sprintf("%1.2f", lk_SubRow['retentionTime'].to_f)} minutes: #{lk_SubRow['filterLine']}</div>"
 							lk_Out.puts ls_Svg
