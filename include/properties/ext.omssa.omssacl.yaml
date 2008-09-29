@@ -1,7 +1,7 @@
 binary:
-  windows: omssacl.exe
+  win32: omssacl.exe
   linux: omssacl
-  mac: omssacl
+  macx: omssacl
 
 parameters:
 

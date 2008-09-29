@@ -1,15 +1,15 @@
 title: SIMQuant
 
-version: trunk
+version: 0.1.1
 
 link: http://simquant.origo.ethz.ch/
 
 download:
-  linux: ''
-  win32: ''
-  macx: ''
+  linux: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-linux.tar.bz2'
+  win32: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-win32.tar.bz2'
+  macx: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-macx.tar.bz2'
 
 path:
-  linux: simquant-trunk-linux
-  win32: simquant-trunk-win32
-  macx: simquant-trunk-macx
+  linux: simquant-0.1.1-linux
+  win32: simquant-0.1.1-win32
+  macx: simquant-0.1.1-macx

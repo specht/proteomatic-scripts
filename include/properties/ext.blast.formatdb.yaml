@@ -1,4 +1,4 @@
 binary:
   linux: formatdb
-  windows: formatdb.exe
-  mac: formatdb
+  win32: formatdb.exe
+  macx: formatdb

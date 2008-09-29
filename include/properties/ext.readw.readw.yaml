@@ -1,5 +1,5 @@
 binary:
-  windows: ReAdW.exe
+  win32: ReAdW.exe
 
 parameters:
   - key: centroidScans

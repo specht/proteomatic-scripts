@@ -1,4 +1,4 @@
 binary:
-  windows: xml2mgf.exe
+  win32: xml2mgf.exe
   linux: xml2mgf
-  mac: xml2mgf
+  macx: xml2mgf

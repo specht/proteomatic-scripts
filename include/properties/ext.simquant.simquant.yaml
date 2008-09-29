@@ -1,4 +1,4 @@
 binary:
-  windows: simquant.exe
+  win32: simquant.exe
   linux: simquant
-  mac: simquant
+  macx: simquant
