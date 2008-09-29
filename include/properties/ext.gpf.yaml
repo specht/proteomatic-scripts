@@ -6,7 +6,7 @@ link: http://gpf.origo.ethz.ch/
 
 download:
   linux: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-linux.tar.bz2
-  win32: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-win32.tar.zip
+  win32: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-win32.zip
   macx: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-macx.tar.bz2
 
 path:

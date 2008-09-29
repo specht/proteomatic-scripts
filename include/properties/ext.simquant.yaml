@@ -6,7 +6,7 @@ link: http://simquant.origo.ethz.ch/
 
 download:
   linux: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-linux.tar.bz2'
-  win32: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-win32.tar.bz2'
+  win32: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-win32.zip'
   macx: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.1-macx.tar.bz2'
 
 path:
