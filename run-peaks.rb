@@ -66,10 +66,10 @@ class RunPeaks < ProteomaticScript
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
 		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} \"Trypsin without PTMs\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 1"
-		ls_OldPath = Dir::pwd()
-		Dir::chdir(ls_TempPath)
         ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
         print 'Running PEAKS...'
+		ls_OldPath = Dir::pwd()
+		Dir::chdir(ls_TempPath)
         puts 'There was an error while executing PEAKS.' unless system(ls_Command)
 		Dir::chdir(ls_OldPath)
         File::rename(File::join(ls_TempOutPath, 'in.fas'), @output[:fasFile]) if @output[:fasFile]
