@@ -31,7 +31,7 @@ class ExternalTools
 	
 	def self.unpack(as_Path)
 		# note: we are already in the correct directory, I guess.
-		if (@@ms_Platform == 'linux' || @@ms_Platform == 'mac')
+		if (@@ms_Platform == 'linux' || @@ms_Platform == 'macx')
 			if stringEndsWith(as_Path, '.tar.gz', false)
 				system("gzip -dc #{as_Path} | tar xf -")
 				return
@@ -39,7 +39,7 @@ class ExternalTools
 				system("bzip2 -dc #{as_Path} | tar xf -")
 				return
 			end
-		elsif (@@ms_Platform == 'windows')
+		elsif (@@ms_Platform == 'win32')
 			system("#{binaryPath('7zip.7zip')} x #{as_Path}")
 			return
 		end

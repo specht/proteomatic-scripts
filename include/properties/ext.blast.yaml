@@ -6,10 +6,10 @@ link: http://www.ncbi.nlm.nih.gov/blast
 
 download:
   linux: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-ia32-linux.tar.gz
-  windows: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-ia32-win32.exe
-  mac: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-universal-macosx.tar.gz
+  win32: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-ia32-win32.exe
+  macx: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-universal-macosx.tar.gz
 
 path:
   linux: blast-2.2.18/bin
-  windows: bin
-  mac: blast-2.2.18/bin
+  win32: bin
+  macx: blast-2.2.18/bin

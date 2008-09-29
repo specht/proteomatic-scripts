@@ -6,10 +6,10 @@ link: http://simquant.origo.ethz.ch/
 
 download:
   linux: ''
-  windows: ''
-  mac: ''
+  win32: ''
+  macx: ''
 
 path:
   linux: simquant-trunk-linux
-  windows: simquant-trunk-win32
-  mac: simquant-trunk-macx
+  win32: simquant-trunk-win32
+  macx: simquant-trunk-macx

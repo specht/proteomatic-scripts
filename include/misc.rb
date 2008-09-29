@@ -76,9 +76,9 @@ def determinePlatform()
 	when /linux/
 		'linux'
 	when /darwin/
-		'mac'
+		'macx'
 	when /mswin/
-		'windows'
+		'win32'
 	else
 		puts "Internal error: #{RUBY_PLATFORM} platform not supported."
 		exit 1

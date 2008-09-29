@@ -6,10 +6,10 @@ link: http://pubchem.ncbi.nlm.nih.gov/omssa/
 
 download:
   linux: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.linux.tar.gz
-  windows: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.win32.exe
-  mac: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.macos.tar.gz
+  win32: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.win32.exe
+  macx: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.macos.tar.gz
 
 path:
   linux: omssa-2.1.1.linux
-  windows: omssa-2.1.1.win32
-  mac: omssa-2.1.1.macos
+  win32: omssa-2.1.1.win32
+  macx: omssa-2.1.1.macos
