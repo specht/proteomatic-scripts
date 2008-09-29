@@ -43,3 +43,4 @@ parameters:
 
 needs:
   - config
+  - ext.simquant
