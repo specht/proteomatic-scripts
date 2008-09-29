@@ -54,7 +54,7 @@ class RunPeaks < ProteomaticScript
 		unless (lk_XmlFiles.empty?)
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
-			system("\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -o \"#{ls_TempInPath}\" #{lk_XmlFiles.join(' ')}");
+			puts 'There was an error while executing xml2mgf.' unless system("\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -o \"#{ls_TempInPath}\" #{lk_XmlFiles.join(' ')}");
 		end
 		
 		ls_ParamFile = File::join(ls_TempPath, 'peaks-config.xml')
@@ -65,11 +65,11 @@ class RunPeaks < ProteomaticScript
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
 		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} \"Trypsin without PTMs\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 1"
-		ls_OldPath = Dir::current()
+		ls_OldPath = Dir::pwd()
 		Dir::chdir(ls_TempPath)
         ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
         print 'Running PEAKS...'
-        system(ls_Command)
+        puts 'There was an error while executing PEAKS.' unless system(ls_Command)
 		Dir::chdir(ls_OldPath)
         File::rename(File::join(ls_TempOutPath, 'in.fas'), @output[:fasFile]) if @output[:fasFile]
         File::rename(File::join(ls_TempOutPath, 'in.ann'), @output[:annFile]) if @output[:annFile]
