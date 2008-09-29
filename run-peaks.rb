@@ -54,7 +54,7 @@ class RunPeaks < ProteomaticScript
 		unless (lk_XmlFiles.empty?)
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
-			system("\"#{ExternalTools::binaryPath('xml2mgf.xml2mgf')}\" -o \"#{ls_TempInPath}\" #{lk_XmlFiles.join(' ')}");
+			system("\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -o \"#{ls_TempInPath}\" #{lk_XmlFiles.join(' ')}");
 		end
 		
 		ls_ParamFile = File::join(ls_TempPath, 'peaks-config.xml')
