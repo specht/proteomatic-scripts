@@ -5,9 +5,11 @@ version: 0.1.1
 link: http://gpf.origo.ethz.ch/
 
 download:
-  linux: ftp://gpf.uni-muenster.de/gpf/gpf-0.1.1-linux.tar.bz2
-  win32: ftp://gpf.uni-muenster.de/gpf/gpf-0.1.1-windows.zip
+  linux: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-linux.tar.bz2
+  win32: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-win32.tar.zip
+  macx: ftp://gpf.uni-muenster.de/download/gpf-2.1.0-macx.tar.bz2
 
 path:
-  linux: gpf-0.1.1-linux
-  win32: gpf-0.1.1-windows
+  linux: gpf-2.1.0-linux
+  win32: gpf-2.1.0-win32
+  macx: gpf-2.1.0-macx
