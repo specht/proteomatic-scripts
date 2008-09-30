@@ -74,8 +74,8 @@ class RunPeaks < ProteomaticScript
 		Dir::chdir(ls_TempPath)
         puts 'There was an error while executing PEAKS.' unless system(ls_Command)
 		Dir::chdir(ls_OldPath)
-        File::rename(File::join(ls_TempOutPath, 'in.fas'), @output[:fasFile]) if @output[:fasFile]
-        File::rename(File::join(ls_TempOutPath, 'in.ann'), @output[:annFile]) if @output[:annFile]
+        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.fas'), @output[:fasFile]) if @output[:fasFile]
+        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.ann'), @output[:annFile]) if @output[:annFile]
         FileUtils::rm_rf(ls_TempPath)
         puts 'done.'
 	end
