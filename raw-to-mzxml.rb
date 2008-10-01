@@ -13,6 +13,8 @@ class Raw2MzXML < ProteomaticScript
 			ls_Command = "#{ExternalTools::binaryPath('readw.readw')} --mzXML #{@mk_Parameters.commandLineFor('readw.readw')} #{lk_Arguments.join(' ')} \"#{ls_InPath}\" \"#{File::join(ls_TempOutPath, File::basename(ls_OutPath).sub('.zip.proteomatic.part', ''))}\""
 
 			print 'converting'
+			$stdout.flush
+			
 			begin
 				lk_Process = IO.popen(ls_Command)
 				lk_Process.read
@@ -27,6 +29,7 @@ class Raw2MzXML < ProteomaticScript
 			Dir.chdir(ls_TempOutPath)
 			
 			print ', zipping'
+			$stdout.flush
 			
 			# zip mzXML file
 			ls_Command = "#{ls_7ZipPath} a -tzip #{File::basename(ls_OutPath)} #{File::basename(ls_OutPath).sub('.zip.proteomatic.part', '')} -mx5"
@@ -42,6 +45,7 @@ class Raw2MzXML < ProteomaticScript
 			Dir.chdir(ls_OldDir)
 			FileUtils::rm_rf(File::join(ls_TempOutPath, File::basename(ls_OutPath).sub('.zip.proteomatic.part', '')))
 			puts ' - done.'
+			$stdout.flush
 		end
 		FileUtils::rm_rf(ls_TempOutPath)
 	end
