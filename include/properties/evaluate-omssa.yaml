@@ -30,11 +30,11 @@ output:
     format: fasta-proteins
     filename: identified-peptides.fasta
     default: no
-  - key: amsFile
-    label: 2DB import file
-    format: ams
-    filename: 2db-import.ams
-    default: no
+#  - key: amsFile
+#    label: 2DB import file
+#    format: ams
+#    filename: 2db-import.ams
+#    default: no
 
 parameters:
   - key: targetFpr
