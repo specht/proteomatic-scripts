@@ -1,0 +1,31 @@
+group: FASTA
+
+title: Check FASTA databases
+
+description: >
+  Check FASTA databases for redundant id lines and protein/nucleotide sequences. 
+  If you find that there are redundancies and choose to receive output files which 
+  will help you in removing redundancies please process one database at a time.
+
+type: processor
+
+input:
+  - key: databases
+    label: FASTA database
+    formats: [fasta-proteins, fasta-nucleotides]
+    min: 1
+
+defaultOutputDirectory: databases
+
+output:
+  - key: nrEntries
+    label: non-redundant entries
+    format: fasta
+    filename: nr-entries.fasta
+    default: no
+  - key: rEntries
+    label: fixed redundant entries
+    format: fasta
+    filename: fixed-r-entries.fasta
+    default: no
+    
