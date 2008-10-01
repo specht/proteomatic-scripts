@@ -712,7 +712,7 @@ class ProteomaticScript
 				@mk_Output.keys.each do |ls_OutputGroup|
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
-						ls_Basename = File::basename(ls_Path)
+						ls_Basename = File::basename(ls_Path).dup
 						ls_Format = findFormatForFile(ls_Path)
 						ls_Extension = ''
 						formatInfo(ls_Format)['extensions'].each do |ls_Try|
