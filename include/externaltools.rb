@@ -41,7 +41,16 @@ class ExternalTools
 				return
 			end
 		elsif (@@ms_Platform == 'win32')
-			system("#{binaryPath('7zip.7zip')} x #{as_Path}")
+			ls_Command = "#{binaryPath('7zip.7zip')} x #{as_Path}"
+			
+			begin
+				lk_Process = IO.popen(ls_Command)
+				lk_Process.read
+			rescue StandardError => e
+				puts 'Error: There was an error while executing 7zip.'
+				exit 1
+			end
+			
 			return
 		end
 		puts "Internal error: Unable to unpack #{as_Path} (file extension handling not implemented for this system)."
