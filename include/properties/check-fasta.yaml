@@ -18,14 +18,8 @@ input:
 defaultOutputDirectory: databases
 
 output:
-  - key: nrEntries
-    label: non-redundant entries
+  - key: fixedDatabase
+    label: fixed database
     format: fasta
-    filename: nr-entries.fasta
+    filename: fixed-database.fasta
     default: no
-  - key: rEntries
-    label: fixed redundant entries
-    format: fasta
-    filename: fixed-r-entries.fasta
-    default: no
-    

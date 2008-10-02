@@ -32,30 +32,42 @@ end
 
 class CheckFasta < ProteomaticScript
 	def run()
-		if (@output[:nrEntries] || @output[:rEntries]) && (@input[:databases].size > 1)
-			puts "Error: only one FASTA database may be specified "
+		if (@output[:fixedDatabase] || @output[:fixedDatabase]) && (@input[:databases].size > 1)
+			puts "Error: only one FASTA database may be specified if you want the repaired database."
 			exit 1
 		end
+		lb_DuplicateIdLines = false
 		@input[:databases].each do |ls_Path|
 			puts "Checking #{File::basename(ls_Path)}..."
 			lk_ProteinKeys = Set.new
 			lk_DuplicateProteinKeys = Hash.new
 			lk_IdsForProtein = Hash.new
-			ls_CurrentId = ''
+			ls_CurrentId = nil
 			ls_CurrentProtein = ''
 			li_TotalEntryCount = 0
+			lk_EmptyProteins = Set.new
+			lk_EmptyIdLines = Array.new
+			
+			li_CurrentLineIndex = 0
+			
 			File::open(ls_Path).each do |ls_Line|
+				li_CurrentLineIndex += 1
 				ls_Line.strip!
 				if (ls_Line[0, 1] == '>')
 					li_TotalEntryCount += 1
-					unless ls_CurrentProtein.empty?
-						# check protein
-						lk_IdsForProtein[ls_CurrentProtein] ||= Set.new
-						lk_IdsForProtein[ls_CurrentProtein].add(ls_CurrentId)
+					if ls_CurrentId
+						unless ls_CurrentProtein.empty?
+							# check protein
+							lk_IdsForProtein[ls_CurrentProtein] ||= Set.new
+							lk_IdsForProtein[ls_CurrentProtein].add(ls_CurrentId)
+						else
+							lk_EmptyProteins.add(ls_CurrentId)
+						end
 					end
 					# we have an id line
 					ls_Line.slice!(0, 1)
-					ls_CurrentId = ls_Line
+					ls_CurrentId = ls_Line.strip
+					lk_EmptyIdLines.push(li_CurrentLineIndex) if ls_CurrentId.empty?
 					if (lk_ProteinKeys.include?(ls_CurrentId))
 						lk_DuplicateProteinKeys[ls_CurrentId] ||= 1
 						lk_DuplicateProteinKeys[ls_CurrentId] += 1
@@ -66,10 +78,14 @@ class CheckFasta < ProteomaticScript
 					ls_CurrentProtein += ls_Line
 				end
 			end
-			unless ls_CurrentProtein.empty?
-				# check protein
-				lk_IdsForProtein[ls_CurrentProtein] ||= Set.new
-				lk_IdsForProtein[ls_CurrentProtein].add(ls_CurrentId)
+			if ls_CurrentId
+				unless ls_CurrentProtein.empty?
+					# check protein
+					lk_IdsForProtein[ls_CurrentProtein] ||= Set.new
+					lk_IdsForProtein[ls_CurrentProtein].add(ls_CurrentId)
+				else
+					lk_EmptyProteins.add(ls_CurrentId)
+				end
 			end
 			
 			lk_DuplicateProteins = Hash.new
@@ -83,17 +99,10 @@ class CheckFasta < ProteomaticScript
 			unless (lk_DuplicateProteinKeys.empty?)
 				li_Count = 0
 				lk_DuplicateProteinKeys.each { |a, b| li_Count += b }
-				puts "Problem: There are #{lk_DuplicateProteinKeys.size} distinct ids which appear multiple times (total #{li_Count})."
+				puts "Problem: There are #{lk_DuplicateProteinKeys.size} distinct id lines which appear multiple times (total #{li_Count}):"
 				lb_Error = true
-				unless lk_DuplicateProteinKeys.empty?
-					puts 'Duplicate id lines'
-					puts '=================='
-					puts
-					puts 'The following id lines appear more than once:'
-					puts lk_DuplicateProteinKeys.to_a.join("\n")
-					puts 'ATTENTION: To make sure that no entries are lost when fixing the database, please fix all duplicate id lines manually before attempting repair.'
-					puts
-				end
+				puts lk_DuplicateProteinKeys.to_a.join("\n")
+				lb_DuplicateIdLines = true
 			end
 			unless (lk_DuplicateProteins.empty?)
 				li_Count = 0
@@ -101,14 +110,36 @@ class CheckFasta < ProteomaticScript
 				puts "Problem: There are #{lk_DuplicateProteins.size} distinct proteins which appear multiple times (total #{li_Count})."
 				lb_Error = true
 			end
+			unless lk_EmptyIdLines.empty?
+				puts "Problem: There are empty id lines at the following line numbers: #{lk_EmptyIdLines.join(', ')}."
+				lb_Error = true
+			end
+			unless (lk_EmptyProteins.empty?)
+				puts "Problem: There are #{lk_EmptyProteins.size} empty entries:"
+				puts lk_EmptyProteins.to_a.collect { |x| "[#{x}]"}.join("\n")
+				lb_Error = true
+			end
 			unless lb_Error
 				puts "All is well."
 			end
-			if @output[:nrEntries]
-				puts 'Writing non-redundant entries...'
-				File::open(@output[:nrEntries], 'w') do |lk_Out|
+			if @output[:fixedDatabase]
+				lb_Error = false
+				if lb_DuplicateIdLines
+					puts 'Error: Cannot fix database while there are duplicate id lines!'
+					lb_Error = true
+				end
+				unless lk_EmptyIdLines.empty?
+					puts 'Error: Cannot fix database while there are empty id lines!'
+					lb_Error = true
+				end
+				exit(0) if lb_Error
+ 
+				puts 'Writing fixed database...'
+				File::open(@output[:fixedDatabase], 'w') do |lk_Out|
 					ls_CurrentKey = ''
 					ls_CurrentProtein = ''
+					
+					# write good entries
 					File::open(ls_Path).each do |ls_Line|
 						ls_Line.strip!
 						if (ls_Line[0, 1] == '>')
@@ -134,11 +165,8 @@ class CheckFasta < ProteomaticScript
 							lk_Out.puts wrap(ls_CurrentProtein)
 						end
 					end
-				end
-			end
-			if @output[:rEntries]
-				puts 'Writing fixed redundant entries...'
-				File::open(@output[:rEntries], 'w') do |lk_Out|
+					
+					# write merged entries
 					unless lk_DuplicateProteins.empty?
 						lk_DuplicateProteins.each do |a, b|
 							lk_Keys = b.to_a
@@ -150,8 +178,10 @@ class CheckFasta < ProteomaticScript
 								lk_Key.reject! { |x| ls_MergedKey.include?(x) }
 								ls_MergedKey += " aka #{lk_Key.join(' ')}"
 							end
-							lk_Out.puts ">#{ls_MergedKey}"
-							lk_Out.puts wrap(a)
+							unless a.empty?
+								lk_Out.puts ">#{ls_MergedKey}"
+								lk_Out.puts wrap(a)
+							end
 						end
 					end
 				end
