@@ -37,6 +37,7 @@ end
 
 
 def shufflePeptide(as_Peptide)
+	return as_Peptide if (as_Peptide.size < 2)
 	ls_LastChar = as_Peptide[as_Peptide.length - 1, 1]
 	ls_Chopped = as_Peptide.chop
 	ls_Result = ''
