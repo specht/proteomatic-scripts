@@ -5,9 +5,9 @@ version: 0.1.2
 link: http://simquant.origo.ethz.ch/
 
 download:
-  linux: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.2-linux.tar.bz2'
-  win32: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.2-win32.zip'
-  macx: 'ftp://gpf.uni-muenster.de/download/simquant-0.1.2-macx.tar.bz2'
+  linux: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.2-linux.tar.bz2'
+  win32: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.2-win32.zip'
+  macx: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.2-macx.tar.bz2'
 
 path:
   linux: simquant-0.1.2-linux
