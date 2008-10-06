@@ -29,19 +29,7 @@ class RunGpf < ProteomaticScript
 		@mk_Peptides = Set.new
 		
 		ls_GenomePath = ''
-		if $gb_FixedGenomes
-			ls_GenomePath = @param[:genome]
-		else
-			ls_GenomePath = @input[:genome].first
-			unless fileMatchesFormat(ls_GenomePath, 'gpfindex')
-				unless File::exists?(ls_GenomePath + '.monoisotopic-trypsin.gpfindex')
-					puts 'The genome files you specified needs to be indexed now. This may take a while but only has to be done once.'
-					ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} #{ls_GenomePath} \"#{File::basename(ls_GenomePath)}\""
-					system(ls_Command)
-				end
-				ls_GenomePath = ls_GenomePath + '.monoisotopic-trypsin.gpfindex'
-			end
-		end
+		ls_GenomePath = $gb_FixedGenomes ? @param[:genome] : @input[:genome].first
 		
 		def handlePeptide(as_Peptide, af_Mass = nil)
 			ls_Id = "peptide=#{as_Peptide}"
@@ -50,27 +38,36 @@ class RunGpf < ProteomaticScript
 		end
 		
 		@input[:predictions].each do |ls_Path|
-			File.open(ls_Path, 'r') do |lk_File|
-				lf_Mass = nil
-				ls_Peptide = ''
-				lk_File.each do |ls_Line|
-					ls_Line.strip!
-					if (ls_Line[0, 1] == '>')
-						handlePeptide(ls_Peptide, lf_Mass) unless ls_Peptide.empty?
-						lk_Line = ls_Line.split(' ')
-						lf_Mass = nil
-						if lk_Line.size > 3
-							lf_Mass = Float(lk_Line[lk_Line.size - 3].strip)
-							li_Charge = Integer(lk_Line[lk_Line.size - 2].strip)
-							lf_Mass = lf_Mass * li_Charge - 1.007825 * (li_Charge - 1)
-						end
-						ls_Peptide = ''
-					else
-						ls_Peptide += ls_Line
+			if (fileMatchesFormat(ls_Path, 'gpf-queries'))
+				File.open(ls_Path, 'r') do |lk_File|
+					lk_File.each do |ls_Line|
+						ls_Line.strip!
+						next if ls_Line.empty?
+						handlePeptide(ls_Line)
 					end
 				end
-				handlePeptide(ls_Peptide, lf_Mass) unless ls_Peptide.empty?
-				lk_File.close()
+			else
+				File.open(ls_Path, 'r') do |lk_File|
+					lf_Mass = nil
+					ls_Peptide = ''
+					lk_File.each do |ls_Line|
+						ls_Line.strip!
+						if (ls_Line[0, 1] == '>')
+							handlePeptide(ls_Peptide, lf_Mass) unless ls_Peptide.empty?
+							lk_Line = ls_Line.split(' ')
+							lf_Mass = nil
+							if lk_Line.size > 3
+								lf_Mass = Float(lk_Line[lk_Line.size - 3].strip)
+								li_Charge = Integer(lk_Line[lk_Line.size - 2].strip)
+								lf_Mass = lf_Mass * li_Charge - 1.007825 * (li_Charge - 1)
+							end
+							ls_Peptide = ''
+						else
+							ls_Peptide += ls_Line
+						end
+					end
+					handlePeptide(ls_Peptide, lf_Mass) unless ls_Peptide.empty?
+				end
 			end
 		end
 		

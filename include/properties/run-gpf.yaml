@@ -14,8 +14,8 @@ input:
     min: 1
     max: 1
   - key: predictions
-    label: de novo predictions
-    formats: [fasta-proteins]
+    label: GPF queries
+    formats: [fasta-proteins, gpf-queries]
     min: 1
 
 defaultOutputDirectory: predictions

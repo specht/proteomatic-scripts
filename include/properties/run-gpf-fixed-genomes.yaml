@@ -12,8 +12,8 @@ type: processor
 
 input:
   - key: predictions
-    label: de novo predictions
-    formats: [fasta-proteins]
+    label: GPF queries
+    formats: [fasta-proteins, gpf-queries]
     min: 1
 
 defaultOutputDirectory: predictions
