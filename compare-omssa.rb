@@ -116,46 +116,37 @@ class CompareOmssa < ProteomaticScript
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
 				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
-				
-=begin				
-				lk_Out.puts "Protein;Spectra count</th><th rowspan='2'>std. dev.</th><th colspan='#{lk_RunKeys.size}'>Distinct peptide count</th><th rowspan='2'>std. dev.</th></tr>"
-				lk_Out.puts "<tr>#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }</tr>"
+				ls_PlaceHolder = ';' * lk_RunKeys.size
+				lk_Out.puts "Protein;Spectra count#{ls_PlaceHolder}std. dev.;Distinct peptide count#{ls_PlaceHolder}std. dev."
+				lk_Out.puts ";#{lk_RunKeys.join(';') };;#{lk_RunKeys.join(';') };"
 				# collect proteins from all runs
 				lk_AllProteinsSet = Set.new
 				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:proteins].keys) }
 				lk_Proteins = lk_AllProteinsSet.to_a.sort { |x, y| String::natcmp(x, y) }
 				lk_Proteins.each do |ls_Protein|
-					lk_Out.print "<tr><td>#{ls_Protein}</td>"
+					lk_Out.print "\"#{ls_Protein}\";"
 					
 					lk_Values = Array.new
 					ls_SpectraCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
 						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['spectraCount'] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
-						"<td>#{li_Count}</td>"
+						"#{li_Count};"
 					end.join('')
 					lk_Out.print ls_SpectraCountString
-					lk_Out.print "<td>#{sprintf("%1.2f", stddev(lk_Values))}</td>"
+					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))};"
 					
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
 						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['peptides'].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
-						"<td>#{li_Count}</td>"
+						"#{li_Count};"
 					end.join('')
 					lk_Out.print ls_DistinctPeptidesCountString
-					lk_Out.print "<td>#{sprintf("%1.2f", stddev(lk_Values))}</td>"
-					
-					lk_Out.print "</tr>"
+					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))}"
 					lk_Out.puts
 				end
-				lk_Out.puts '</table>'
-				
-				
-				lk_Out.puts '</body>'
-				lk_Out.puts '</html>'
-=end				
 			end
 		end
 	end
