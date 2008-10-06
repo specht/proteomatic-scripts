@@ -19,6 +19,5 @@ output:
   - key: merged
     label: merged database
     format: fasta-proteins
-    filename: out.fasta
+    filename: merged-database.fasta
     default: yes
-    force: yes

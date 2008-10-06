@@ -24,7 +24,7 @@ class MergeFasta < ProteomaticScript
 		# merge all databases
 		
 		if @output[:merged]
-			puts "Merging #{lk_Databases.size} fasta databases to #{outFilename('merged')}..."
+			puts "Merging #{lk_Databases.size} fasta databases..."
 		
 			File.open(@output[:merged], 'w') do |lk_Out|
 				lk_Databases.each do |ls_Filename|
