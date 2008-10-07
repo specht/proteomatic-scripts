@@ -240,6 +240,12 @@ class Parameters
 		return ls_Result
 	end
 	
+	def humanReadableConfigurationHash()
+		lk_Result = Array.new
+		@mk_ParametersOrder.each { |ls_Key| lk_Result.push({@mk_Parameters[ls_Key]['label'] => humanReadableValue(ls_Key, value(ls_Key))}) }
+		return lk_Result
+	end
+	
 	def applyParameters(ak_Parameters)
 		@mk_Parameters.each do |ls_Key, lk_Parameter|
 			if (ak_Parameters.include?("-" + ls_Key))

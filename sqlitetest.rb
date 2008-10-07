@@ -4,7 +4,8 @@ require 'yaml'
 =begin
 
 BEGIN TRANSACTION;
-CREATE TABLE files (basename TEXT, directory TEXT, input_file BOOL, md5 TEXT, run_id NUMERIC, size NUMERIC);
+CREATE TABLE files (
+basename TEXT, directory TEXT, input_file BOOL, md5 TEXT, run_id NUMERIC, size NUMERIC);
 CREATE TABLE runs (script_version TEXT, script_uri TEXT, host TEXT, user TEXT, end TIMESTAMP, start TIMESTAMP, id INTEGER PRIMARY KEY, parameters TEXT, script TEXT);
 COMMIT;
 

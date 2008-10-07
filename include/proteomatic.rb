@@ -26,6 +26,8 @@ require 'tempfile'
 require 'thread'
 require 'yaml'
 require 'zlib'
+require 'uri'
+require 'net/http'
 
 
 class ProteomaticScriptDaemon
@@ -288,6 +290,36 @@ class ProteomaticScript
 		@ms_Platform = determinePlatform()
 		@ms_Platform.freeze
 		
+		@ms_UserName = nil
+		@ms_HostName = nil
+		
+		@ms_UserName = ENV.to_hash['USERNAME'] unless @ms_UserName
+		@ms_UserName = ENV.to_hash['USER'] unless @ms_UserName
+		@ms_UserName = 'unknown' unless @ms_UserName
+		
+		@ms_HostName = ENV.to_hash['COMPUTERNAME'] unless @ms_HostName
+		unless @ms_HostName
+			begin
+				lk_IO = IO.popen('hostname')
+				@ms_HostName = lk_IO.gets.strip
+			rescue StandardError 
+			end
+		end
+		@ms_HostName = 'unknown' unless @ms_HostName
+		
+		@ms_UserName.freeze
+		@ms_HostName.freeze
+		
+		@ms_FileTrackerUri = nil
+		if (File::exists?('config/filetracker.config.yaml'))
+			@ms_FileTrackerUri = YAML::load_file('config/filetracker.config.yaml')['fileTrackerUri']
+		end
+		
+		@ms_Version = File::read('include/version.rb').strip
+		@ms_Version.freeze
+		
+		@mk_StartTime = Time.now
+		
 		loadDescription()
 		
 		if ARGV == ['--resolveDependencies']
@@ -329,6 +361,8 @@ class ProteomaticScript
 			end
 			run()
 			finishOutputFiles()
+			@mk_EndTime = Time.now
+			submitRunToFileTracker() if @ms_FileTrackerUri
 		end
 	end
 	
@@ -753,9 +787,30 @@ class ProteomaticScript
 			end
 		end
 		
-		# delete output files
+		# delete temporary files
 		FileUtils::rm_rf(@mk_TempFiles)
 		return lk_Files
+	end
+	
+	
+	def submitRunToFileTracker()
+		return unless @ms_FileTrackerUri
+		puts "Submitting run to file tracker at #{@ms_FileTrackerUri}."
+		
+		lk_Info = Hash.new
+		lk_Info[:user] = @ms_UserName
+		lk_Info[:host] = @ms_HostName
+		lk_Info[:script_uri] = @ms_ScriptName + '.rb'
+		lk_Info[:script_title] = @ms_Title
+		lk_Info[:script_version] = @ms_Version
+		lk_Info[:start_time] = @mk_StartTime
+		lk_Info[:end_time] = @mk_EndTime
+		lk_Info[:parameters] = @mk_Parameters.humanReadableConfigurationHash()
+
+		lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
+			{'run' => lk_Info.to_yaml})
+			
+		puts lk_Response.to_yaml
 	end
 	
 	
