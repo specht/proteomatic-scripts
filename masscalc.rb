@@ -39,6 +39,10 @@ class MassCalc < ProteomaticScript
 			ls_File.each do |ls_Line|
 				ls_Peptide = ls_Line.strip
 				next if ls_Peptide.empty?
+				if (ls_Peptide.include?('.'))
+					lk_Peptide == ls_Peptide.split('.')
+					ls_Peptide = lk_Peptide[1] if (lk_Peptide.size == 3)
+				end
 				lk_PeptideSet.add(ls_Peptide)
 			end
 		end
