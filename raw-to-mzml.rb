@@ -3,7 +3,7 @@ require 'fileutils'
 
 class Raw2MzXML < ProteomaticScript
 	def run()
-		ls_TempOutPath = tempFilename('raw-to-mzml')
+		ls_TempOutPath = tempFilename('raw-to-mzml', Dir::tmpdir)
 		FileUtils.mkpath(ls_TempOutPath)
 		@output.each do |ls_InPath, ls_OutPath|
 			# clean up temp dir
@@ -25,7 +25,6 @@ class Raw2MzXML < ProteomaticScript
 				exit 1
 			end
 
-=begin			
 			ls_OldDir = Dir::pwd()
 			
 			ls_7ZipPath = ExternalTools::binaryPath('7zip.7zip')
@@ -35,7 +34,8 @@ class Raw2MzXML < ProteomaticScript
 			$stdout.flush
 			
 			# zip mzXML file
-			ls_Command = "#{ls_7ZipPath} a -tzip #{File::basename(ls_OutPath)} #{File::basename(ls_OutPath).sub('.zip.proteomatic.part', '')} -mx5"
+			lk_Files = Dir['*']
+			ls_Command = "#{ls_7ZipPath} a -tzip #{lk_Files.first + '.zip'} #{lk_Files.first} -mx5"
 			begin
 				lk_Process = IO.popen(ls_Command)
 				lk_Process.read
@@ -43,15 +43,14 @@ class Raw2MzXML < ProteomaticScript
 				puts 'Error: There was an error while executing 7zip.'
 				exit 1
 			end
-			FileUtils::mv(File::basename(ls_OutPath), File::join('..', File::basename(ls_OutPath).sub('.proteomatic.part', '')))
+			FileUtils::rm_f(lk_Files.first)
 			
 			Dir.chdir(ls_OldDir)
-			FileUtils::rm_rf(File::join(ls_TempOutPath, File::basename(ls_OutPath).sub('.zip.proteomatic.part', '')))
-			puts ' - done.'
-			$stdout.flush
-=end			
+			
 			lk_Files = Dir[File.join(ls_TempOutPath, '*')]
 			FileUtils::mv(lk_Files.first, ls_OutPath)
+			puts ' - done.'
+			$stdout.flush
 		end
 		FileUtils::rm_rf(ls_TempOutPath)
 	end
