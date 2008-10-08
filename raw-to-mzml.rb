@@ -51,6 +51,7 @@ class Raw2MzML < ProteomaticScript
 			
 			lk_Files = Dir[File.join(ls_TempOutPath, '*')]
 			FileUtils::mv(lk_Files.first, ls_OutPath)
+			FileUtils::mv(ls_OutPath, ls_OutPath.sub('.proteomatic.part', ''))
 			puts ' - done.'
 			$stdout.flush
 		end
