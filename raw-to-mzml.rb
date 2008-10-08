@@ -1,7 +1,7 @@
 require 'include/proteomatic'
 require 'fileutils'
 
-class Raw2MzXML < ProteomaticScript
+class Raw2MzML < ProteomaticScript
 	def run()
 		ls_TempOutPath = tempFilename('raw-to-mzml', Dir::tmpdir)
 		FileUtils.mkpath(ls_TempOutPath)
@@ -25,27 +25,29 @@ class Raw2MzXML < ProteomaticScript
 				exit 1
 			end
 
-			ls_OldDir = Dir::pwd()
-			
-			ls_7ZipPath = ExternalTools::binaryPath('7zip.7zip')
-			Dir.chdir(ls_TempOutPath)
-			
-			print ', zipping'
-			$stdout.flush
-			
-			# zip mzXML file
-			lk_Files = Dir['*']
-			ls_Command = "#{ls_7ZipPath} a -tzip #{lk_Files.first + '.zip'} #{lk_Files.first} -mx5"
-			begin
-				lk_Process = IO.popen(ls_Command)
-				lk_Process.read
-			rescue StandardError => e
-				puts 'Error: There was an error while executing 7zip.'
-				exit 1
+			unless (@param[:compression].empty?)
+				ls_OldDir = Dir::pwd()
+				
+				ls_7ZipPath = ExternalTools::binaryPath('7zip.7zip')
+				Dir.chdir(ls_TempOutPath)
+				
+				print ', compressing'
+				$stdout.flush
+				
+				# zip mzXML file
+				lk_Files = Dir['*']
+				ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} #{lk_Files.first + @param[:compression]} #{lk_Files.first} -mx5"
+				begin
+					lk_Process = IO.popen(ls_Command)
+					lk_Process.read
+				rescue StandardError => e
+					puts 'Error: There was an error while executing 7zip.'
+					exit 1
+				end
+				FileUtils::rm_f(lk_Files.first)
+				
+				Dir.chdir(ls_OldDir)
 			end
-			FileUtils::rm_f(lk_Files.first)
-			
-			Dir.chdir(ls_OldDir)
 			
 			lk_Files = Dir[File.join(ls_TempOutPath, '*')]
 			FileUtils::mv(lk_Files.first, ls_OutPath)
@@ -56,4 +58,4 @@ class Raw2MzXML < ProteomaticScript
 	end
 end
 
-lk_Object = Raw2MzXML.new
+lk_Object = Raw2MzML.new

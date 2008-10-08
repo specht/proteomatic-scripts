@@ -1,9 +1,9 @@
 group: Converters
 
-title: RAW to mzXL
+title: RAW to mzML
 
 description: >
-  Convert Thermo Finnigan RAW files to the open mzXL format. 
+  Convert Thermo Finnigan RAW files to the open mzML format. 
   This script only runs on computers that have the Thermo Finnigan
   XDK installed.
 
@@ -19,10 +19,17 @@ defaultOutputDirectory: rawFiles
 
 output:
   - key: rawFiles
-    label: zipped mzML files
-    format: xml-mzml-zipped
-    filename: '#{basename}.mzML.zip'
+    label: mzML files
+    format: xml-mzml
+    filename: '#{basename}.mzML#{compression}'
 	
+parameters:
+  - key: compression
+    label: Compress result file
+    type: enum
+    choices: [{'': 'no compression'}, {'.gz': 'gzip'}, {'.bz2' : 'bzip2'}]
+    default: '.gz'
+
 needs:
   - ext.pwiz
   - ext.7zip
