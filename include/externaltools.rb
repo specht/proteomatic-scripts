@@ -64,15 +64,15 @@ class ExternalTools
 			puts "Error: This package is not available for this platform (#{@@ms_Platform})."
 			return
 		end
-		as_ResultFilePath = File::join('ext', ls_Package, ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
+		as_ResultFilePath = File::join('ext', ls_Package, @@ms_Platform, ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
 		puts "Installing #{ak_PackageDescription['title']}..."
 		ls_Uri = ak_PackageDescription['download'][@@ms_Platform]
 		lk_Uri = URI::parse(ls_Uri)
 		ls_OutFile = File::basename(lk_Uri.path)
 		
-		FileUtils::rm_rf(File.join('ext', ls_Package))
-		FileUtils::mkpath(File.join('ext', ls_Package))
-		ls_OutPath = File.join('ext', ls_Package, ls_OutFile)
+		FileUtils::rm_rf(File.join('ext', ls_Package, @@ms_Platform))
+		FileUtils::mkpath(File.join('ext', ls_Package, @@ms_Platform))
+		ls_OutPath = File.join('ext', ls_Package, @@ms_Platform, ls_OutFile)
 		
 		puts "Downloading #{ls_OutFile}..."
 
@@ -101,9 +101,9 @@ class ExternalTools
 		puts 
 		
 		puts "Unpacking..."
-		FileUtils::chdir(File.join('ext', ls_Package))
+		FileUtils::chdir(File.join('ext', ls_Package, @@ms_Platform))
 		unpack(ls_OutFile)
-		FileUtils::chdir(File.join('..', '..'))
+		FileUtils::chdir(File.join('..', '..', '..'))
 		FileUtils::remove_file(ls_OutPath, true)
 		unless File::exists?(as_ResultFilePath)
 			puts "Installation of #{ak_PackageDescription['title']} failed."
@@ -120,7 +120,7 @@ class ExternalTools
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/properties/ext.#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/properties/ext.#{ls_Package}.yaml"))
-		ls_Path = File::join(@@ms_RootPath, 'ext', ls_Package, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
+		ls_Path = File::join(@@ms_RootPath, 'ext', ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
 		install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) unless File::exists?(ls_Path)
 		return ls_Path
 	end
@@ -130,7 +130,7 @@ class ExternalTools
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/properties/#{as_Package}.yaml"))
 		ls_Package = as_Package.sub('ext.', '')
 		begin
-			return File::directory?(File::join('ext', ls_Package, lk_PackageDescription['path'][@@ms_Platform]))
+			return File::directory?(File::join('ext', ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform]))
 		rescue 
 			return false
 		end
