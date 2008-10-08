@@ -19,14 +19,14 @@ defaultOutputDirectory: rawFiles
 
 output:
   - key: rawFiles
-    label: zipped mzXML files
-    format: xml-mzxml-zipped
-    filename: '#{basename}.mzxml.zip'
+    label: mzML files
+    format: xml-mzml
+    filename: '#{basename}.mzML'
     
 needs:
-  - ext.readw
+  - ext.pwiz
   - ext.7zip
   - config
 
 externalParameters: 
-  - readw.readw
+  - pwiz.msconvert

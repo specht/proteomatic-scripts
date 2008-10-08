@@ -60,7 +60,7 @@ class ExternalTools
 	def self.install(as_Package, ak_Description = nil, as_ResultFilePath = nil, ak_PackageDescription = nil)
 		ls_Package = as_Package.sub('ext.', '')
 		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/properties/ext.#{ls_Package}.yaml")) unless ak_PackageDescription
-		unless ak_PackageDescription['path'][@@ms_Platform] && !ak_PackageDescription['path'][@@ms_Platform].empty?
+		unless ak_PackageDescription['download'][@@ms_Platform]
 			puts "Error: This package is not available for this platform (#{@@ms_Platform})."
 			return
 		end

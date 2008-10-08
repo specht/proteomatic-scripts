@@ -1,2 +1,28 @@
 binary:
   win32: msconvert.exe
+
+parameters:
+  - key: mzPrecision
+    commandLine: ''
+    label: m/z precision
+    type: enum
+    default: '--mz32'
+    choices: [{'--mz32': 32 bits}, {'--mz64': 64 bits}]
+  - key: intenPrecision
+    commandLine: ''
+    label: Intensity precision
+    type: enum
+    default: '--inten32'
+    choices: [{'--inten32': 32 bits}, {'--inten64': 64 bits}]
+  - key: writeIndex
+    commandLine: ''
+    label: Write index
+    type: enum
+    default: ''
+    choices: [{'': 'yes'}, {'--noindex': 'no'}]
+  - key: useCompression
+    commandLine: ''
+    label: Compress spectra
+    type: enum
+    default: ''
+    choices: [{'-z': 'yes'}, {'': 'no'}]
