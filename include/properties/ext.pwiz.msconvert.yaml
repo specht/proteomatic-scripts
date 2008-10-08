@@ -26,9 +26,3 @@ parameters:
     type: enum
     default: ''
     choices: [{'-z': 'yes'}, {'': 'no'}]
-  - key: stripIT
-    commandLine: ''
-    label: Strip IT MS 1 spectra
-    type: enum
-    default: ''
-    choices: [{'--stripIT': 'yes'}, {'': 'no'}]
