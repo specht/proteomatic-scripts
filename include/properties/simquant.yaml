@@ -12,7 +12,7 @@ input:
     label: spectra
     formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
     min: 1
-  - key: peptidesFile
+  - key: peptideFiles
     label: peptides
     formats: [txt]
 

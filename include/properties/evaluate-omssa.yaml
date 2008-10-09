@@ -25,10 +25,15 @@ output:
     format: html
     filename: omssa-report.html
     default: yes
-  - key: identifiedPeptides
-    label: identified peptides
+  - key: allIdentifiedPeptides
+    label: all identified peptides
     format: fasta-proteins
-    filename: identified-peptides.fasta
+    filename: all-identified-peptides.fasta
+    default: no
+  - key: simQuantPeptides
+    label: SimQuant peptides
+    format: txt
+    filename: simquant-peptides.txt
     default: no
 #  - key: amsFile
 #    label: 2DB import file
