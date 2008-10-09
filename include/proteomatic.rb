@@ -808,10 +808,14 @@ class ProteomaticScript
 		lk_Info[:end_time] = @mk_EndTime
 		lk_Info[:parameters] = @mk_Parameters.humanReadableConfigurationHash()
 
-		lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
-			{'run' => lk_Info.to_yaml})
+		begin
+			lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
+				{'run' => lk_Info.to_yaml})
 			
-		puts lk_Response.to_yaml
+			puts lk_Response.to_yaml
+		rescue StandardError => e
+			puts "Unable to connect to file tracker: #{e}"
+		end
 	end
 	
 	

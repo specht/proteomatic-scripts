@@ -11,7 +11,7 @@ type: converter
 
 input:
   - key: rawFiles
-    label: RAW files
+    label: RAW data
     formats: [raw-thermo]
     min: 1
 
