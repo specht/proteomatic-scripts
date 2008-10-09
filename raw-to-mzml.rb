@@ -18,7 +18,8 @@ class Raw2MzML < ProteomaticScript
 			print 'converting'
 			$stdout.flush
 
-			unless %x{#{ls_Command}}
+			%x{#{ls_Command}}
+			unless $? == 0
 				puts 'Error: There was an error while executing msconvert.'
 				exit 1
 			end
@@ -35,7 +36,8 @@ class Raw2MzML < ProteomaticScript
 				# zip mzXML file
 				lk_Files = Dir['*']
 				ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} #{lk_Files.first + @param[:compression]} #{lk_Files.first} -mx5"
-				unless %x{#{ls_Command}}
+				%x{#{ls_Command}}
+				unless $? == 0
 					puts 'Error: There was an error while executing 7zip.'
 					exit 1
 				end

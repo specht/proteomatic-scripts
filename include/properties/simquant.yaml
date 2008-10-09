@@ -10,7 +10,7 @@ type: processor
 input:
   - key: spectra
     label: spectra
-    formats: [xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
     min: 1
   - key: peptidesFile
     label: peptides
@@ -39,7 +39,7 @@ parameters:
   - key: scanType
     label: Scans to analyze
     type: enum
-    choices: [{sim: SIM scans only}, {all: All MS1 scans)}]
+    choices: [{sim: SIM scans only}, {all: All MS1 scans}]
     default: 'sim'
   - key: isotopeCount
     label: Isotope count

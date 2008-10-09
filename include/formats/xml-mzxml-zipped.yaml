@@ -1,3 +1,0 @@
-extensions: ['.mzXML.zip']
-detection: return true
-description: mzXML (zipped)

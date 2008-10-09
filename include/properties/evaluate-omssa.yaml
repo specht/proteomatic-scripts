@@ -15,7 +15,7 @@ input:
     min: 1
   - key: spectra
     label: spectra
-    formats: [dta, mgf, xml-mzdata, xml-mzdata-zipped, xml-mzxml, xml-mzxml-zipped]
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
 
 defaultOutputDirectory: omssaResults
 

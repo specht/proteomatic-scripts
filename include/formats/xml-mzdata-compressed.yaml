@@ -1,0 +1,3 @@
+extensions: ['.mzData.zip', '.xml.zip', '.mzData.gz', '.xml.gz', '.mzData.bz2', '.xml.bz2']
+detection: return true
+description: mzData (compressed)

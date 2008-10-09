@@ -1,0 +1,3 @@
+extensions: ['.mzXML.zip', '.mzXML.gz', '.mzXML.bz2']
+detection: return true
+description: mzXML (compressed)

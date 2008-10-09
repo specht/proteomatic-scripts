@@ -299,9 +299,8 @@ class ProteomaticScript
 		
 		@ms_HostName = ENV.to_hash['COMPUTERNAME'] unless @ms_HostName
 		unless @ms_HostName
-			if %x{hostname}
-				@ms_HostName = lk_IO.gets.strip
-			end
+			ls_Result = %x{hostname}
+			@ms_HostName = ls_Result if $? == 0
 		end
 		@ms_HostName = 'unknown' unless @ms_HostName
 		
