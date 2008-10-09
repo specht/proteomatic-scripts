@@ -299,10 +299,8 @@ class ProteomaticScript
 		
 		@ms_HostName = ENV.to_hash['COMPUTERNAME'] unless @ms_HostName
 		unless @ms_HostName
-			begin
-				lk_IO = IO.popen('hostname')
+			if %x{hostname}
 				@ms_HostName = lk_IO.gets.strip
-			rescue StandardError 
 			end
 		end
 		@ms_HostName = 'unknown' unless @ms_HostName
