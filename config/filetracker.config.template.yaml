@@ -1,0 +1,7 @@
+# ===============================
+# File tracker configuration file
+# ===============================
+# In order to use file tracking, please adjust the following values to your 
+# system and save this file with the '.template' part removed.
+
+fileTrackerUri: 'http://localhost:3000'

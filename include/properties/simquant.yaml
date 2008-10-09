@@ -38,10 +38,9 @@ parameters:
     choices: [{argc13: 'heavy arginine'}]
   - key: scanType
     label: Scans to analyze
-    type: csvString
-    choices: [{sim: SIM scans}, {full: Full scans}]
+    type: enum
+    choices: [{sim: SIM scans only}, {all: All MS1 scans)}]
     default: 'sim'
-    display: row
   - key: isotopeCount
     label: Isotope count
     type: int
