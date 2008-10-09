@@ -55,7 +55,7 @@ class SimQuant < ProteomaticScript
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 		
-		ls_Command = "#{ExternalTools::binaryPath('simquant.simquant')} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget #{ls_YamlPath} --svgOutPath #{ls_SvgPath} --files #{@input[:spectra].join(' ')} --peptides #{lk_Peptides.join(' ')}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --files #{@input[:spectra].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')}"
 		puts 'There was an error while executing simquant.' unless system(ls_Command)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
