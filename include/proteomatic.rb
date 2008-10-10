@@ -305,6 +305,8 @@ class ProteomaticScript
 		end
 		@ms_HostName = 'unknown' unless @ms_HostName
 		
+		@ms_UserName.strip!
+		@ms_HostName.strip!
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
@@ -799,7 +801,6 @@ class ProteomaticScript
 		lk_Info[:basename] = File::basename(as_Path)
 		lk_Info[:directory] = File::dirname(as_Path)
 		lk_Info[:size] = File::size(as_Path)
-		lk_Info[:ctime] = File::ctime(as_Path)
 		lk_Info[:md5] = Digest::MD5.hexdigest(File::read(as_Path))
 		
 		return lk_Info
@@ -808,7 +809,7 @@ class ProteomaticScript
 	
 	def submitRunToFileTracker()
 		return unless @ms_FileTrackerUri
-		puts "Submitting run to file tracker at #{@ms_FileTrackerUri}."
+		print "Submitting run to file tracker at #{@ms_FileTrackerUri}..."
 		
 		lk_Info = Hash.new
 		lk_Info[:user] = @ms_UserName
@@ -824,30 +825,31 @@ class ProteomaticScript
 		
 		@input.each_key do |ls_Key|
 			@input[ls_Key].each do |ls_Path|
-				lk_Info = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
-				lk_Info[:input_file] = true
-				lk_Files.push(lk_Info)
+				next unless File::exists?(ls_Path)
+				lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+				lk_FileInfo[:input_file] = true
+				lk_Files.push(lk_FileInfo)
 			end
 		end
 		@output.each_key do |ls_Key|
-			ls_Path = @output[ls_Key]
-			lk_Info = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
-			lk_Info[:input_file] = false
-			lk_Files.push(lk_Info)
+			ls_Path = @output[ls_Key].sub('.proteomatic.part', '')
+			next unless File::exists?(ls_Path)
+			lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+			lk_FileInfo[:input_file] = false
+			lk_Files.push(lk_FileInfo)
 		end
 			
-		lk_Info[:files] = lk_Files
-		
-		puts lk_Info.to_yaml
-
-		exit 1
 		begin
 			lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
-				{'run' => lk_Info.to_yaml})
-			
-			puts lk_Response.to_yaml
+				{'run' => lk_Info.to_yaml, 'files' => lk_Files.to_yaml})
+				
+			if (lk_Response.code[0, 3] == "200")
+				puts " done."
+			else
+				puts " something went wrong."
+			end
 		rescue StandardError => e
-			puts "Unable to connect to file tracker: #{e}"
+			puts "\nUnable to connect to file tracker: #{e}"
 		end
 	end
 	
