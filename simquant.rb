@@ -133,9 +133,9 @@ class SimQuant < ProteomaticScript
 				
 				lk_ProteinKeys.each do |ls_Protein|
 					lk_Peptides = lk_Proteins[ls_Protein].sort
-					lk_Out.puts "<tr><td colspan='4' style='border: none; padding-top: 1em; padding-bottom: 1em;'><b>#{ls_Protein}</b></td></tr>"
+					lk_Out.puts "<tr><td colspan='4' style='border: none; padding-top: 1em;'><b>#{ls_Protein}</b></td></tr>"
 					lk_Peptides.each do |ls_Peptide|
-						lk_Out.puts "<tr><td colspan='4' style='border: none;'>#{ls_Peptide}</td></tr>"
+						lk_Out.puts "<tr><td colspan='4' style='border: none; padding-top: 1em; padding-bottom: 1em;'>#{ls_Peptide}</td></tr>"
 						lk_Out.puts "<tr><th>Spot</th><th>Ratio mean (std. dev.)</th><th>SNR mean (std. dev.)</th><th>Scans</th></tr>"
 						lk_PeptideResults = lk_Results['results'][ls_Peptide]['results']
 						lk_PeptideResults.sort! { |a, b| String::natcmp(a['file'], b['file']) }

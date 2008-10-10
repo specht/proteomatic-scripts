@@ -71,6 +71,7 @@ parameters:
     type: float
     default: 2.0
     min: 0.0
+    step: 0.1
   - key: maxOffCenter
     label: Maximum off center
     type: float
