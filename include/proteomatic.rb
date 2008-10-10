@@ -28,6 +28,7 @@ require 'yaml'
 require 'zlib'
 require 'uri'
 require 'net/http'
+require 'digest/md5'
 
 
 class ProteomaticScriptDaemon
@@ -793,6 +794,18 @@ class ProteomaticScript
 	end
 	
 	
+	def getFileInfo(as_Path, ab_Md5)
+		lk_Info = Hash.new
+		lk_Info[:basename] = File::basename(as_Path)
+		lk_Info[:directory] = File::dirname(as_Path)
+		lk_Info[:size] = File::size(as_Path)
+		lk_Info[:ctime] = File::ctime(as_Path)
+		lk_Info[:md5] = Digest::MD5.hexdigest(File::read(as_Path))
+		
+		return lk_Info
+	end
+	
+	
 	def submitRunToFileTracker()
 		return unless @ms_FileTrackerUri
 		puts "Submitting run to file tracker at #{@ms_FileTrackerUri}."
@@ -806,7 +819,28 @@ class ProteomaticScript
 		lk_Info[:start_time] = @mk_StartTime
 		lk_Info[:end_time] = @mk_EndTime
 		lk_Info[:parameters] = @mk_Parameters.humanReadableConfigurationHash()
+		
+		lk_Files = Array.new
+		
+		@input.each_key do |ls_Key|
+			@input[ls_Key].each do |ls_Path|
+				lk_Info = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+				lk_Info[:input_file] = true
+				lk_Files.push(lk_Info)
+			end
+		end
+		@output.each_key do |ls_Key|
+			ls_Path = @output[ls_Key]
+			lk_Info = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+			lk_Info[:input_file] = false
+			lk_Files.push(lk_Info)
+		end
+			
+		lk_Info[:files] = lk_Files
+		
+		puts lk_Info.to_yaml
 
+		exit 1
 		begin
 			lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
 				{'run' => lk_Info.to_yaml})
