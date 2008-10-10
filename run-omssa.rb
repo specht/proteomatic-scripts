@@ -104,7 +104,8 @@ class RunOmssa < ProteomaticScript
 		unless (lk_XmlFiles.empty?)
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
-			puts 'There was an error while executing xml2mgf.' unless system("\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{ls_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}");
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{ls_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}"
+			puts 'There was an error while executing xml2mgf.' unless system(ls_Command);
 			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[ls_TempPath + '/mgf-in*']
 		end
 		
