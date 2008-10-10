@@ -28,8 +28,9 @@ class CompileGpfIndex < ProteomaticScript
 	def run()
 		@output.each do |ls_InPath, ls_OutPath|
 			ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} #{ls_InPath} #{ls_OutPath} \"\""
-			unless system(ls_Command)
-				puts 'There was an error while executing gpfindex.'
+			%x{#{ls_Command}}
+			unless $? == 0
+				puts 'Error: There was an error while executing gpfindex.'
 				exit 1
 			end
 		end

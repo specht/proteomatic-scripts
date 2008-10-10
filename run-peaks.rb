@@ -57,7 +57,12 @@ class RunPeaks < ProteomaticScript
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
 			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -o \"#{File::join(ls_TempInPath, 'xml2mgf-out.mgf')}\" #{lk_XmlFiles.join(' ')}"
-			puts 'There was an error while executing xml2mgf.' unless system(ls_Command);
+			
+			%x{#{ls_Command}}
+			unless $? == 0
+				puts 'Error: There was an error while executing xml2mgf.'
+				exit 1
+			end
 		end
 		
 		ls_ParamFile = File::join(ls_TempPath, 'peaks-config.xml')
@@ -72,7 +77,13 @@ class RunPeaks < ProteomaticScript
         print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
 		Dir::chdir(ls_TempPath)
-        puts 'There was an error while executing PEAKS.' unless system(ls_Command)
+		
+		%x{#{ls_Command}}
+		unless $? == 0
+			puts 'Error: There was an error while executing PEAKS.'
+			exit 1
+		end
+		
 		Dir::chdir(ls_OldPath)
         File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.fas'), @output[:fasFile]) if @output[:fasFile]
         File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.ann'), @output[:annFile]) if @output[:annFile]
