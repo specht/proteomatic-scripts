@@ -907,4 +907,17 @@ class ProteomaticScript
 		lk_Config = YAML::load_file(File::join('config', "#{@ms_ScriptName}.config.yaml"))
 		return lk_Config[as_Key]
 	end
+	
+	def runCommand(as_Command, ab_PrintStdOut = false)
+		if (ab_PrintStdOut)
+			system(as_Command)
+		else
+			ls_Output = %x{#{as_Command}}
+		end
+		unless $?.exitstatus == 0
+			puts "Error: There was an error while executing #{as_Command.split(' ').first}."
+			exit(1)
+		end
+		#puts ls_Output if ab_PrintStdOut			
+	end
 end

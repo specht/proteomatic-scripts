@@ -46,11 +46,7 @@ class SimQuant < ProteomaticScript
 		FileUtils::mkpath(ls_SvgPath)
 		
 		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --files #{@input[:spectra].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
-		%x{#{ls_Command}}
-		unless $? == 0
-			puts 'Error: There was an error while executing SimQuant.'
-			exit 1
-		end
+		runCommand(ls_Command)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		

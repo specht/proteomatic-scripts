@@ -81,12 +81,7 @@ class RunGpf < ProteomaticScript
 		ls_ResultFile = tempFilename("gpf-results-");
 		
 		ls_Command = "#{ExternalTools::binaryPath('gpf.gpfbatch')} #{ls_GpfOptions} #{ls_GenomePath} #{ls_QueryFile} #{ls_ResultFile}"
-		
-		%x{#{ls_Command}}
-		unless $? == 0
-			puts 'Error: There was an error while executing gpfbatch.'
-			exit 1
-		end
+		runCommand(ls_Command)
 		
 		FileUtils::cp(ls_ResultFile, @output[:gpfResults]) if @output[:gpfResults]
 		

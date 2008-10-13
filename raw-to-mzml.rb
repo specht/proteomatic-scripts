@@ -18,11 +18,7 @@ class Raw2MzML < ProteomaticScript
 			print 'converting'
 			$stdout.flush
 
-			%x{#{ls_Command}}
-			unless $? == 0
-				puts 'Error: There was an error while executing msconvert.'
-				exit 1
-			end
+			runCommand(ls_Command)
 			
 			unless (@param[:compression].empty?)
 				ls_OldDir = Dir::pwd()
@@ -36,11 +32,7 @@ class Raw2MzML < ProteomaticScript
 				# zip mzXML file
 				lk_Files = Dir['*']
 				ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} #{lk_Files.first + @param[:compression]} #{lk_Files.first} -mx5"
-				%x{#{ls_Command}}
-				unless $? == 0
-					puts 'Error: There was an error while executing 7zip.'
-					exit 1
-				end
+				runCommand(ls_Command)
 				FileUtils::rm_f(lk_Files.first)
 				
 				Dir.chdir(ls_OldDir)

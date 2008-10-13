@@ -40,12 +40,7 @@ class RunOmssa < ProteomaticScript
 
 			ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{ls_TargetDecoyPath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
 			ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
-			
-			%x{#{ls_Command}}
-			unless $? == 0
-				puts 'Error: There was an error while executing omssacl.'
-				exit 1
-			end
+			runCommand(ls_Command)1
 		end
 
 		File::delete('test.dta') if File.exists?('test.dta') && !lb_TestDtaExisted
@@ -109,12 +104,7 @@ class RunOmssa < ProteomaticScript
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
 			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{ls_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}"
-			
-			%x{#{ls_Command}}
-			unless $? == 0
-				puts 'Error: There was an error while executing xml2mgf.'
-				exit 1
-			end
+			runCommand(ls_Command)
 			
 			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[ls_TempPath + '/mgf-in*']
 		end
