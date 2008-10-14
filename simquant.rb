@@ -50,6 +50,11 @@ class SimQuant < ProteomaticScript
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		
+		if ((!lk_Results.include?('results')) || (lk_Results['results'].class != Hash))
+			puts 'No peptides could be quantified.'
+			exit 0
+		end
+		
 		if @output[:xhtmlReport]
 			File.open(@output[:xhtmlReport], 'w') do |lk_Out|
 				lk_Out.puts "<?xml version='1.0' encoding='utf-8' ?>"
