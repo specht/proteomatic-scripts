@@ -24,24 +24,20 @@ require 'fileutils'
 
 class RunOmssa < ProteomaticScript
 
-	def runOmssa(as_SpectrumFilename, ak_Databases, as_OutputDirectory, as_Format = 'csv')
-		lk_TargetDecoyFilenames = Array.new()
-		ak_Databases.each { |ls_Path| lk_TargetDecoyFilenames.push(getTargetDecoyFilename(ls_Path)) }
+	def runOmssa(as_SpectrumFilename, as_DatabasePath, as_OutputDirectory, as_Format = 'csv')
 		lk_OutFiles = Array.new
 		
 		lb_TestDtaExisted = File.exists?('test.dta')
 		
-		lk_TargetDecoyFilenames.each do |ls_TargetDecoyPath|
-			ls_OutFilename = tempFilename("omssa-out", as_OutputDirectory)
-			lk_OutFiles.push(ls_OutFilename)
-			
-			ls_InputSwitch = '-fm'
-			ls_InputSwitch = '-f' if fileMatchesFormat(as_SpectrumFilename, 'dta')
+		ls_OutFilename = tempFilename("omssa-out", as_OutputDirectory)
+		lk_OutFiles.push(ls_OutFilename)
+		
+		ls_InputSwitch = '-fm'
+		ls_InputSwitch = '-f' if fileMatchesFormat(as_SpectrumFilename, 'dta')
 
-			ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{ls_TargetDecoyPath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
-			ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
-			runCommand(ls_Command)1
-		end
+		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
+		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
+		runCommand(ls_Command)
 
 		File::delete('test.dta') if File.exists?('test.dta') && !lb_TestDtaExisted
 		
@@ -50,40 +46,31 @@ class RunOmssa < ProteomaticScript
 
 
 	def run()
-		# merge all input databases into one database
-		lb_MergedDatabase = false
-		lk_Databases = Array.new
-		if @input[:databases].size == 1
-			lk_Databases = @input[:databases]
-		else
-			puts 'Merging databases...'
-			lb_MergedDatabase = true
-			ls_MergedDatabase = tempFilename('merged-database');
-			File::open(ls_MergedDatabase, 'w') do |lk_OutFile|
+		@ms_TempPath = tempFilename('run-omssa')
+		FileUtils::mkpath(@ms_TempPath)
+		
+		# if target-decoy if switched off and we have multiple databases,
+		# merge all of them into one database
+		ls_DatabasePath = nil
+		if @param[:targetDecoyMethod] == 'off'
+			# no target decoy!
+			puts 'Merging databases...' unless @input[:databases].size == 1
+			ls_DatabasePath= tempFilename('merged-database', @ms_TempPath);
+			File::open(ls_DatabasePath, 'w') do |lk_OutFile|
 				@input[:databases].each do |ls_Path|
-					File::open(ls_Path, 'r') do |lk_InFile|
-						ls_Contents = lk_InFile.read
-						ls_Contents += "\n" unless ls_Contents[-1] == "\n"
-						lk_OutFile.write(ls_Contents)
-					end
+					File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
 				end
 			end
-			lk_Databases = [ls_MergedDatabase]
+		else
+			# yay, make it target decoy!
+			puts "Creating target-decoy database..."
+			ls_DatabasePath= tempFilename('target-decoy-database', @ms_TempPath);
+			ls_Command = "#{ExternalTools::binaryPath('simquant.decoyfasta')} --output #{ls_DatabasePath} --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].join(' ')}"
+			runCommand(ls_Command, true)
 		end
 		
-		puts 'Creating target-decoy database and converting to BLAST format...'
-		# ensure that all databases are target-decoy and in BLAST format
-		lk_ToBeDeleted = Array.new
-		lk_Databases.each do |ls_Path|
-			createTargetDecoyDatabase(ls_Path)
-			createBlastDatabase(getTargetDecoyFilename(ls_Path))
-			if (lb_MergedDatabase)
-				lk_ToBeDeleted.push(getTargetDecoyFilename(ls_Path))
-				lk_ToBeDeleted.push(getTargetDecoyFilename(ls_Path) + '.phr')
-				lk_ToBeDeleted.push(getTargetDecoyFilename(ls_Path) + '.psq')
-				lk_ToBeDeleted.push(getTargetDecoyFilename(ls_Path) + '.pin')
-			end
-		end
+		puts 'Converting database to BLAST format...'
+		createBlastDatabase(ls_DatabasePath)
 		
 		# check if there are spectra files that are not dta or mgf
 		lk_PreparedSpectraFiles = Array.new
@@ -98,15 +85,13 @@ class RunOmssa < ProteomaticScript
 			end
 		end
 		
-		ls_TempPath = tempFilename('run-omssa')
-		FileUtils::mkpath(ls_TempPath)
 		unless (lk_XmlFiles.empty?)
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{ls_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}"
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{@ms_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}"
 			runCommand(ls_Command)
 			
-			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[ls_TempPath + '/mgf-in*']
+			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[@ms_TempPath + '/mgf-in*']
 		end
 		
 		# run OMSSA on each spectrum file
@@ -114,7 +99,7 @@ class RunOmssa < ProteomaticScript
 		li_Counter = 0
 		lk_PreparedSpectraFiles.each do |ls_Path|
 			print "\rRunning OMSSA: #{li_Counter * 100 / lk_PreparedSpectraFiles.size}% done."
-			lk_OutFiles += runOmssa(ls_Path, lk_Databases, ls_TempPath, 'csv')
+			lk_OutFiles += runOmssa(ls_Path, ls_DatabasePath, @ms_TempPath, 'csv')
 			li_Counter += 1
 		end
 		puts "\rRunning OMSSA: 100% done."
@@ -123,7 +108,6 @@ class RunOmssa < ProteomaticScript
 		print "Merging OMSSA results..."
 		mergeCsvFiles(lk_OutFiles, @output[:resultFile])
 		
-		FileUtils.rm_f(lk_ToBeDeleted);
 		puts "done."
 	end
 end

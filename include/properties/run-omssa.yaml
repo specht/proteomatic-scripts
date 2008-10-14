@@ -28,6 +28,27 @@ output:
     default: yes
 
 parameters:
+  - key: targetDecoyMethod
+    group: Sequence library
+    label: Target-decoy method
+    type: enum
+    choices: ['off', 'shuffle', 'reverse']
+    default: shuffle
+    description: Specify how decoys should be created.
+  - key: targetDecoyKeepStart
+    group: Sequence library
+    label: Decoy keep start
+    type: int
+    default: 1
+    min: 0
+    description: Specify how many amino acids from the start of a sequence should be left untouched when creating a decoy entry.
+  - key: targetDecoyKeepEnd
+    group: Sequence library
+    label: Decoy keep end
+    type: int
+    default: 1
+    min: 0
+    description: Specify how many amino acids from the end of a sequence should be left untouched when creating a decoy entry.
   - key: batchSize
     group: Tweaks
     label: Spectrum batch size
