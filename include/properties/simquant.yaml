@@ -8,15 +8,18 @@ description: >
 type: processor
 
 input:
-  - key: spectra
+  - key: spectraFiles
     label: spectra
     formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
     min: 1
   - key: peptideFiles
     label: peptides
     formats: [txt]
+  - key: modelFiles
+    label: gene model
+    formats: [fasta-proteins]
 
-defaultOutputDirectory: spectra
+defaultOutputDirectory: spectraFiles
 
 output:
   - key: xhtmlReport
