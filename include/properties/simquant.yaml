@@ -43,7 +43,7 @@ parameters:
     label: Scans to analyze
     type: enum
     choices: [{sim: SIM scans only}, {all: All MS1 scans}]
-    default: 'sim'
+    default: 'all'
   - key: isotopeCount
     label: Isotope count
     type: int

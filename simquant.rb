@@ -309,7 +309,7 @@ class SimQuant < ProteomaticScript
 						lk_ProteinKeys.each do |ls_Protein|
 							lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
 							lk_Out.puts "<tr style='background-color: #eee;'>"
-							lk_Out.puts "<td>#{ls_Protein}</td>"
+							lk_Out.puts "<td><b>#{ls_Protein}</b></td>"
 							lk_Out.puts "<td class='ratio-m-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['ratioMean'])}</td>"
 							lk_Out.puts "<td class='ratio-s-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['ratioStdDev'])}</td>"
 							lk_Out.puts "<td class='snr-m-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['snrMean'])}</td>"
@@ -344,7 +344,7 @@ class SimQuant < ProteomaticScript
 					lk_PeptideKeys.sort! { |a, b| String::natcmp(a, b) }
 					lk_PeptideKeys.each do |ls_Peptide|
 						lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
-						lk_Out.puts "<tr style='background-color: #ddd;' id='peptide-#{ls_Peptide}'><td>#{ls_Peptide}</td>"
+						lk_Out.puts "<tr style='background-color: #ddd;' id='peptide-#{ls_Peptide}'><td><b>#{ls_Peptide}</b></td>"
 						lk_Out.puts "<td class='ratio-m-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['ratioMean'])}</td>"
 						lk_Out.puts "<td class='ratio-s-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['ratioStdDev'])}</td>"
 						lk_Out.puts "<td class='snr-m-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['snrMean'])}</td>"
@@ -355,6 +355,7 @@ class SimQuant < ProteomaticScript
 						lk_SpotKeys = lk_Results['peptideResults'][ls_Peptide]['spots'].keys
 						lk_SpotKeys.sort! { |a, b| String::natcmp(a, b) }
 						lk_SpotKeys.each do |ls_Spot|
+							lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
 							lk_Out.puts "<tr style='background-color: #eee;' id='peptide-#{ls_Peptide}-spot-#{ls_Spot}'><td>#{ls_Spot}</td>"
 							lk_Out.puts "<td class='ratio-m-#{lk_PeptideAndFileIndex[ls_Peptide + '-' + ls_Spot]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['spots'][ls_Spot]['mergedResults']['ratioMean'])}</td>"
 							lk_Out.puts "<td class='ratio-s-#{lk_PeptideAndFileIndex[ls_Peptide + '-' + ls_Spot]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['spots'][ls_Spot]['mergedResults']['ratioStdDev'])}</td>"

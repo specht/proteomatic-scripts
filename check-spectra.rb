@@ -22,7 +22,7 @@ require 'fileutils'
 
 class CheckSpectra < ProteomaticScript
 	def run()
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.checkspectra')}\" #{@input[:spectra].join(' ')}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.checkspectra')}\" #{@input[:spectra].collect { |x| '"' + x + '"' }.join(' ')}"
 		runCommand(ls_Command, true)
 	end
 end
