@@ -45,7 +45,7 @@ class SimQuant < ProteomaticScript
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 		
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --files #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --models #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
@@ -297,6 +297,30 @@ class SimQuant < ProteomaticScript
 					lk_Out.puts '</p>'
 					
 					lk_Out.puts "<h2>Quantified proteins</h2>"
+					
+					if (lk_Results['ambiguousPeptides'])
+						lk_Out.puts "<p><b>Attention:</b> The following peptides have been quantified but could not be assigned to a single proteins.</p>"
+						lk_Out.puts "<table>"
+						lk_Out.puts "<tr><th>Peptide</th><th>Proteins</th></tr>"
+						lk_Results['ambiguousPeptides'].keys.each do |ls_Peptide|
+							li_Count = 0
+							li_Count = lk_Results['ambiguousPeptides'][ls_Peptide].size if lk_Results['ambiguousPeptides'][ls_Peptide]
+							lk_Out.puts "<tr><td rowspan='#{li_Count == 0 ? 1 : li_Count}'>#{ls_Peptide}</td>"
+							if (li_Count == 0)
+								lk_Out.puts "<td><i>(unable to match to protein)</i></td>"
+							else
+								(0...li_Count).each do |li_Index|
+									ls_Protein = lk_Results['ambiguousPeptides'][ls_Peptide][li_Index]
+									lk_Out.puts "<tr>" unless li_Index == 0
+									lk_Out.puts "<td>#{ls_Protein}</td>"
+									lk_Out.puts "</tr>" unless li_Index == li_Count - 1
+								end
+							end
+							lk_Out.puts "</tr>"
+						end
+						lk_Out.puts "</table>"
+						lk_Out.puts "<p> </p>"
+					end
 					
 					if (lk_Results['proteinResults'].size == 0)
 						lk_Out.puts "<p><i>No proteins were quantified.</i></p>"

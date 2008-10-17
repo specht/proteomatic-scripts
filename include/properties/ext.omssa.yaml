@@ -1,15 +1,15 @@
 title: OMSSA
 
-version: 2.1.1
+version: 2.1.4
 
 link: http://pubchem.ncbi.nlm.nih.gov/omssa/
 
 download:
-  linux: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.linux.tar.gz
-  win32: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.win32.exe
-  macx: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.1/omssa-2.1.1.macos.tar.gz
+  linux: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.4/omssa-2.1.4.linux.tar.gz
+  win32: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.4/omssa-2.1.4.win32.exe
+  macx: ftp://ftp.ncbi.nih.gov/pub/lewisg/omssa/2.1.4/omssa-2.1.4.macos.tar.gz
 
 path:
-  linux: omssa-2.1.1.linux
-  win32: omssa-2.1.1.win32
-  macx: omssa-2.1.1.macos
+  linux: omssa-2.1.4.linux
+  win32: omssa-2.1.4.win32
+  macx: omssa-2.1.4.macos

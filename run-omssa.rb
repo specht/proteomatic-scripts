@@ -52,7 +52,7 @@ class RunOmssa < ProteomaticScript
 		# if target-decoy if switched off and we have multiple databases,
 		# merge all of them into one database
 		ls_DatabasePath = nil
-		if @param[:targetDecoyMethod] == 'off'
+		if !@param[:doTargetDecoy]
 			# no target decoy!
 			puts 'Merging databases...' unless @input[:databases].size == 1
 			ls_DatabasePath= tempFilename('merged-database', @ms_TempPath);
@@ -70,6 +70,7 @@ class RunOmssa < ProteomaticScript
 		end
 		
 		puts 'Converting database to BLAST format...'
+		puts ls_DatabasePath
 		createBlastDatabase(ls_DatabasePath)
 		
 		# check if there are spectra files that are not dta or mgf
@@ -103,6 +104,8 @@ class RunOmssa < ProteomaticScript
 			li_Counter += 1
 		end
 		puts "\rRunning OMSSA: 100% done."
+		
+		exit 1
 		
 		# merge results
 		print "Merging OMSSA results..."
