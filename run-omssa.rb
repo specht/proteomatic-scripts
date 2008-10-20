@@ -55,7 +55,7 @@ class RunOmssa < ProteomaticScript
 		if !@param[:doTargetDecoy]
 			# no target decoy!
 			puts 'Merging databases...' unless @input[:databases].size == 1
-			ls_DatabasePath= tempFilename('merged-database', @ms_TempPath);
+			ls_DatabasePath= tempFilename('merged-database', Dir::tmpdir);
 			File::open(ls_DatabasePath, 'w') do |lk_OutFile|
 				@input[:databases].each do |ls_Path|
 					File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
@@ -64,13 +64,12 @@ class RunOmssa < ProteomaticScript
 		else
 			# yay, make it target decoy!
 			puts "Creating target-decoy database..."
-			ls_DatabasePath= tempFilename('target-decoy-database', @ms_TempPath);
+			ls_DatabasePath= tempFilename('target-decoy-database', Dir::tmpdir);
 			ls_Command = "#{ExternalTools::binaryPath('simquant.decoyfasta')} --output #{ls_DatabasePath} --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].join(' ')}"
 			runCommand(ls_Command, true)
 		end
 		
 		puts 'Converting database to BLAST format...'
-		puts ls_DatabasePath
 		createBlastDatabase(ls_DatabasePath)
 		
 		# check if there are spectra files that are not dta or mgf
@@ -104,8 +103,6 @@ class RunOmssa < ProteomaticScript
 			li_Counter += 1
 		end
 		puts "\rRunning OMSSA: 100% done."
-		
-		exit 1
 		
 		# merge results
 		print "Merging OMSSA results..."

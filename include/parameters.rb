@@ -263,7 +263,7 @@ class Parameters
 				if (lk_Parameter['type'] == 'flag')
 					ls_Result += " #{lk_Parameter['commandLine']}" if lk_Parameter['value']
 				else
-					if !(lk_Parameter['ignoreIfEmpty'] == true)
+					unless lk_Parameter['ignoreIfEmpty'] && lk_Parameter['value'].empty?
 						ls_Result += " #{lk_Parameter['commandLine']} #{lk_Parameter['value']}"
  					end
 				end
