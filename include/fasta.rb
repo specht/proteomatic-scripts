@@ -25,7 +25,8 @@ def createBlastDatabase(as_Filename)
 		if (!FileUtils.uptodate?(as_Filename + '.phr', [as_Filename]) ||
 			!FileUtils.uptodate?(as_Filename + '.psq', [as_Filename]) ||
 			!FileUtils.uptodate?(as_Filename + '.pin', [as_Filename]))
-			unless system("\"#{ExternalTools::binaryPath('blast.formatdb')}\" -i \"#{as_Filename}\" -p T -o F")
+			ls_Command = "\"#{ExternalTools::binaryPath('blast.formatdb')}\" -i \"#{as_Filename}\" -p T -o F"
+			unless system(ls_Command)
 				puts 'Error: There was an error while executing formatdb.'
 				exit(1)
 			end

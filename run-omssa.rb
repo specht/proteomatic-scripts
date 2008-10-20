@@ -48,6 +48,22 @@ class RunOmssa < ProteomaticScript
 	def run()
 		@ms_TempPath = tempFilename('run-omssa')
 		FileUtils::mkpath(@ms_TempPath)
+		ls_DatabaseTempPath = @ms_TempPath
+		@input[:databases].each do |ls_DatabasePath|
+			ls_DatabaseTempPath = tempFilename('run-omssa', File::dirname(ls_DatabasePath))
+			break unless ls_DatabaseTempPath.include?(' ')
+		end
+		ls_DatabaseTempPath = Dir::tmpdir if (ls_DatabaseTempPath.include?(' '))
+		ls_DatabaseTempPath = 'c:/' if (ls_DatabaseTempPath.include?(' '))
+		if (ls_DatabaseTempPath.include?(' '))
+			puts 'Sorry, but Run OMSSA is unable to continue.'
+			puts 'For the conversion of the FASTA database into the BLAST format, formatdb is used ' +
+			'which requires a path without spaces. In order to solve this problem, please move the ' +
+			'FASTA database file to a location without spaces in the path.'
+			exit 1
+		else
+			FileUtils::mkpath(ls_DatabaseTempPath)
+		end
 		
 		# if target-decoy if switched off and we have multiple databases,
 		# merge all of them into one database
@@ -55,7 +71,7 @@ class RunOmssa < ProteomaticScript
 		if !@param[:doTargetDecoy]
 			# no target decoy!
 			puts 'Merging databases...' unless @input[:databases].size == 1
-			ls_DatabasePath= tempFilename('merged-database', Dir::tmpdir);
+			ls_DatabasePath= tempFilename('merged-database', ls_DatabaseTempPath);
 			File::open(ls_DatabasePath, 'w') do |lk_OutFile|
 				@input[:databases].each do |ls_Path|
 					File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
@@ -64,8 +80,8 @@ class RunOmssa < ProteomaticScript
 		else
 			# yay, make it target decoy!
 			puts "Creating target-decoy database..."
-			ls_DatabasePath= tempFilename('target-decoy-database', Dir::tmpdir);
-			ls_Command = "#{ExternalTools::binaryPath('simquant.decoyfasta')} --output #{ls_DatabasePath} --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].join(' ')}"
+			ls_DatabasePath= tempFilename('target-decoy-database', ls_DatabaseTempPath);
+			ls_Command = "#{ExternalTools::binaryPath('simquant.decoyfasta')} --output \"#{ls_DatabasePath}\" --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
 			runCommand(ls_Command, true)
 		end
 		
