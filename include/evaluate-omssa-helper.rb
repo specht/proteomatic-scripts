@@ -41,7 +41,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		lk_File.each do |ls_Line|
 			lk_Line = ls_Line.parse_csv()
 			ls_Scan = lk_Line[1]
-			ls_Peptide = lk_Line[2]
+			ls_Peptide = lk_Line[2].upcase
 			lf_E = lk_Line[3].to_f
 			ls_DefLine = lk_Line[9]
 			lf_Mass = lk_Line[4]
