@@ -30,11 +30,6 @@ output:
     format: fasta-proteins
     filename: all-identified-peptides.fasta
     default: no
-  - key: simQuantPeptides
-    label: SimQuant peptides
-    format: txt
-    filename: simquant-peptides.txt
-    default: no
 #  - key: amsFile
 #    label: 2DB import file
 #    format: ams

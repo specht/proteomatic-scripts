@@ -286,15 +286,6 @@ class EvaluateOmssa < ProteomaticScript
 			end
 		end
 		
-		if (@output[:simQuantPeptides])
-			File.open(@output[:simQuantPeptides], 'w') do |lk_Out|
-				lk_Peptides = lk_ProteinIdentifyingModelPeptides.to_a.sort
-				lk_Peptides.each do |ls_Peptide|
-					lk_Out.puts "#{ls_Peptide};#{lk_PeptideHash[ls_Peptide]['proteins'].keys.first}"
-				end
-			end
-		end
-		
 		if (@output[:amsFile])
 			File.open(@output[:amsFile], 'w') do |lk_Out|
 				lk_NeededSpots = Set.new
