@@ -65,6 +65,10 @@ parameters:
     label: Write ambiguous peptides
     type: flag
     default: true
+  - key: writeModifiedPeptides
+    label: Write modified peptides
+    type: flag
+    default: true
   - key: writeEValueThresholds
     label: Write E-value thresholds
     type: flag
