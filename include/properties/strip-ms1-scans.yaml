@@ -1,0 +1,34 @@
+group: Spectra
+
+title: Strip MS1 scans
+
+description: >
+  This script removes all MS1 scans from a set of mzML files. Use this script
+  if you would like to save disk space and don't need the MS1 scans.
+
+type: converter
+
+input:
+  - key: mzMlFiles
+    label: mzML
+    formats: [xml-mzml, xml-mzml-compressed]
+    min: 1
+
+defaultOutputDirectory: mzMlFiles
+
+output:
+  - key: mzMlFiles
+    label: stripped mzML files
+    format: xml-mzml
+    filename: '#{basename}-no-ms1.mzML#{compression}'
+	
+parameters:
+  - key: compression
+    label: Compress result file
+    type: enum
+    choices: [{'': 'no compression'}, {'.gz': 'gzip'}, {'.bz2' : 'bzip2'}]
+    default: '.gz'
+
+needs:
+  - ext.7zip
+  - ext.simquant
