@@ -20,6 +20,28 @@ class Raw2MzML < ProteomaticScript
 
 			runCommand(ls_Command)
 			
+			# strip MS1 scans if desired
+			# Note: msconvert has the --stripIT option to strip MS1 ion trap scans, but 
+			# it didn't strip our MS1 scans when I tried it, so we use simquant.stripscans here
+			
+			unless (@param[:stripMs1Scans].empty?)
+				ls_OldDir = Dir::pwd()
+				
+				ls_StripScansPath = ExternalTools::binaryPath('simquant.stripscans')
+				Dir.chdir(ls_TempOutPath)
+				
+				print ', stripping'
+				$stdout.flush
+				
+				# strip mzML file
+				lk_Files = Dir['*']
+				ls_Command = "#{ls_StripScansPath} \"#{lk_Files.first}\""
+				runCommand(ls_Command)
+				FileUtils::rm_f(lk_Files.first)
+				
+				Dir.chdir(ls_OldDir)
+			end
+			
 			unless (@param[:compression].empty?)
 				ls_OldDir = Dir::pwd()
 				
@@ -29,9 +51,9 @@ class Raw2MzML < ProteomaticScript
 				print ', compressing'
 				$stdout.flush
 				
-				# zip mzXML file
+				# zip mzML file
 				lk_Files = Dir['*']
-				ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} #{lk_Files.first + @param[:compression]} #{lk_Files.first} -mx5"
+				ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} \"#{lk_Files.first + @param[:compression]}\" \"#{lk_Files.first}\" -mx5"
 				runCommand(ls_Command)
 				FileUtils::rm_f(lk_Files.first)
 				
