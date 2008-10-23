@@ -106,7 +106,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		li_CropCount = 0
 		lk_ScansByE.each do |ls_Scan|
 			#puts lk_ScanHash[ls_Spot][ls_Scan].to_yaml
-			puts "#{lk_ScanHash[ls_Spot][ls_Scan][:e].to_f}\t#{lk_ScanHash[ls_Spot][ls_Scan][:deflines].first}"
+			#puts "#{lk_ScanHash[ls_Spot][ls_Scan][:e].to_f}\t#{lk_ScanHash[ls_Spot][ls_Scan][:deflines].first}"
 			li_TotalCount += 1
 			li_DecoyCount += 1 if lk_ScanHash[ls_Spot][ls_Scan][:decoy]
 			lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f * 100.0

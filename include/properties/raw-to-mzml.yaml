@@ -21,7 +21,7 @@ output:
   - key: rawFiles
     label: mzML files
     format: xml-mzml
-    filename: '#{basename}.mzML#{compression}'
+    filename: '#{basename}#{stripMs1Scans}.mzML#{compression}'
 	
 parameters:
   - key: compression
@@ -29,10 +29,16 @@ parameters:
     type: enum
     choices: [{'': 'no compression'}, {'.gz': 'gzip'}, {'.bz2' : 'bzip2'}]
     default: '.gz'
+  - key: stripMs1Scans
+    label: Strip MS1 scans
+    type: enum
+    choices: [{'': 'no'}, {'-no-ms1': 'yes'}]
+    default: ''
 
 needs:
   - ext.pwiz
   - ext.7zip
+  - ext.simquant
   - config
 
 externalParameters: 

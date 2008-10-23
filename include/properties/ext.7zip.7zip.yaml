@@ -1,2 +1,4 @@
 binary:
   win32: 7za.exe
+  linux: 7za
+  macx: 7za
