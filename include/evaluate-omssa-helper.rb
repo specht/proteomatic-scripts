@@ -94,6 +94,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	lk_GoodScans = Array.new
 	
 	lk_EThresholds = Hash.new
+	lk_ActualFpr = Hash.new
 	
 	# determine e-value cutoff for each spot
 	lk_ScanHash.keys.each do |ls_Spot|
@@ -110,7 +111,14 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 			li_TotalCount += 1
 			li_DecoyCount += 1 if lk_ScanHash[ls_Spot][ls_Scan][:decoy]
 			lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f * 100.0
-			li_CropCount = li_TotalCount if lf_Fpr < af_TargetFpr
+			if lf_Fpr < af_TargetFpr
+				li_CropCount = li_TotalCount 
+				lk_ActualFpr[ls_Spot] = lf_Fpr if li_DecoyCount > 0
+			else
+				if (li_DecoyCount > 0 && (!lk_ActualFpr[ls_Spot]))
+					lk_ActualFpr[ls_Spot] = lf_Fpr
+				end
+			end
 		end
 		
 		lk_GoodScans += lk_ScansByE[0, li_CropCount]
@@ -203,6 +211,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	lk_Result[:proteinIdentifyingModelPeptides] = lk_ProteinIdentifyingModelPeptides
 	lk_Result[:proteins] = lk_Proteins
 	lk_Result[:eThresholds] = lk_EThresholds
+	lk_Result[:actualFpr] = lk_ActualFpr
 	
 	return lk_Result
 end

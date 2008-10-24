@@ -35,6 +35,7 @@ class EvaluateOmssa < ProteomaticScript
 		lk_ProteinIdentifyingModelPeptides = lk_Result[:proteinIdentifyingModelPeptides]
 		lk_Proteins = lk_Result[:proteins]
 		lk_EThresholds = lk_Result[:eThresholds]
+		lk_ActualFpr = lk_Result[:actualFpr]
 		
 		lk_ProteinsBySpectraCount = lk_Proteins.keys.sort { |a, b| lk_Proteins[b][:spectraCount] <=> lk_Proteins[a][:spectraCount]}
 		lk_AmbiguousPeptides = (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).to_a.sort! do |x, y|
@@ -119,7 +120,7 @@ class EvaluateOmssa < ProteomaticScript
 				lk_Out.puts "<li><a href='#header-new-gpf-peptides'>Additional peptides identified by GPF</a></li>" if (lk_GpfPeptides - lk_ModelPeptides).size > 0 && @param[:writeAdditionalPeptidesIdentifiedByGPF]
 				lk_Out.puts "<li><a href='#header-ambiguous-peptides'>Identified peptides that appear in more than one model protein</a></li>" if (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size > 0 && @param[:writeAmbiguousPeptides]
 				lk_Out.puts "<li><a href='#header-modified-peptides'>Modified peptides</a></li>" if @param[:writeModifiedPeptides]
-				lk_Out.puts "<li><a href='#header-e-thresholds'>E-value thresholds by spot</a></li>" if @param[:writeEValueThresholds]
+				lk_Out.puts "<li><a href='#header-e-thresholds'>E-value thresholds and actual FPR by spot</a></li>" if @param[:writeEValueThresholds]
 				lk_Out.puts '</ol>'
 			
 				if @param[:writeIdentifiedProteinsBySpectraCount]
@@ -328,13 +329,13 @@ class EvaluateOmssa < ProteomaticScript
 				end
 				
 				if @param[:writeEValueThresholds]
-					lk_Out.puts "<h2 id='header-e-thresholds'>E-value thresholds by spot</h2>"
-					lk_Out.puts "<p>In the following table you find the E-value thresholds that have been determined for each spot in order to achieve a maximum false positive ratio of #{@param[:targetFpr]}%.</p>"
+					lk_Out.puts "<h2 id='header-e-thresholds'>E-value thresholds and actual FPR by spot</h2>"
+					lk_Out.puts "<p>In the following table you find the E-value thresholds and actual false positive rates (FPR) that have been determined for each spot in order to achieve a maximum false positive ratio of #{@param[:targetFpr]}%.</p>"
 					lk_Out.puts '<table>'
-					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th></tr>'
+					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
 					
 					lk_ShortScanKeys.each do |ls_Spot|
-						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_EThresholds[ls_Spot] ? sprintf('%e', lk_EThresholds[ls_Spot]) : 'n/a'}</td></tr>"
+						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_EThresholds[ls_Spot] ? sprintf('%e', lk_EThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot]) : 'n/a'}</td></tr>"
 					end
 					lk_Out.puts '</table>'
 				end
