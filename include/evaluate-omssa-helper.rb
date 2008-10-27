@@ -63,6 +63,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 			lk_ScanParts[3] = li_Charge.to_s
 			ls_Scan = lk_ScanParts.join('.')
 			ls_Spot = lk_ScanParts.first
+			ls_Spot = 'all'
 			lk_ScanHash[ls_Spot] ||= Hash.new
 			
 			lk_ScanHash[ls_Spot][ls_Scan] = Hash.new if !lk_ScanHash[ls_Spot].has_key?(ls_Scan)
@@ -96,6 +97,14 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	lk_EThresholds = Hash.new
 	lk_ActualFpr = Hash.new
 	
+	# here is the target-decoy cutoff strategy:
+	# we have a target FPR but we do not yet know whether we can achieve a FPR
+	# less or equal to that target FPR. So search for the global FPR minimum
+	# initially, and if we find a FPR which is <= the target FPR, search for
+	# the global maximum FRP which is <= the target FPR
+	
+	lb_FoundValidFpr = false
+	
 	# determine e-value cutoff for each spot
 	lk_ScanHash.keys.each do |ls_Spot|
 		li_TotalScanCount += lk_ScanHash[ls_Spot].size
@@ -107,16 +116,24 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		li_CropCount = 0
 		lk_ScansByE.each do |ls_Scan|
 			#puts lk_ScanHash[ls_Spot][ls_Scan].to_yaml
-			#puts "#{lk_ScanHash[ls_Spot][ls_Scan][:e].to_f}\t#{lk_ScanHash[ls_Spot][ls_Scan][:deflines].first}"
 			li_TotalCount += 1
 			li_DecoyCount += 1 if lk_ScanHash[ls_Spot][ls_Scan][:decoy]
 			lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f * 100.0
-			if lf_Fpr < af_TargetFpr
-				li_CropCount = li_TotalCount 
-				lk_ActualFpr[ls_Spot] = lf_Fpr if li_DecoyCount > 0
-			else
-				if (li_DecoyCount > 0 && (!lk_ActualFpr[ls_Spot]))
-					lk_ActualFpr[ls_Spot] = lf_Fpr
+			#puts "#{sprintf('%1.2f', lf_Fpr)}\t#{lk_ScanHash[ls_Spot][ls_Scan][:e].to_f}\t#{lk_ScanHash[ls_Spot][ls_Scan][:deflines].first}"
+			if (li_DecoyCount > 0)
+				if (lb_FoundValidFpr)
+					# search for the global maximum FPR that is <= target FPR
+					if (lf_Fpr > lk_ActualFpr[ls_Spot])
+						lk_ActualFpr[ls_Spot] = lf_Fpr
+						li_CropCount = li_TotalCount
+					end
+				else
+					# search for the global minimum FPR
+					if ((!lk_ActualFpr[ls_Spot]) || (lf_Fpr < lk_ActualFpr[ls_Spot]))
+						lk_ActualFpr[ls_Spot] = lf_Fpr
+						li_CropCount = li_TotalCount
+						lb_FoundValidFpr = true if (lf_Fpr <= af_TargetFpr)
+					end
 				end
 			end
 		end
@@ -124,6 +141,8 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		lk_GoodScans += lk_ScansByE[0, li_CropCount]
 		lk_EThresholds[ls_Spot] = lk_ScanHash[ls_Spot][lk_ScansByE[li_CropCount - 1]][:e] if li_CropCount > 0
 	end
+	
+	puts lk_ActualFpr.to_yaml
 	
 	# chuck spots out of lk_ScanHash
 	lk_NewScanHash = Hash.new
