@@ -760,7 +760,7 @@ class ProteomaticScript
 						@param.keys.each do |ls_Param|
 							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', @param[ls_Param])
 						end
-						ls_OutPath = File::join(ls_OutputDirectory, @param['[output]prefix'.intern] + ls_OutFilename)
+						ls_OutPath = File::join(ls_Directory, @param['[output]prefix'.intern] + ls_OutFilename)
 						@output[ls_Path] = ls_OutPath
 					end
 				end

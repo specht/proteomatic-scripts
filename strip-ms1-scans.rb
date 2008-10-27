@@ -3,11 +3,9 @@ require 'fileutils'
 
 class StripMs1Scans < ProteomaticScript
 	def run()
-		ls_TempOutPath = tempFilename('strip-ms1-scans')
-		FileUtils::mkpath(ls_TempOutPath)
 		@output.each do |ls_InPath, ls_OutPath|
-			# clean up temp dir
-			FileUtils::rm_rf(File::join(ls_TempOutPath, '*'))
+			ls_TempOutPath = tempFilename('strip-ms1-scans', File.dirname(ls_OutPath))
+			FileUtils::mkpath(ls_TempOutPath)
 			print "#{File.basename(ls_InPath)}: "
 			
 			ls_OldDir = Dir.pwd
@@ -42,8 +40,8 @@ class StripMs1Scans < ProteomaticScript
 			FileUtils::mv(ls_OutPath, ls_OutPath.sub('.proteomatic.part', ''))
 			puts ' - done.'
 			$stdout.flush
+			FileUtils::rm_rf(ls_TempOutPath)
 		end
-		FileUtils::rm_rf(ls_TempOutPath)
 	end
 end
 
