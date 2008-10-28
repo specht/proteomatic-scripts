@@ -63,7 +63,6 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 			lk_ScanParts[3] = li_Charge.to_s
 			ls_Scan = lk_ScanParts.join('.')
 			ls_Spot = lk_ScanParts.first
-			ls_Spot = 'all'
 			lk_ScanHash[ls_Spot] ||= Hash.new
 			
 			lk_ScanHash[ls_Spot][ls_Scan] = Hash.new if !lk_ScanHash[ls_Spot].has_key?(ls_Scan)
@@ -105,6 +104,12 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	
 	lb_FoundValidFpr = false
 	
+	lk_AllScanHash = {'all' => Hash.new }
+	lk_ScanHash.keys.each do |ls_Spot|
+		lk_AllScanHash['all'].merge(lk_ScanHash[ls_Spot])
+	end
+	lk_ScanHash = lk_AllScanHash
+	
 	# determine e-value cutoff for each spot
 	lk_ScanHash.keys.each do |ls_Spot|
 		li_TotalScanCount += lk_ScanHash[ls_Spot].size
@@ -141,8 +146,6 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		lk_GoodScans += lk_ScansByE[0, li_CropCount]
 		lk_EThresholds[ls_Spot] = lk_ScanHash[ls_Spot][lk_ScansByE[li_CropCount - 1]][:e] if li_CropCount > 0
 	end
-	
-	puts lk_ActualFpr.to_yaml
 	
 	# chuck spots out of lk_ScanHash
 	lk_NewScanHash = Hash.new
