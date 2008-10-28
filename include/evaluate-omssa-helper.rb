@@ -35,6 +35,7 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	
 	#puts "Evaluating #{ak_Files.collect { |x| File::basename(x) }.join(', ')}..."
 	
+	# read all PSM from all result files in ak_Files, record them in lk_ScanHash
 	ak_Files.each do |ls_Filename|
 		ls_Spot = File::basename(ls_Filename).split('.').first
 		lk_File = File.open(ls_Filename, 'r')
@@ -73,20 +74,13 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 				lk_ScanHash[ls_Spot][ls_Scan][:e] = lf_E;
 				lk_ScanHash[ls_Spot][ls_Scan][:mods] = Array.new
 				lk_ScanHash[ls_Spot][ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
+				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = (ls_DefLine[0, 6] == 'decoy_')
 			elsif (lf_E == lk_ScanHash[ls_Spot][ls_Scan][:e])
 				lk_ScanHash[ls_Spot][ls_Scan][:peptides][ls_Peptide] = lf_Mass
 				lk_ScanHash[ls_Spot][ls_Scan][:deflines].push(ls_DefLine)
 				lk_ScanHash[ls_Spot][ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
+				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = true if (ls_DefLine[0, 6] == 'decoy_')
 			end
-		end
-	end
-	
-	# mark decoy scans 
-	lk_ScanHash.keys.each do |ls_Spot|
-		lk_ScanHash[ls_Spot].keys.each do |ls_Scan|
-			lb_Decoy = false
-			lk_ScanHash[ls_Spot][ls_Scan][:deflines].each { |ls_DefLine| lb_Decoy = true if ls_DefLine[0, 6] == 'decoy_' }
-			lk_ScanHash[ls_Spot][ls_Scan][:decoy] = lb_Decoy
 		end
 	end
 	
@@ -104,11 +98,13 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	
 	lb_FoundValidFpr = false
 	
+=begin
 	lk_AllScanHash = {'all' => Hash.new }
 	lk_ScanHash.keys.each do |ls_Spot|
 		lk_AllScanHash['all'].merge(lk_ScanHash[ls_Spot])
 	end
 	lk_ScanHash = lk_AllScanHash
+=end
 	
 	# determine e-value cutoff for each spot
 	lk_ScanHash.keys.each do |ls_Spot|
