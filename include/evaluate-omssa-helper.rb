@@ -17,7 +17,7 @@
 
 require 'bigdecimal'
 
-def evaluateFiles(ak_Files, af_TargetFpr)
+def evaluateFiles(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -36,6 +36,8 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	#puts "Evaluating #{ak_Files.collect { |x| File::basename(x) }.join(', ')}..."
 	
 	# read all PSM from all result files in ak_Files, record them in lk_ScanHash
+	li_EntryCount = 0
+	li_ErrorCount = 0
 	ak_Files.each do |ls_Filename|
 		ls_Spot = File::basename(ls_Filename).split('.').first
 		lk_File = File.open(ls_Filename, 'r')
@@ -44,6 +46,8 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		lk_File.readline
 		
 		lk_File.each do |ls_Line|
+			li_EntryCount += 1
+			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
 			lk_Line = ls_Line.parse_csv()
 			ls_Scan = lk_Line[1]
 			ls_OriginalPeptide = lk_Line[2]
@@ -61,9 +65,25 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 			# it obviously doens't have to believe the input file, and in that case
 			# the charge in the dta filename must be corrected)
 			lk_ScanParts = ls_Scan.split('.')
-			lk_ScanParts[3] = li_Charge.to_s
+			begin
+				li_TestStartScan = Integer(lk_ScanParts[-3])
+				li_TestStopScan = Integer(lk_ScanParts[-2])
+				li_TestCharge = Integer(lk_ScanParts[-1])
+				if (li_TestCharge < 1 || (li_TestStopScan < li_TestStartScan))
+					li_ErrorCount += 1
+					next
+				end
+			rescue StandardError => e
+				li_ErrorCount += 1
+				next
+			end
+			lk_ScanParts[-1] = li_Charge.to_s
 			ls_Scan = lk_ScanParts.join('.')
-			ls_Spot = lk_ScanParts.first
+			
+			# determine spot name from scan name by cutting of the start scan,
+			# end scan, and charge
+			ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
+			
 			lk_ScanHash[ls_Spot] ||= Hash.new
 			
 			lk_ScanHash[ls_Spot][ls_Scan] = Hash.new if !lk_ScanHash[ls_Spot].has_key?(ls_Scan)
@@ -83,10 +103,15 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 			end
 		end
 	end
+	puts "\rReading PSM entries... done.       "
+	if (li_ErrorCount > 0)
+		puts "ATTENTION: The scan name was not as expected in #{li_ErrorCount} of #{li_EntryCount} lines, these lines have been ignored."
+		puts "The scan name is expected to end with (start scan).(end scan).(charge)."
+	end
 	
-	li_TotalScanCount = 0
 	lk_GoodScans = Array.new
 	
+	lf_GlobalEThreshold = nil
 	lk_EThresholds = Hash.new
 	lk_ActualFpr = Hash.new
 	
@@ -96,31 +121,34 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 	# initially, and if we find a FPR which is <= the target FPR, search for
 	# the global maximum FRP which is <= the target FPR
 	
+	lk_Spots = lk_ScanHash.keys
+	if (ab_DetermineGlobalScoreThreshold)
+		# pull spots out of lk_ScanHash at the beginning if we want a global
+		# score threshold
+		lk_NewScanHash = Hash.new
+		lk_ScanHash.keys.each { |ls_Spot| lk_NewScanHash.merge!(lk_ScanHash[ls_Spot]) }
+		lk_ScanHash = lk_NewScanHash
+		# since all spots are gone, call all scans (global)
+		lk_Spots = ['(global)']
+	end
+	
 	lb_FoundValidFpr = false
 	
-=begin
-	lk_AllScanHash = {'all' => Hash.new }
-	lk_ScanHash.keys.each do |ls_Spot|
-		lk_AllScanHash['all'].merge(lk_ScanHash[ls_Spot])
-	end
-	lk_ScanHash = lk_AllScanHash
-=end
-	
 	# determine e-value cutoff for each spot
-	lk_ScanHash.keys.each do |ls_Spot|
-		li_TotalScanCount += lk_ScanHash[ls_Spot].size
+	lk_Spots.each do |ls_Spot|
 		# sort scans by e value
-		lk_ScansByE = lk_ScanHash[ls_Spot].keys.sort { |a, b| lk_ScanHash[ls_Spot][a][:e] <=> lk_ScanHash[ls_Spot][b][:e] }
+		lk_LocalScanHash = lk_ScanHash
+		lk_LocalScanHash = lk_ScanHash[ls_Spot] unless ab_DetermineGlobalScoreThreshold
+		
+		lk_ScansByE = lk_LocalScanHash.keys.sort { |a, b| lk_LocalScanHash[a][:e] <=> lk_LocalScanHash[b][:e] }
 		
 		li_TotalCount = 0
 		li_DecoyCount = 0
 		li_CropCount = 0
 		lk_ScansByE.each do |ls_Scan|
-			#puts lk_ScanHash[ls_Spot][ls_Scan].to_yaml
 			li_TotalCount += 1
-			li_DecoyCount += 1 if lk_ScanHash[ls_Spot][ls_Scan][:decoy]
+			li_DecoyCount += 1 if lk_LocalScanHash[ls_Scan][:decoy]
 			lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f * 100.0
-			#puts "#{sprintf('%1.2f', lf_Fpr)}\t#{lk_ScanHash[ls_Spot][ls_Scan][:e].to_f}\t#{lk_ScanHash[ls_Spot][ls_Scan][:deflines].first}"
 			if (li_DecoyCount > 0)
 				if (lb_FoundValidFpr)
 					# search for the global maximum FPR that is <= target FPR
@@ -140,13 +168,15 @@ def evaluateFiles(ak_Files, af_TargetFpr)
 		end
 		
 		lk_GoodScans += lk_ScansByE[0, li_CropCount]
-		lk_EThresholds[ls_Spot] = lk_ScanHash[ls_Spot][lk_ScansByE[li_CropCount - 1]][:e] if li_CropCount > 0
+		lk_EThresholds[ls_Spot] = lk_LocalScanHash[lk_ScansByE[li_CropCount - 1]][:e] if li_CropCount > 0
 	end
 	
-	# chuck spots out of lk_ScanHash
-	lk_NewScanHash = Hash.new
-	lk_ScanHash.keys.each { |ls_Spot| lk_NewScanHash.merge!(lk_ScanHash[ls_Spot]) }
-	lk_ScanHash = lk_NewScanHash
+	unless ab_DetermineGlobalScoreThreshold
+		# chuck spots out of lk_ScanHash if it hasn't already been done
+		lk_NewScanHash = Hash.new
+		lk_ScanHash.keys.each { |ls_Spot| lk_NewScanHash.merge!(lk_ScanHash[ls_Spot]) }
+		lk_ScanHash = lk_NewScanHash
+	end
 	
 	lk_GoodScans.delete_if { |ls_Scan| lk_ScanHash[ls_Scan][:decoy] || lk_ScanHash[ls_Scan][:peptides].size > 1 }
 	

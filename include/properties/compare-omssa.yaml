@@ -1,6 +1,6 @@
 group: OMSSA
 
-title: Compare OMSSA Runs
+title: Compare OMSSA runs
 
 description: >
   Compare OMSSA runs at a certain target false positive ratio.

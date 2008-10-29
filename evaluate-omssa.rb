@@ -25,7 +25,7 @@ require 'yaml'
 class EvaluateOmssa < ProteomaticScript
 	def run()
 		# merge OMSSA results
-		lk_Result = evaluateFiles(@input[:omssaResults], @param[:targetFpr])
+		lk_Result = evaluateFiles(@input[:omssaResults], @param[:targetFpr], @param[:scoreThresholdScope] == 'global')
 		
 		lk_GoodScans = lk_Result[:goodScans]
 		lk_ScanHash = lk_Result[:scanHash]
@@ -273,9 +273,7 @@ class EvaluateOmssa < ProteomaticScript
 				
 				if @param[:writeModifiedPeptides]
 					lk_Out.puts "<h2 id='header-modified-peptides'>Modified peptides</h2>"
-					lk_Out.puts '<p>These peptides have been found with modifications.</p>'
-					lk_Out.puts '<table>'
-					lk_Out.puts '<tr><th>Peptide</th><th>Modified peptide</th><th>Description</th><th>Spot</th><th>Scan</th></tr>'
+					lb_FoundAny = false
 					lk_PeptideHash.keys.sort.each do |ls_Peptide|
 						next if lk_PeptideHash[ls_Peptide][:mods].empty?
 						
@@ -306,6 +304,12 @@ class EvaluateOmssa < ProteomaticScript
 								lk_PeptideHash[ls_Peptide][:mods][ls_ModifiedPeptide][ls_Description].keys.each do |ls_Spot|
 									ls_Mod = ls_ModifiedPeptide.dup
 									ls_Mod.gsub!(/([a-z])/, "<b>\\1</b>")
+									unless lb_FoundAny
+										lk_Out.puts '<p>These peptides have been found with modifications.</p>'
+										lk_Out.puts '<table>'
+										lk_Out.puts '<tr><th>Peptide</th><th>Modified peptide</th><th>Description</th><th>Spot</th><th>Scan</th></tr>'
+										lb_FoundAny = true
+									end
 									lk_Out.puts "<tr>"
 									if (lb_PeptideRow)
 										lk_Out.puts "<td id='modified-peptide-#{ls_Peptide}' rowspan='#{li_PeptideRowCount}'>#{ls_Peptide}</td>"
@@ -325,7 +329,11 @@ class EvaluateOmssa < ProteomaticScript
 							end
 						end
 					end
-					lk_Out.puts '</table>'
+					if lb_FoundAny
+						lk_Out.puts '</table>'
+					else
+						lk_Out.puts '<p>No modified peptides have been found.</p>'
+					end
 				end
 				
 				if @param[:writeEValueThresholds]
@@ -334,7 +342,7 @@ class EvaluateOmssa < ProteomaticScript
 					lk_Out.puts '<table>'
 					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
 					
-					lk_ShortScanKeys.each do |ls_Spot|
+					lk_EThresholds.keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
 						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_EThresholds[ls_Spot] ? sprintf('%e', lk_EThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot]) : 'n/a'}</td></tr>"
 					end
 					lk_Out.puts '</table>'

@@ -44,32 +44,44 @@ parameters:
     suffix: '%'
     min: 0.0
     max: 100.0
-    step: 0.1
+    step: 0.1    
+  - key: scoreThresholdScope
+    label: Score threshold scope
+    type: enum
+    choices: ['global', 'spot']
+    default: 'spot'
   - key: writeIdentifiedProteinsBySpectraCount
+    group: OMSSA report
     label: Write identified proteins by spectra count
     type: flag
     default: true
   - key: writeIdentifiedProteinsBySpot
+    group: OMSSA report
     label: Write identified proteins by spot
     type: flag
     default: true
   - key: writeIdentifiedProteinsByDistinctPeptideCount
+    group: OMSSA report
     label: Write identified proteins by distinct peptide count
     type: flag
     default: true
   - key: writeAdditionalPeptidesIdentifiedByGPF
+    group: OMSSA report
     label: Write additional peptides identified by GPF
     type: flag
     default: true
   - key: writeAmbiguousPeptides
+    group: OMSSA report
     label: Write ambiguous peptides
     type: flag
     default: true
   - key: writeModifiedPeptides
+    group: OMSSA report
     label: Write modified peptides
     type: flag
     default: true
   - key: writeEValueThresholds
+    group: OMSSA report
     label: Write E-value thresholds
     type: flag
     default: true

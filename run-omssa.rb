@@ -35,7 +35,7 @@ class RunOmssa < ProteomaticScript
 		ls_InputSwitch = '-fm'
 		ls_InputSwitch = '-f' if fileMatchesFormat(as_SpectrumFilename, 'dta')
 
-		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
+		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -op \"#{ls_OutFilename}\" -ni "
 		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
 		runCommand(ls_Command)
 
@@ -48,10 +48,14 @@ class RunOmssa < ProteomaticScript
 	def run()
 		@ms_TempPath = tempFilename('run-omssa')
 		FileUtils::mkpath(@ms_TempPath)
+		# use the temp path for the BLAST database as well
+		# BUT: if there are spaces in the path, find something else
 		ls_DatabaseTempPath = @ms_TempPath
-		@input[:databases].each do |ls_DatabasePath|
-			ls_DatabaseTempPath = tempFilename('run-omssa', File::dirname(ls_DatabasePath))
-			break unless ls_DatabaseTempPath.include?(' ')
+		if ls_DatabaseTempPath.include?(' ')
+			@input[:databases].each do |ls_DatabasePath|
+				ls_DatabaseTempPath = tempFilename('run-omssa', File::dirname(ls_DatabasePath))
+				break unless ls_DatabaseTempPath.include?(' ')
+			end
 		end
 		ls_DatabaseTempPath = Dir::tmpdir if (ls_DatabaseTempPath.include?(' '))
 		ls_DatabaseTempPath = 'c:/' if (ls_DatabaseTempPath.include?(' '))
@@ -122,7 +126,8 @@ class RunOmssa < ProteomaticScript
 		
 		# merge results
 		print "Merging OMSSA results..."
-		mergeCsvFiles(lk_OutFiles, @output[:resultFile])
+		exit
+		#mergeCsvFiles(lk_OutFiles, @output[:resultFile])
 		
 		puts "done."
 	end
