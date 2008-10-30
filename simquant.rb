@@ -88,7 +88,7 @@ class SimQuant < ProteomaticScript
 					
 					lk_ProteinForPeptide = Hash.new
 					lk_Results['proteinResults'].keys.each do |ls_Protein|
-						lk_Results['proteinResults'][ls_Protein]['peptides'].each do |ls_Peptide|
+						lk_Results['proteinResults'][ls_Protein]['peptides'].keys.each do |ls_Peptide|
 							if (lk_ProteinForPeptide.include?(ls_Peptide))
 								puts 'WARNING: Something went wrong. A peptide matches multiple proteins.'
 							end
@@ -173,7 +173,7 @@ class SimQuant < ProteomaticScript
 					lk_Results['proteinResults'].keys.each do |ls_Protein|
 						ls_Id = lk_ProteinIndex[ls_Protein]
 						lk_Out.puts "gk_CalculationHash['#{ls_Id}'] = new Array();"
-						lk_Results['proteinResults'][ls_Protein]['peptides'].each do |ls_Peptide|
+						lk_Results['proteinResults'][ls_Protein]['peptides'].keys.each do |ls_Peptide|
 							lk_Results['peptideResults'][ls_Peptide]['spots'].keys.each do |ls_Spot|
 								lk_Results['peptideResults'][ls_Peptide]['spots'][ls_Spot]['scanResults'].each do |lk_Scan|
 									lk_Out.puts "gk_CalculationHash['#{ls_Id}'].push('#{lk_ScanIndex["#{ls_Peptide}-#{ls_Spot}-#{lk_Scan['id']}-#{lk_Scan['charge']}"]}');"
@@ -339,7 +339,7 @@ class SimQuant < ProteomaticScript
 							lk_Out.puts "<td class='snr-m-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['snrMean'])}</td>"
 							lk_Out.puts "<td class='snr-s-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['snrStdDev'])}</td>"
 							lk_Out.puts "</tr>"
-							lk_Results['proteinResults'][ls_Protein]['peptides'].each do |ls_Peptide|
+							lk_Results['proteinResults'][ls_Protein]['peptides'].keys.each do |ls_Peptide|
 								lk_Out.puts "<tr>"
 								lk_Out.puts "<td><a href='#peptide-#{ls_Peptide}'>#{ls_Peptide}</a></td>"
 								lk_Out.puts "<td class='ratio-m-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['ratioMean'])}</td>"
