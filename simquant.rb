@@ -340,8 +340,9 @@ class SimQuant < ProteomaticScript
 							lk_Out.puts "<td class='snr-s-#{lk_ProteinIndex[ls_Protein]}' style='text-align: right;'>#{cutMax(lk_Results['proteinResults'][ls_Protein]['mergedResults']['snrStdDev'])}</td>"
 							lk_Out.puts "</tr>"
 							lk_Results['proteinResults'][ls_Protein]['peptides'].keys.each do |ls_Peptide|
+								ls_PeptideInProteinSvg = "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='100px' height='3px'><line x1='0' y1='1.5' x2='100' y2='1.5' fill='none' stroke='#888' stroke-width='2' /><line x1='#{lk_Results['proteinResults'][ls_Protein]['peptides'][ls_Peptide]['start'].to_f / lk_Results['proteinResults'][ls_Protein]['peptides'][ls_Peptide]['proteinLength'].to_f * 100.0}' y1='1.5' x2='#{(lk_Results['proteinResults'][ls_Protein]['peptides'][ls_Peptide]['start'].to_f + lk_Results['proteinResults'][ls_Protein]['peptides'][ls_Peptide]['length'].to_f) / lk_Results['proteinResults'][ls_Protein]['peptides'][ls_Peptide]['proteinLength'].to_f * 100.0}' y2='1.5' fill='none' stroke='#000' stroke-width='2' /></svg>"
 								lk_Out.puts "<tr>"
-								lk_Out.puts "<td><a href='#peptide-#{ls_Peptide}'>#{ls_Peptide}</a></td>"
+								lk_Out.puts "<td>#{ls_PeptideInProteinSvg}<a href='#peptide-#{ls_Peptide}'>#{ls_Peptide}</a></td>"
 								lk_Out.puts "<td class='ratio-m-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['ratioMean'])}</td>"
 								lk_Out.puts "<td class='ratio-s-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['ratioStdDev'])}</td>"
 								lk_Out.puts "<td class='snr-m-#{lk_PeptideIndex[ls_Peptide]}' style='text-align: right;'>#{cutMax(lk_Results['peptideResults'][ls_Peptide]['mergedResults']['snrMean'])}</td>"
