@@ -29,6 +29,16 @@ def wrap(as_String, ai_Width = 70)
 	return ls_Result
 end
 
+=begin
+This script checks for:
+
+duplicate ID lines
+duplicate entries
+empty ID lines
+empty entries
+illegal characters in ID lines: "
+illegal characters in entries: only amino acid codes are allowed
+=end
 
 class CheckFasta < ProteomaticScript
 	def run()
@@ -132,7 +142,7 @@ class CheckFasta < ProteomaticScript
 					puts 'Error: Cannot fix database while there are empty id lines!'
 					lb_Error = true
 				end
-				exit(0) if lb_Error
+				exit(1) if lb_Error
  
 				puts 'Writing fixed database...'
 				File::open(@output[:fixedDatabase], 'w') do |lk_Out|

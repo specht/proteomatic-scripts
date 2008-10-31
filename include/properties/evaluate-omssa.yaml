@@ -48,8 +48,8 @@ parameters:
   - key: scoreThresholdScope
     label: Score threshold scope
     type: enum
-    choices: ['global', 'spot']
-    default: 'spot'
+    choices: [global, spot]
+    default: global
   - key: writeIdentifiedProteinsBySpectraCount
     group: OMSSA report
     label: Write identified proteins by spectra count
