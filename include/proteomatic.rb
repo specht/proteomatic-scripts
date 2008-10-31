@@ -744,6 +744,7 @@ class ProteomaticScript
 				end
 			elsif (@ms_ScriptType == 'converter')
 				@mk_Output.keys.each do |ls_OutputGroup|
+					lk_ExistingFiles = Array.new
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
 						ls_Basename = File::basename(ls_Path).dup
@@ -761,16 +762,25 @@ class ProteomaticScript
 							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', @param[ls_Param])
 						end
 						ls_OutPath = File::join(ls_Directory, @param['[output]prefix'.intern] + ls_OutFilename)
-						@output[ls_Path] = ls_OutPath
+						if (File::exists?(ls_OutPath))
+							lk_ExistingFiles.push(ls_Path)
+							puts "Notice: #{ls_OutPath} already exists - #{ls_Path} will be skipped."
+						else
+							@output[ls_Path] = ls_OutPath
+						end
 					end
+					# remove input files for which the output file already exists
+					lk_ExistingFiles.each { |ls_Path| @input[ls_OutputGroup.intern].delete(ls_Path) }
 				end
 			end
 		end
 		@outputDirectory = ls_OutputDirectory
 
-		# check if output files already exist
-		@output.each_value do |ls_Path|
-			lk_Errors.push("#{ls_Path} already exists. I won't overwrite this file.") if File::exists?(ls_Path)
+		if (@ms_ScriptType != 'processor')
+			# check if output files already exist
+			@output.each_value do |ls_Path|
+				lk_Errors.push("#{ls_Path} already exists. I won't overwrite this file.") if File::exists?(ls_Path)
+			end
 		end
 		
 		# add .proteomatic.part to each output file
