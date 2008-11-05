@@ -8,7 +8,7 @@ detection: |
   Float(lk_Line[lk_Line.size - 2].strip) rescue return false
   Integer(lk_Line[lk_Line.size - 3].strip) rescue return false
   ls_Line = lk_File.readline.strip
-  ls_Chars = 'ARNDCEQGHILKMFPSTWYV$*.'
+  ls_Chars = 'ARNDCEQGHILKMFPSTWXYV$*.'
   (0...ls_Line.length).each do |i|
     lc_Char = ls_Line[i, 1]
     return false if !ls_Chars.include?(lc_Char)

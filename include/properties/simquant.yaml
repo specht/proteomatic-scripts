@@ -88,6 +88,16 @@ parameters:
     suffix: seconds
     default: 60.0
     min: 0.0
+  - key: showPeptideInProtein
+    label: Show peptide location within protein
+    group: SimQuant Report
+    type: flag
+    default: yes
+  - key: includeSpectra
+    label: Include spectra
+    group: SimQuant Report
+    type: flag
+    default: yes
     
 needs:
   - ext.simquant

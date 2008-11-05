@@ -776,7 +776,7 @@ class ProteomaticScript
 		end
 		@outputDirectory = ls_OutputDirectory
 
-		if (@ms_ScriptType != 'processor')
+		if (@ms_ScriptType == 'processor')
 			# check if output files already exist
 			@output.each_value do |ls_Path|
 				lk_Errors.push("#{ls_Path} already exists. I won't overwrite this file.") if File::exists?(ls_Path)
