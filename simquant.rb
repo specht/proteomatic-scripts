@@ -28,6 +28,17 @@ class SimQuant < ProteomaticScript
 		return af_Value > ai_Max.to_f ? ">#{ai_Max}" : sprintf("%1.#{ai_Places}f", af_Value)
 	end
 	
+	def meanAndStandardDeviation(ak_Values)
+		ld_Mean = 0.0
+		ld_Sd = 0.0
+		ak_Values.each { |x| ld_Mean += x }
+		ld_Mean /= ak_Values.size
+		ak_Values.each { |x| ld_Sd += ((x - ld_Mean) ** 2.0) }
+		ld_Sd /= ak_Values.size
+		ld_Sd = Math.sqrt(ld_Sd)
+		return ld_Mean, ld_Sd
+	end
+	
 	def run()
 		lk_Peptides = @param[:peptides].split(%r{[,;\s/]+})
 		lk_Peptides.reject! { |x| x.strip.empty? }
@@ -40,7 +51,6 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		ls_TempPath = '/flipbook/spectra/quantitation/temp-simquant20081105-32576-10xz5lf-0'
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		ls_SvgPath = File::join(ls_TempPath, 'svg')
@@ -50,12 +60,12 @@ class SimQuant < ProteomaticScript
 		lk_PeptideMatches = nil
 		unless @input[:modelFiles].empty?
 			ls_Command = "\"#{ExternalTools::binaryPath('simquant.matchpeptides')}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')} > \"#{ls_PeptideMatchYamlPath}\""
-			#runCommand(ls_Command, true)
+			runCommand(ls_Command, true)
 			lk_PeptideMatches = YAML::load_file(ls_PeptideMatchYamlPath)
 		end
 		
 		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
-		#runCommand(ls_Command, true)
+		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		
@@ -329,11 +339,66 @@ class SimQuant < ProteomaticScript
 					lk_MatchedPeptides.each do |ls_Peptide|
 						ls_Protein = lk_PeptideMatches[ls_Peptide].keys.first
 						lk_PeptidesForProtein[ls_Protein] ||= Array.new
-						lk_PeptidesForProtein[ls_Protein].push(ls_Peptide)
+						lk_PeptidesForProtein[ls_Protein].push(ls_Peptide) unless lk_PeptidesForProtein[ls_Protein].include?(ls_Peptide)
 					end
 					lk_PeptidesForProtein.keys.each do |ls_Protein|
 						lk_PeptidesForProtein[ls_Protein].sort! do |a, b|
 							lk_PeptideMatches[a][ls_Protein].first['start'] <=> lk_PeptideMatches[b][ls_Protein].first['start']
+						end
+					end
+					
+					# determine merged results for each spot/peptide
+					lk_PeptideMergedResults = Hash.new
+					lk_Results['results'].keys.each do |ls_Spot|
+						lk_PeptideMergedResults[ls_Spot] = Hash.new
+						lk_Results['results'][ls_Spot].keys.each do |ls_Peptide|
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide] = Hash.new
+							# determine merged ratio/snr
+							lk_MergedSnr = Array.new
+							lk_MergedRatio = Array.new
+							lk_Results['results'][ls_Spot][ls_Peptide].each do |lk_Scan|
+								lk_MergedSnr.push(lk_Scan['snr'])
+								lk_MergedRatio.push(lk_Scan['ratio'])
+							end
+							ld_MergedSnrMean, ld_MergedSnrSd = meanAndStandardDeviation(lk_MergedSnr)
+							ld_MergedRatioMean, ld_MergedRatioSd = meanAndStandardDeviation(lk_MergedRatio)
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean] = ld_MergedSnrMean
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd] = ld_MergedSnrSd
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean] = ld_MergedRatioMean
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd] = ld_MergedRatioSd
+							lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count] = lk_MergedSnr.size
+						end
+					end
+					
+					# determine merged results for each spot/protein
+					lk_ProteinMergedResults = Hash.new
+					lk_Results['results'].keys.each do |ls_Spot|
+						lk_ProteinMergedResults[ls_Spot] = Hash.new
+						lk_Proteins = lk_MatchedPeptides.select { |x| lk_Results['results'][ls_Spot].keys.include?(x) }.collect do |ls_Peptide|
+							lk_PeptideMatches[ls_Peptide].keys.first
+						end
+						lk_Proteins.sort! { |a, b| String::natcmp(a, b) }
+						lk_Proteins.uniq!
+						
+						lk_Proteins.each do |ls_Protein|
+							lk_ProteinMergedResults[ls_Spot][ls_Protein] = Hash.new
+							# determine merged ratio/snr
+							lk_MergedSnr = Array.new
+							lk_MergedRatio = Array.new
+							lk_PeptidesForProtein[ls_Protein].each do |ls_Peptide|
+								next unless lk_Results['results'][ls_Spot].keys.include?(ls_Peptide)
+								lk_Results['results'][ls_Spot][ls_Peptide].each do |lk_Scan|
+									lk_MergedSnr.push(lk_Scan['snr'])
+									lk_MergedRatio.push(lk_Scan['ratio'])
+								end
+							end
+							ld_MergedSnrMean, ld_MergedSnrSd = meanAndStandardDeviation(lk_MergedSnr)
+							ld_MergedRatioMean, ld_MergedRatioSd = meanAndStandardDeviation(lk_MergedRatio)
+							lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean] = ld_MergedSnrMean
+							lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd] = ld_MergedSnrSd
+							lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean] = ld_MergedRatioMean
+							lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd] = ld_MergedRatioSd
+							lk_ProteinMergedResults[ls_Spot][ls_Protein][:count] = lk_MergedSnr.size
 						end
 					end
 					
@@ -361,13 +426,13 @@ class SimQuant < ProteomaticScript
 						lk_Out.puts "<h3>Quantified proteins</h3>"
 						
 						lk_Out.puts "<table>"
-						lk_Out.puts "<tr><th rowspan='2'>Spot / Protein / Peptides</th><th colspan='2'>Ratio</th><th colspan='2'>SNR</th></tr>"
+						lk_Out.puts "<tr><th rowspan='2'>Spot / Protein / Peptides</th><th rowspan='2'>count</th><th colspan='2'>Ratio</th><th colspan='2'>SNR</th></tr>"
 						lk_Out.puts "<tr><th>mean</th><th>std. dev.</th><th>mean</th><th>std. dev.</th></tr>"
 						
 						lk_Results['results'].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
 							lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
 							lk_Out.puts "<tr style='background-color: #ddd;'>"
-							lk_Out.puts "<td colspan='5'><b>#{ls_Spot}</b></td>"
+							lk_Out.puts "<td colspan='6'><b>#{ls_Spot}</b></td>"
 							lk_Out.puts "</tr>"
 							
 							lk_Proteins = lk_MatchedPeptides.select { |x| lk_Results['results'][ls_Spot].keys.include?(x) }.collect do |ls_Peptide|
@@ -380,10 +445,11 @@ class SimQuant < ProteomaticScript
 								lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
 								lk_Out.puts "<tr style='background-color: #eee;'>"
 								lk_Out.puts "<td>#{ls_Protein}</td>"
-								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
+								lk_Out.puts "<td style='text-align: right;'>#{lk_ProteinMergedResults[ls_Spot][ls_Protein][:count]}</td>"
+								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean])}</td>"
+								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd])}</td>"
+								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean])}</td>"
+								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd])}</td>"
 								lk_Out.puts "</tr>"
 								
 								lk_PeptidesForProtein[ls_Protein].each do |ls_Peptide|
@@ -392,6 +458,7 @@ class SimQuant < ProteomaticScript
 									li_Width = 256
 									ls_PeptideInProteinSvg = ''
 									
+									lk_Out.puts '<td>'
 									if (@param[:showPeptideInProtein])
 										ls_PeptideInProteinSvg = "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{li_Width}px' height='3px'><line x1='0' y1='1.5' x2='#{li_Width}' y2='1.5' fill='none' stroke='#aaa' stroke-width='1.5' />"
 										lk_PeptideMatches[ls_Peptide][lk_PeptideMatches[ls_Peptide].keys.first].each do |lk_Line|
@@ -400,15 +467,14 @@ class SimQuant < ProteomaticScript
 											ls_PeptideInProteinSvg += "<line x1='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width}' y1='1.5' x2='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width + lf_BarWidth}' y2='1.5' fill='none' stroke='#000' stroke-width='2' />"
 										end
 										ls_PeptideInProteinSvg += "</svg>"
-										lk_Out.puts "<td><div style='float: right'>#{ls_PeptideInProteinSvg}</div> #{ls_Peptide}</td>"
-									else
-										lk_Out.puts "<td>#{ls_Peptide}</td>"
+										lk_Out.puts "<div style='float: right'>#{ls_PeptideInProteinSvg}</div> "
 									end
-									
-									lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-									lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-									lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-									lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
+									lk_Out.puts "<a href='##{ls_Spot}-#{ls_Peptide}'>#{ls_Peptide}</a></td>"
+									lk_Out.puts "<td style='text-align: right;'>#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count]}</td>"
+									lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean])}</td>"
+									lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd])}</td>"
+									lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean])}</td>"
+									lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd])}</td>"
 									lk_Out.puts "</tr>"
 								end
 							end
@@ -423,7 +489,7 @@ class SimQuant < ProteomaticScript
 							
 							lk_Results['results'][ls_Spot]['proteins'].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Protein|
 								lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
-								lk_Out.puts "<tr style='background-color: #eee;'>"
+								lk_Out.puts "<tr style='baclk_PeptideMergedResultskground-color: #eee;'>"
 								lk_Out.puts "<td>#{ls_Protein}</td>"
 								lk_Out.puts "<td style='text-align: right;'>#{cutMax(0.0)}</td>"
 								lk_Out.puts "<td style='text-align: right;'>#{cutMax(0.0)}</td>"
@@ -462,7 +528,7 @@ class SimQuant < ProteomaticScript
 					lk_Out.puts "<h2 id='header-quantified-peptides'>Quantified peptides</h2>"
 					
 					lk_Out.puts "<table style='min-width: 820px;'>"
-					lk_Out.puts "<tr><th rowspan='2'>Spot / Peptide / Scan</th><th colspan='2'>Ratio</th><th colspan='2'>SNR</th><th rowspan='2'>manual exclusion</th></tr>"
+					lk_Out.puts "<tr><th rowspan='2'>Spot / Peptide / Scan</th><th rowspan='2'>count</th><th colspan='2'>Ratio</th><th colspan='2'>SNR</th></tr>"
 					lk_Out.puts "<tr><th>mean</th><th>std. dev.</th><th>mean</th><th>std. dev.</th></tr>"
 					lk_Results['results'].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
 						lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
@@ -472,12 +538,12 @@ class SimQuant < ProteomaticScript
 						
 						lk_Results['results'][ls_Spot].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Peptide|
 							lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
-							lk_Out.puts "<tr style='background-color: #eee;'><td id='peptide-#{ls_Peptide}'><b>#{ls_Peptide}</b></td>"
-							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
-							lk_Out.puts "<td></td>"
+							lk_Out.puts "<tr style='background-color: #eee;' id='#{ls_Spot}-#{ls_Peptide}'><td id='peptide-#{ls_Peptide}'><b>#{ls_Peptide}</b></td>"
+							lk_Out.puts "<td style='text-align: right;'>#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count]}</td>"
+							lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean])}</td>"
+							lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd])}</td>"
+							lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean])}</td>"
+							lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd])}</td>"
 							lk_Out.puts "</tr>"
 							
 							lk_Scans = lk_Results['results'][ls_Spot][ls_Peptide]
@@ -485,11 +551,12 @@ class SimQuant < ProteomaticScript
 							lk_Scans.each do |lk_Scan|
 								lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>" if @param[:includeSpectra]
 								lk_Out.puts "<tr><td>scan ##{lk_Scan['id']} (charge #{lk_Scan['charge']}+)</td>"
+								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
 								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_Scan['ratio'])}</td>"
-								lk_Out.puts "<td style='border-left: none;'></td>"
+								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
 								lk_Out.puts "<td style='text-align: right;'>#{cutMax(lk_Scan['snr'])}</td>"
-								lk_Out.puts "<td style='border-left: none;'></td>"
-								lk_Out.puts "<td style='background-color: #b1d28f;' class='clickableCell'>included</td>"
+								lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
+								#lk_Out.puts "<td style='background-color: #b1d28f;' class='clickableCell'>(included)</td>"
 								
 								lk_Out.puts "</tr>"
 								
@@ -512,8 +579,6 @@ class SimQuant < ProteomaticScript
 				end
 			end
 		end
-		puts "SOMEONE HAS SET UP US THE BOMB!!"
-		exit 1
 	end
 end
 

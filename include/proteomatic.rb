@@ -275,6 +275,21 @@ end
 
 
 class ProteomaticScript
+	def formatTime(af_Duration)
+		if (af_Duration < 60.0)
+			return sprintf('%1.1f seconds', af_Duration)
+		elsif (af_Duration < 3600.0)
+			return sprintf('%d minutes and %d seconds', 
+				(af_Duration / 60.0).floor,
+				(af_Duration % 60.0).floor)
+		else
+			return sprintf('%d hours, %d minutes and %d seconds',
+				(af_Duration / 3600.0).floor,
+				((af_Duration % 3600.0) / 60.0).floor,
+				(af_Duration % 60.0).floor)
+		end
+	end
+	
 	def initialize()
 	
 		@mk_TempFiles = Array.new
@@ -362,6 +377,7 @@ class ProteomaticScript
 			run()
 			finishOutputFiles()
 			@mk_EndTime = Time.now
+			puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
 			submitRunToFileTracker() if @ms_FileTrackerUri
 		end
 	end

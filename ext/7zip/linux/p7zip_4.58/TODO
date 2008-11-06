@@ -1,0 +1,21 @@
+
+- auto-generate config.h
+
+- suppress all exit(EXIT_FAILURE), FIXME, ...
+
+- no chmod for TAR (should restore the rights set)
+
+- no chown(uid,gid) for TAR
+
+- Use a more portable "String.h"
+
+- UTF16 : try to test with Complex Unicode filenames
+
+- KNOWN BUGS
+
+  - date (format arj/rar/chm) ?
+
+  - absolute path ?
+
+- zip format : better support of symbolic links
+
