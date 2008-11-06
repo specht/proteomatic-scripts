@@ -35,7 +35,7 @@ class RunOmssa < ProteomaticScript
 		ls_InputSwitch = '-fm'
 		ls_InputSwitch = '-f' if fileMatchesFormat(as_SpectrumFilename, 'dta')
 
-		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -op \"#{ls_OutFilename}\" -ni "
+		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
 		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
 		runCommand(ls_Command)
 
@@ -126,8 +126,8 @@ class RunOmssa < ProteomaticScript
 		
 		# merge results
 		print "Merging OMSSA results..."
-		exit
-		#mergeCsvFiles(lk_OutFiles, @output[:resultFile])
+		#exit
+		mergeCsvFiles(lk_OutFiles, @output[:resultFile])
 		
 		puts "done."
 	end
