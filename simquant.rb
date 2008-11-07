@@ -59,7 +59,7 @@ class SimQuant < ProteomaticScript
 
 		lk_PeptideMatches = nil
 		unless @input[:modelFiles].empty?
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.matchpeptides')}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')} > \"#{ls_PeptideMatchYamlPath}\""
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.matchpeptides')}\" --output \"#{ls_PeptideMatchYamlPath}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
 			runCommand(ls_Command, true)
 			lk_PeptideMatches = YAML::load_file(ls_PeptideMatchYamlPath)
 		end
