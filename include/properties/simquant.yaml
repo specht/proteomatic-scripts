@@ -27,6 +27,11 @@ output:
     format: xhtml
     filename: quantitation-results.xhtml
     default: yes
+  - key: proteinCsv
+    label: CSV protein quantitation results
+    format: csv
+    filename: quantified-proteins.csv
+    default: yes
 
 parameters:
   - key: peptides
