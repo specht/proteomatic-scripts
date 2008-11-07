@@ -159,7 +159,7 @@ class SimQuant < ProteomaticScript
 							lk_Proteins.uniq!
 							
 							lk_Proteins.each do |ls_Protein|
-								lk_Out.puts "#{ls_Protein};#{lk_ProteinMergedResults[ls_Spot][ls_Protein][:count]};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd])}"
+								lk_Out.puts "\"#{ls_Protein}\";#{lk_ProteinMergedResults[ls_Spot][ls_Protein][:count]};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd])}"
 								lk_PeptidesForProtein[ls_Protein].each do |ls_Peptide|
 									next unless lk_Results['results'][ls_Spot].keys.include?(ls_Peptide)
 									lk_Out.puts "#{ls_Peptide};#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count]};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean])};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd])};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean])};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd])}"
