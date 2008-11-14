@@ -120,6 +120,7 @@ class EvaluateOmssa < ProteomaticScript
 				lk_Out.puts "<li><a href='#header-new-gpf-peptides'>Additional peptides identified by GPF</a></li>" if (lk_GpfPeptides - lk_ModelPeptides).size > 0 && @param[:writeAdditionalPeptidesIdentifiedByGPF]
 				lk_Out.puts "<li><a href='#header-ambiguous-peptides'>Identified peptides that appear in more than one model protein</a></li>" if (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size > 0 && @param[:writeAmbiguousPeptides]
 				lk_Out.puts "<li><a href='#header-modified-peptides'>Modified peptides</a></li>" if @param[:writeModifiedPeptides]
+				lk_Out.puts "<li><a href='#header-quantitation-candidate-peptides'>Quantitation candidate peptides</a></li>" if @param[:writeQuantitationCandidatePeptides]
 				lk_Out.puts "<li><a href='#header-e-thresholds'>E-value thresholds and actual FPR by spot</a></li>" if @param[:writeEValueThresholds]
 				lk_Out.puts '</ol>'
 			
@@ -334,6 +335,14 @@ class EvaluateOmssa < ProteomaticScript
 					else
 						lk_Out.puts '<p>No modified peptides have been found.</p>'
 					end
+				end
+				
+				if @param[:writeQuantitationCandidatePeptides]
+					lk_Out.puts "<h2 id='header-quantitation-candidate-peptides'>Quantitation candidate peptides</h2>"
+					lk_Out.puts "<p>In the following table, you find for each identified protein the spot that it</p>"
+					lk_Out.puts '<table>'
+					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
+					lk_Out.puts '</table>'
 				end
 				
 				if @param[:writeEValueThresholds]

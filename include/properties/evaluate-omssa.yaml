@@ -80,6 +80,11 @@ parameters:
     label: Write modified peptides
     type: flag
     default: true
+  - key: writeQuantitationCandidatePeptides
+    group: OMSSA report
+    label: Write quantitation candidate peptides
+    type: flag
+    default: true
   - key: writeEValueThresholds
     group: OMSSA report
     label: Write E-value thresholds
