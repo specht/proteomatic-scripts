@@ -3,7 +3,11 @@ group: Quantitation
 title: SimQuant
 
 description: >
-   Perform quantitation on SIM scans. <br />All specified spots are searched against all specified peptides. Peptides may be specified via text files and additionally in the peptides input field.
+   Perform quantitation on SIM scans. <br />
+   All specified spots are searched against all specified peptides. 
+   Peptides may be specified via text files and additionally in the 
+   peptides input field. <br />
+   <span style='background-color: #faa;'><b>Warning:</b> SimQuant is still in development. Use at your own risk.</span>
 
 type: processor
 

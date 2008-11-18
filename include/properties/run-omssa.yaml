@@ -5,8 +5,8 @@ title: Run OMSSA
 type: processor
 
 description: >
-  This script runs OMSSA on a given set of spectra files and databases. 
-  A target-decoy approach is used.
+  This script runs OMSSA on a given set of spectral files and databases. 
+  If desired, a target-decoy approach can be used.
 
 input:
   - key: spectra
