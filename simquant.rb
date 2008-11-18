@@ -50,22 +50,25 @@ class SimQuant < ProteomaticScript
 			exit 1
 		end
 		
-		ls_TempPath = tempFilename('simquant')
+		#ls_TempPath = tempFilename('simquant')
+		ls_TempPath = '/flipbook/spectra/quantification/temp-simquant.560.0'
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		ls_SvgPath = File::join(ls_TempPath, 'svg')
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 
-		lk_PeptideMatches = nil
+		lk_PeptideMatches = Hash.new
 		unless @input[:modelFiles].empty?
+			print 'Matching peptides to proteins...'
 			ls_Command = "\"#{ExternalTools::binaryPath('simquant.matchpeptides')}\" --output \"#{ls_PeptideMatchYamlPath}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
-			runCommand(ls_Command, true)
+			#runCommand(ls_Command, true)
 			lk_PeptideMatches = YAML::load_file(ls_PeptideMatchYamlPath)
 		end
+		puts 'done.'
 		
 		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper #{@param[:cropUpper] / 100.0} --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
-		runCommand(ls_Command, true)
+		#runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		
@@ -423,13 +426,13 @@ class SimQuant < ProteomaticScript
 					lk_QuantifiedPeptides = Array.new
 					lk_Results['results'].each { |ls_Spot, lk_SpotResults| lk_QuantifiedPeptides += lk_SpotResults.keys }
 					lk_UnmatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
-						(!lk_PeptideMatches.include?(ls_Peptide)) || lk_PeptideMatches[ls_Peptide].empty?
+						(!lk_PeptideMatches[ls_Peptide]) || lk_PeptideMatches[ls_Peptide].empty?
 					end
 					lk_OvermatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
-						lk_PeptideMatches.include?(ls_Peptide) && lk_PeptideMatches[ls_Peptide].size > 1
+						lk_PeptideMatches[ls_Peptide] && lk_PeptideMatches[ls_Peptide].size > 1
 					end
 					lk_MatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
-						lk_PeptideMatches.include?(ls_Peptide) && lk_PeptideMatches[ls_Peptide].size == 1
+						lk_PeptideMatches[ls_Peptide] && lk_PeptideMatches[ls_Peptide].size == 1
 					end
 					
 					lk_PeptidesForProtein = Hash.new
@@ -557,14 +560,29 @@ class SimQuant < ProteomaticScript
 									
 									lk_Out.puts '<td>'
 									if (@param[:showPeptideInProtein])
-										ls_PeptideInProteinSvg = "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{li_Width}px' height='3px'><line x1='0' y1='1.5' x2='#{li_Width}' y2='1.5' fill='none' stroke='#aaa' stroke-width='1.5' />"
+										ls_Svg = "<svg style='margin-left: 4px;' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{li_Width}px' height='3px'><line x1='0' y1='1.5' x2='#{li_Width}' y2='1.5' fill='none' stroke='#aaa' stroke-width='1.5' />"
 										lk_PeptideMatches[ls_Peptide][lk_PeptideMatches[ls_Peptide].keys.first].each do |lk_Line|
 											lf_BarWidth = lk_Line['length'].to_f / lk_Line['proteinLength'] * li_Width
 											lf_BarWidth = 2.0 if lf_BarWidth < 2.0
-											ls_PeptideInProteinSvg += "<line x1='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width}' y1='1.5' x2='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width + lf_BarWidth}' y2='1.5' fill='none' stroke='#000' stroke-width='2' />"
+											ls_Svg += "<line x1='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width}' y1='1.5' x2='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width + lf_BarWidth}' y2='1.5' fill='none' stroke='#000' stroke-width='2' />"
 										end
-										ls_PeptideInProteinSvg += "</svg>"
-										lk_Out.puts "<div style='float: right'>#{ls_PeptideInProteinSvg}</div> "
+										ls_Svg += "</svg>"
+										lk_Out.puts "<div style='float: right'>#{ls_Svg}</div> "
+									end
+									if (@param[:showPeptideInProtein])
+										ls_Svg = "<svg style='margin-left: 4px;' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{li_Width}px' height='16px'><rect x='0' y='0' width='#{li_Width}' height='16px' fill='#ddd' />"
+										lk_Results['results'][ls_Spot][ls_Peptide].each do |lk_Hit|
+											ls_Svg += "<line x1='#{lk_Hit['retentionTime'] / 60.0 * li_Width}' y1='0' x2='#{lk_Hit['retentionTime'] / 60.0 * li_Width}' y2='14' fill='none' stroke='#000' stroke-width='1' />"
+										end
+=begin										
+										lk_PeptideMatches[ls_Peptide][lk_PeptideMatches[ls_Peptide].keys.first].each do |lk_Line|
+											lf_BarWidth = lk_Line['length'].to_f / lk_Line['proteinLength'] * li_Width
+											lf_BarWidth = 2.0 if lf_BarWidth < 2.0
+											ls_Svg += "<line x1='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width}' y1='1.5' x2='#{lk_Line['start'].to_f / lk_Line['proteinLength'] * li_Width + lf_BarWidth}' y2='1.5' fill='none' stroke='#000' stroke-width='2' />"
+										end
+=end										
+										ls_Svg += "</svg>"
+										lk_Out.puts "<div style='float: right'>#{ls_Svg}</div> "
 									end
 									lk_Out.puts "<a href='##{ls_Spot}-#{ls_Peptide}'>#{ls_Peptide}</a></td>"
 									lk_Out.puts "<td style='text-align: right;'>#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count]}</td>"
@@ -676,6 +694,7 @@ class SimQuant < ProteomaticScript
 				end
 			end
 		end
+		exit 1
 	end
 end
 
