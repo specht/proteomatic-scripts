@@ -23,7 +23,9 @@ def evaluateFiles(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
 	#    :e: 3.88761e-07
 	#    :peptides:
-	#      NLLAALNHEETR: true
+	#      NLLAALNHEETR: 
+	#        :measuredMass: 1374.32
+	#        :calculatedMass: 1374.31
 	#    :deflines:
 	#    - target_proteins.finalModelsV2.fasta;171789
 	#    - target_proteins.frozen_GeneCatalog_2007_09_13.fasta;jgi|Chlre3|194475
@@ -58,6 +60,7 @@ def evaluateFiles(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 			ls_Mods = lk_Line[10]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
 			lf_Mass = lk_Line[4]
+			lf_TheoMass = lk_Line[12]
 			li_Charge = lk_Line[11].to_i
 			
 			# correct charge in scan name (because when there are multiple charges,
@@ -89,14 +92,14 @@ def evaluateFiles(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 			lk_ScanHash[ls_Spot][ls_Scan] = Hash.new if !lk_ScanHash[ls_Spot].has_key?(ls_Scan)
 			if (!lk_ScanHash[ls_Spot][ls_Scan].has_key?(:e) || lf_E < lk_ScanHash[ls_Spot][ls_Scan][:e])
 				# clear scan hash
-				lk_ScanHash[ls_Spot][ls_Scan][:peptides] = {ls_Peptide => lf_Mass}
+				lk_ScanHash[ls_Spot][ls_Scan][:peptides] = {ls_Peptide => {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass} }
 				lk_ScanHash[ls_Spot][ls_Scan][:deflines] = [ls_DefLine]
 				lk_ScanHash[ls_Spot][ls_Scan][:e] = lf_E;
 				lk_ScanHash[ls_Spot][ls_Scan][:mods] = Array.new
 				lk_ScanHash[ls_Spot][ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
 				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = (ls_DefLine[0, 6] == 'decoy_')
 			elsif (lf_E == lk_ScanHash[ls_Spot][ls_Scan][:e])
-				lk_ScanHash[ls_Spot][ls_Scan][:peptides][ls_Peptide] = lf_Mass
+				lk_ScanHash[ls_Spot][ls_Scan][:peptides][ls_Peptide] = {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass}
 				lk_ScanHash[ls_Spot][ls_Scan][:deflines].push(ls_DefLine)
 				lk_ScanHash[ls_Spot][ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
 				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = true if (ls_DefLine[0, 6] == 'decoy_')

@@ -30,7 +30,7 @@ class CompareOmssa < ProteomaticScript
 			ls_Key = File::basename(ls_OmssaResultFile)
 			ls_Key.sub!('omssa-results.csv', '')
 			ls_Key = ls_Key[0, ls_Key.size - 1] while ((!ls_Key.empty?) && ('_-. '.include?(ls_Key[ls_Key.size - 1, 1])))
-			lk_Result = evaluateFiles([ls_OmssaResultFile], @param[:targetFpr])
+			lk_Result = evaluateFiles([ls_OmssaResultFile], @param[:targetFpr], @param[:scoreThresholdScope] == 'global')
 			lk_RunResults[ls_Key] = lk_Result
 		end
 		
@@ -113,6 +113,7 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts '</html>'
 			end
 		end
+=begin		
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
 				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
@@ -149,6 +150,7 @@ class CompareOmssa < ProteomaticScript
 				end
 			end
 		end
+=end		
 	end
 end
 

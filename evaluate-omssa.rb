@@ -393,12 +393,12 @@ class EvaluateOmssa < ProteomaticScript
 				lk_MissingSpots = Array.new
 				lk_NeededSpots.each { |ls_Spot|	lk_MissingSpots.push(ls_Spot) unless lk_SpotToSpectraFile[ls_Spot] }
 				lk_ScanData = Hash.new
-				lk_MeasuredMasses = Hash.new
 				
 				unless lk_MissingSpots.empty?
-					puts "ATTENTION: The measures masses and spectral data for the following spots can not be included into the 2DB upload file because the following spots have not been specified as input files: #{lk_MissingSpots.join(', ')}."
+					puts "ATTENTION: The spectral data for the following spots can not be included into the 2DB upload file because the following spots have not been specified as input files: #{lk_MissingSpots.join(', ')}."
 				end
 				
+=begin				
 				#fetch measures masses and spectral data
 				print 'Extracting spectral data...' unless lk_NeededSpots.to_a == lk_MissingSpots
 				lk_NeededSpots.each do |ls_Spot|
@@ -417,6 +417,7 @@ class EvaluateOmssa < ProteomaticScript
 					DtaIterator.new(ls_Filename, lk_SpectrumProc).run
 				end
 				puts 'done.' unless lk_NeededSpots.to_a == lk_MissingSpots
+=end				
 				
 				# write AMS header
 				lk_Out.puts "spectrum_id!software!charge!meas_mass!cal_mass!delta_mass!scores!sequence_in!sequence_out!left_fragment!right_fragment!left_pos!right_pos!left_rf!right_rf!tic!database!reference!spectrum!search_string!"
@@ -427,12 +428,11 @@ class EvaluateOmssa < ProteomaticScript
 						lk_Peptide[:found].keys.each do |ls_Found|
 							ls_Software = lk_FoundToSoftware[ls_Found]
 							lk_ScanNameParts = ls_Scan.split('.')
-							li_Charge = lk_ScanNameParts[lk_ScanNameParts.size - 2].to_i
+							li_Charge = lk_ScanNameParts.last.to_i
 							ls_Spot = lk_ScanNameParts.first
 							ls_SpotFilename = lk_SpotToSpectraFile[ls_Spot]
-							lf_CalculatedMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide].to_f
-							lf_MeasuredMass = lk_MeasuredMasses[ls_Scan]
-							lf_MeasuredMass = lf_CalculatedMass unless lf_MeasuredMass
+							lf_CalculatedMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:calculatedMass].to_f
+							lf_MeasuredMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:measuredMass].to_f
 							lf_EValue = lk_ScanHash[ls_Scan][:e]
 							ls_SpectrumData = lk_ScanData[ls_Scan]
 							ls_SpectrumData = '' unless ls_SpectrumData
@@ -440,7 +440,7 @@ class EvaluateOmssa < ProteomaticScript
 							# the search by itself.
 							ls_Database = ''
 							ls_Reference = ''
-							lk_Out.puts "#{ls_Scan}!#{ls_Software}!#{li_Charge}!#{lf_MeasuredMass}!#{lf_CalculatedMass}!#{lf_MeasuredMass - lf_CalculatedMass}!fpr:#{@param[:targetFpr] / 100.0},evalue:#{lf_EValue}!!#{ls_Peptide}!!!!!!!!#{ls_Database}!#{ls_Reference}!#{ls_SpectrumData}!!"
+							lk_Out.puts "#{ls_Scan}!#{ls_Software}!#{li_Charge}!#{lf_MeasuredMass}!#{lf_CalculatedMass}!#{Math.abs(lf_MeasuredMass - lf_CalculatedMass)}!fpr:#{@param[:targetFpr] / 100.0},evalue:#{lf_EValue}!!#{ls_Peptide}!!!!!!!!#{ls_Database}!#{ls_Reference}!#{ls_SpectrumData}!!"
 						end
 					end
 				end
