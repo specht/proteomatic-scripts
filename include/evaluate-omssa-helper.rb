@@ -156,13 +156,13 @@ def evaluateFiles(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 				if (lb_FoundValidFpr)
 					# search for the global maximum FPR that is <= target FPR
 					if ((lf_Fpr > lk_ActualFpr[ls_Spot]) && (lf_Fpr <= af_TargetFpr))
-						lk_ActualFpr[ls_Spot] = lf_Fpr
+						lk_ActualFpr[ls_Spot] = lf_Fpr / 100.0
 						li_CropCount = li_TotalCount
 					end
 				else
 					# search for the global minimum FPR
 					if ((!lk_ActualFpr[ls_Spot]) || (lf_Fpr < lk_ActualFpr[ls_Spot]))
-						lk_ActualFpr[ls_Spot] = lf_Fpr
+						lk_ActualFpr[ls_Spot] = lf_Fpr / 100.0
 						li_CropCount = li_TotalCount
 						lb_FoundValidFpr = true if (lf_Fpr <= af_TargetFpr)
 					end

@@ -352,7 +352,7 @@ class EvaluateOmssa < ProteomaticScript
 					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
 					
 					lk_EThresholds.keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
-						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_EThresholds[ls_Spot] ? sprintf('%e', lk_EThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot]) : 'n/a'}</td></tr>"
+						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_EThresholds[ls_Spot] ? sprintf('%e', lk_EThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
 					end
 					lk_Out.puts '</table>'
 				end
@@ -377,7 +377,7 @@ class EvaluateOmssa < ProteomaticScript
 			File.open(@output[:amsFile], 'w') do |lk_Out|
 				lk_NeededSpots = Set.new
 				lk_NeededScans = Set.new
-				lk_FoundToSoftware = {'models' => 'OMSSA', 'gpf' => 'GPF-OMSSA'}
+				lk_FoundToSoftware = {:models => 'OMSSA', :gpf => 'GPF-OMSSA'}
 				lk_SpotToSpectraFile = Hash.new
 				@input[:spectra].each { |ls_Path| lk_SpotToSpectraFile[File::basename(ls_Path).split('.').first] = ls_Path } if @input[:spectra]
 				
@@ -430,6 +430,7 @@ class EvaluateOmssa < ProteomaticScript
 							lk_ScanNameParts = ls_Scan.split('.')
 							li_Charge = lk_ScanNameParts.last.to_i
 							ls_Spot = lk_ScanNameParts.first
+							lf_Fpr = @param[:scoreThresholdScope] == 'global' ? lk_Result[:actualFpr].values.first : lk_Result[:actualFpr][ls_Spot]
 							ls_SpotFilename = lk_SpotToSpectraFile[ls_Spot]
 							lf_CalculatedMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:calculatedMass].to_f
 							lf_MeasuredMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:measuredMass].to_f
@@ -440,12 +441,13 @@ class EvaluateOmssa < ProteomaticScript
 							# the search by itself.
 							ls_Database = ''
 							ls_Reference = ''
-							lk_Out.puts "#{ls_Scan}!#{ls_Software}!#{li_Charge}!#{lf_MeasuredMass}!#{lf_CalculatedMass}!#{Math.abs(lf_MeasuredMass - lf_CalculatedMass)}!fpr:#{@param[:targetFpr] / 100.0},evalue:#{lf_EValue}!!#{ls_Peptide}!!!!!!!!#{ls_Database}!#{ls_Reference}!#{ls_SpectrumData}!!"
+							lk_Out.puts "#{ls_Scan}!#{ls_Software}!#{li_Charge}!#{lf_MeasuredMass}!#{lf_CalculatedMass}!#{(lf_MeasuredMass - lf_CalculatedMass).abs}!fpr:#{lf_Fpr},evalue:#{lf_EValue}!!#{ls_Peptide}!!!!!!!!#{ls_Database}!#{ls_Reference}!#{ls_SpectrumData}!!"
 						end
 					end
 				end
 			end
 		end
+		exit 1
 	end
 end
 
