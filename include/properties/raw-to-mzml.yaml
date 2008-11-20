@@ -39,7 +39,6 @@ needs:
   - ext.pwiz
   - ext.7zip
   - ext.simquant
-  - config
 
 externalParameters: 
   - pwiz.msconvert
