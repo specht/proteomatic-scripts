@@ -1,0 +1,61 @@
+group: OMSSA
+
+title: Write OMSSA report
+
+description: >
+  Create a HTML report for peptide-spectral matching results.
+
+type: processor
+
+input:
+  - key: psmFile
+    label: PSM list
+    formats: [csv]
+    min: 1
+    max: 1
+  - key: spectra
+    label: spectra
+    formats: [dta, mgf, xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+
+defaultOutputDirectory: psmFile
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: omssa-report.html
+    default: yes
+
+parameters:
+  - key: writeEValueThresholds
+    label: Write E-value thresholds
+    type: flag
+    default: true
+  - key: writeIdentifiedProteinsBySpectralCount
+    label: Write identified proteins by spectral count
+    type: flag
+    default: true
+  - key: writeIdentifiedProteinsBySpot
+    label: Write identified proteins by spot
+    type: flag
+    default: true
+  - key: writeIdentifiedProteinsByDistinctPeptideCount
+    label: Write identified proteins by distinct peptide count
+    type: flag
+    default: true
+  - key: writeAdditionalPeptidesIdentifiedByGPF
+    label: Write additional peptides identified by GPF
+    type: flag
+    default: true
+  - key: writeAmbiguousPeptides
+    label: Write ambiguous peptides
+    type: flag
+    default: true
+  - key: writeModifiedPeptides
+    label: Write modified peptides
+    type: flag
+    default: true
+  - key: writeQuantitationCandidatePeptides
+    label: Write quantitation candidate peptides
+    type: flag
+    default: true

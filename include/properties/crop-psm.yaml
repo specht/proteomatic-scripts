@@ -1,0 +1,38 @@
+group: OMSSA
+
+title: Crop peptide-spectral matches
+
+description: >
+  Crop peptide-spectral matches resulting from a target-decoy search at a certain target false positive rate.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: croppedPsm
+    label: cropped results
+    format: csv
+    filename: psm-cropped.csv
+    default: yes
+
+parameters:
+  - key: targetFpr
+    label: Target FPR
+    type: float
+    default: 0.1
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+    step: 0.1    
+  - key: scoreThresholdScope
+    label: Score threshold scope
+    type: enum
+    choices: [global, spot]
+    default: global
