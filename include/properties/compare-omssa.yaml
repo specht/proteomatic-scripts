@@ -1,43 +1,28 @@
 group: OMSSA
 
-title: Compare OMSSA runs
+title: Compare PSM lists
 
 description: >
-  Compare OMSSA runs at a certain target false positive ratio.
+  Compare cropped peptide-spectral matches.
 
 type: processor
 
 input:
-  - key: omssaResults
-    label: OMSSA results
+  - key: psmFile
+    label: PSM list
     formats: [csv]
     min: 1
 
-defaultOutputDirectory: omssaResults
+defaultOutputDirectory: psmFile
 
 output:
   - key: htmlReport
     label: HTML report
     format: html
     filename: compare-omssa-report.html
-    default: no
+    default: yes
   - key: csvReport
     label: CSV report
     format: csv
     filename: compare-omssa-report.csv
     default: yes
-
-parameters:
-  - key: targetFpr
-    label: Target FPR
-    type: float
-    default: 0.1
-    suffix: '%'
-    min: 0.0
-    max: 100.0
-    step: 0.1
-  - key: scoreThresholdScope
-    label: Score threshold scope
-    type: enum
-    choices: [global, spot]
-    default: global

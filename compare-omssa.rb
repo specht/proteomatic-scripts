@@ -26,12 +26,11 @@ class CompareOmssa < ProteomaticScript
 	def run()
 		lk_RunResults = Hash.new
 		# compare multiple OMSSA results
-		@input[:omssaResults].each do |ls_OmssaResultFile|
-			ls_Key = File::basename(ls_OmssaResultFile)
-			ls_Key.sub!('omssa-results.csv', '')
+		@input[:psmFile].each do |ls_Path|
+			ls_Key = File::basename(ls_Path)
+			ls_Key.sub!('psm-cropped.csv', '')
 			ls_Key = ls_Key[0, ls_Key.size - 1] while ((!ls_Key.empty?) && ('_-. '.include?(ls_Key[ls_Key.size - 1, 1])))
-			lk_Result = evaluateFiles([ls_OmssaResultFile], @param[:targetFpr], @param[:scoreThresholdScope] == 'global')
-			lk_RunResults[ls_Key] = lk_Result
+			lk_RunResults[ls_Key] = loadPsm(ls_Path)
 		end
 		
 		if @output[:htmlReport]
@@ -84,19 +83,19 @@ class CompareOmssa < ProteomaticScript
 					lk_Out.print "<tr><td>#{ls_Protein}</td>"
 					
 					lk_Values = Array.new
-					ls_SpectraCountString = lk_RunKeys.collect do |ls_Key|
+					ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['spectraCount'] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:spectralCount] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"<td>#{li_Count}</td>"
 					end.join('')
-					lk_Out.print ls_SpectraCountString
+					lk_Out.print ls_SpectralCountString
 					lk_Out.print "<td>#{sprintf("%1.2f", stddev(lk_Values))}</td>"
 					
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['peptides'].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:peptides].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"<td>#{li_Count}</td>"
 					end.join('')
@@ -113,7 +112,6 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts '</html>'
 			end
 		end
-=begin		
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
 				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
@@ -128,19 +126,19 @@ class CompareOmssa < ProteomaticScript
 					lk_Out.print "\"#{ls_Protein}\";"
 					
 					lk_Values = Array.new
-					ls_SpectraCountString = lk_RunKeys.collect do |ls_Key|
+					ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['spectraCount'] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:spectralCount] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"#{li_Count};"
 					end.join('')
-					lk_Out.print ls_SpectraCountString
+					lk_Out.print ls_SpectralCountString
 					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))};"
 					
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein]['peptides'].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:peptides].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"#{li_Count};"
 					end.join('')
@@ -150,7 +148,6 @@ class CompareOmssa < ProteomaticScript
 				end
 			end
 		end
-=end		
 	end
 end
 

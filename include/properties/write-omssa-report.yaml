@@ -27,10 +27,6 @@ output:
     default: yes
 
 parameters:
-  - key: writeEValueThresholds
-    label: Write E-value thresholds
-    type: flag
-    default: true
   - key: writeIdentifiedProteinsBySpectralCount
     label: Write identified proteins by spectral count
     type: flag

@@ -67,6 +67,8 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 			# it obviously doens't have to believe the input file, and in that case
 			# the charge in the dta filename must be corrected)
 			lk_ScanParts = ls_Scan.split('.')
+			# remove trailing .dta if it's there
+			lk_ScanParts.slice!(-1, 1) if (lk_ScanParts.last == 'dta')
 			begin
 				li_TestStartScan = Integer(lk_ScanParts[-3])
 				li_TestStopScan = Integer(lk_ScanParts[-2])
@@ -219,6 +221,8 @@ def loadPsm(as_Path)
 			# it obviously doens't have to believe the input file, and in that case
 			# the charge in the dta filename must be corrected)
 			lk_ScanParts = ls_Scan.split('.')
+			# remove trailing .dta if it's there
+			lk_ScanParts.slice!(-1, 1) if (lk_ScanParts.last == 'dta')
 			begin
 				li_TestStartScan = Integer(lk_ScanParts[-3])
 				li_TestStopScan = Integer(lk_ScanParts[-2])
@@ -289,8 +293,8 @@ def loadPsm(as_Path)
 		if (lk_ActualFpr.values.uniq.size == 1 && lk_ScoreThreshold.values.uniq.size == 1)
 			# all actual fpr and score thresholds are the same, so it's global!
 			lb_GlobalFpr = true
-			lk_ScoreThreshold['(global)'] = lk_ScoreThreshold.values.first
-			lk_ActualFpr['(global)'] = lk_ActualFpr.values.first
+			lk_ScoreThreshold = {'(global)' => lk_ScoreThreshold.values.first}
+			lk_ActualFpr = {'(global)' => lk_ActualFpr.values.first}
 		else
 			lb_GlobalFpr = false
 		end
