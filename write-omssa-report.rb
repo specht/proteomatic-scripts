@@ -51,14 +51,15 @@ class WriteOmssaReport < ProteomaticScript
 			
 		if @output[:htmlReport]
 			File.open(@output[:htmlReport], 'w') do |lk_Out|
-				lk_ShortScans = Hash.new()
+				lk_Spots = Hash.new()
 				lk_ScanHash.keys.each do |ls_Scan|
-					ls_ShortScan = ls_Scan.split('.').first
-					lk_ShortScans[ls_ShortScan] ||= Array.new
-					lk_ShortScans[ls_ShortScan].push(ls_Scan)
+					lk_ScanParts = ls_Scan.split('.')
+					ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
+					lk_Spots[ls_Spot] ||= Array.new
+					lk_Spots[ls_Spot].push(ls_Scan)
 				end
-				lk_ShortScanKeys = lk_ShortScans.keys
-				lk_ShortScanKeys.sort! { |x, y| String::natcmp(x, y) }
+				lk_SpotKeys = lk_Spots.keys
+				lk_SpotKeys.sort! { |x, y| String::natcmp(x, y) }
 				
 				lk_Out.puts '<html>'
 				lk_Out.puts '<head>'
@@ -94,20 +95,14 @@ class WriteOmssaReport < ProteomaticScript
 				lk_Out.puts '</head>'
 				lk_Out.puts '<body>'
 				lk_Out.puts '<h1>OMSSA Report</h1>'
-=begin				
-				lk_Out.puts '<p>'
-				lk_Out.puts "Processed #{lk_ScanHash.size} spectra in #{lk_ShortScanKeys.size} spot#{lk_ShortScanKeys.size == 1 ? '' : 's'}.<br />"
-				lk_Out.puts "Significant identifications could be made in #{lk_GoodScans.size} of these spectra at a maximum false positive ratio of #{@param[:targetFpr]}%.<br />"
-				lk_Out.puts '</p>'
-=end				
 				lk_Out.puts '<h2>Contents</h2>'
 				lk_Out.puts '<ol>'
 				lk_SpotLinks = Array.new
-				lk_ShortScanKeys.each { |ls_Spot| lk_SpotLinks.push("<a href='#subheader-spot-#{ls_Spot}'>#{ls_Spot}</a>") }
+				lk_SpotKeys.each { |ls_Spot| lk_SpotLinks.push("<a href='#subheader-spot-#{ls_Spot}'>#{ls_Spot}</a>") }
 				
 				lk_Out.puts "<li><a href='#header-statistical-significance'>Statistical significance</a></li>"
 				lk_Out.puts "<li><a href='#header-identified-proteins-by-spectral-count'>Identified proteins by spectral count</a></li>" if @param[:writeIdentifiedProteinsBySpectralCount]
-				lk_Out.puts "<li><a href='#header-identified-proteins-by-spot'>Identified proteins by spot</a> <span class='toggle' onclick='toggle(\"toc-proteins-by-spot-spots\", \"inline\")'>[show spots]</span><span class='toc-proteins-by-spot-spots' style='display: none;'><br />(#{lk_SpotLinks.join(', ')})</span></li>" if @param[:writeIdentifiedProteinsBySpot] && lk_ShortScanKeys.size > 1
+				lk_Out.puts "<li><a href='#header-identified-proteins-by-spot'>Identified proteins by spot</a> <span class='toggle' onclick='toggle(\"toc-proteins-by-spot-spots\", \"inline\")'>[show spots]</span><span class='toc-proteins-by-spot-spots' style='display: none;'><br />(#{lk_SpotLinks.join(', ')})</span></li>" if @param[:writeIdentifiedProteinsBySpot] && lk_SpotKeys.size > 1
 				lk_Out.puts "<li><a href='#header-identified-proteins-by-distinct-peptide-count'>Identified proteins by distinct peptide count</a></li>" if @param[:writeIdentifiedProteinsByDistinctPeptideCount]
 				lk_Out.puts "<li><a href='#header-new-gpf-peptides'>Additional peptides identified by GPF</a></li>" if (lk_GpfPeptides - lk_ModelPeptides).size > 0 && @param[:writeAdditionalPeptidesIdentifiedByGPF]
 				lk_Out.puts "<li><a href='#header-ambiguous-peptides'>Identified peptides that appear in more than one model protein</a></li>" if (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size > 0 && @param[:writeAmbiguousPeptides]
@@ -163,7 +158,7 @@ class WriteOmssaReport < ProteomaticScript
 						li_ToggleCounter += 1
 						ls_ToggleClass = "proteins-by-spectral-count-#{li_ToggleCounter}"
 						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein][:peptides].size}'>#{ls_Protein.sub('target_', '')} "
-						lk_Out.print "<i>(<span class='toggle' onclick='toggle(\"#{ls_ToggleClass}\", \"inline\")'>found in:</span><span class='#{ls_ToggleClass}' style='display: none;'> #{ls_FoundInSpots}</span>)</i>" if lk_ShortScanKeys.size > 1
+						lk_Out.print "<i>(<span class='toggle' onclick='toggle(\"#{ls_ToggleClass}\", \"inline\")'>found in:</span><span class='#{ls_ToggleClass}' style='display: none;'> #{ls_FoundInSpots}</span>)</i>" if lk_SpotKeys.size > 1
 						lk_Out.print "</td>"
 						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein][:peptides].size}'>#{lk_Proteins[ls_Protein][:spectralCount]}</td>"
 						lk_PeptidesSorted = lk_Proteins[ls_Protein][:peptides].keys.sort { |x, y| lk_Proteins[ls_Protein][:peptides][y] <=> lk_Proteins[ls_Protein][:peptides][x]}
@@ -178,7 +173,7 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts '</table>'
 				end
 				
-				if @param[:writeIdentifiedProteinsBySpot] && lk_ShortScanKeys.size > 1
+				if @param[:writeIdentifiedProteinsBySpot] && lk_SpotKeys.size > 1
 					lk_Out.puts "<h2 id='header-identified-proteins-by-spot'>Identified proteins by spot</h2>"
 					lk_Out.puts "<p>"
 					lk_Out.puts "This table contains all model proteins that could be identified, sorted by spot. "
@@ -187,7 +182,7 @@ class WriteOmssaReport < ProteomaticScript
 					
 					lk_Out.puts '<table>'
 					lk_Out.puts '<tr><th>Protein</th><th>Protein spectral count</th><th>Peptides</th><th>Peptide spectral count</th></tr>'
-					lk_ShortScanKeys.each do |ls_Spot|
+					lk_SpotKeys.each do |ls_Spot|
 				#WLQYSEVIHAR:
 				#  scans: [MT_HydACPAN_1_300407.100.100.2, ...]
 				#  spots: (MT_HydACPAN_1_300407) (set)
@@ -209,9 +204,9 @@ class WriteOmssaReport < ProteomaticScript
 						end
 						#lk_Out.puts "<h3 id='subheader-spot-#{ls_Spot}'>#{ls_Spot}</h3>"
 						#lk_Out.puts "<tr id='subheader-spot-#{ls_Spot}'><td style='border-style: none; background-color: #fff; padding-top: 2em; padding-bottom: 1em;' colspan='4'><span style='font-weight: bold;'>#{ls_Spot}</span></td></tr>"
-						lk_Out.puts "<tr><td style='border: none' colspan='6'></td></tr>"
+						lk_Out.puts "<tr><td style='border: none' colspan='4'></td></tr>"
 						lk_Out.puts "<tr id='subheader-spot-#{ls_Spot}' style='background-color: #eee;'>"
-						lk_Out.puts "<td colspan='6'><b>#{ls_Spot}</b></td>"
+						lk_Out.puts "<td colspan='4'><b>#{ls_Spot}</b></td>"
 						lk_Out.puts "</tr>"
 						lk_Out.print '<tr>'
 						lb_Open0 = true
