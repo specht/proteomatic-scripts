@@ -185,6 +185,19 @@ def loadPsm(as_Path)
 	lb_HasFpr = false
 	lb_GlobalFpr = false
 	
+	# lk_SpectralCounts:
+	#   :peptides:
+	#     LYDEELQAIAK:
+	#       MT_HydACPAN_25_020507: 14
+	#       MT_HydACPAN_23_020507: 12
+	#       :total: 26
+	#   :proteins:
+	#     extgeneshsomething:
+	#       MT_HydACPAN_25_020507: 2
+	#       MT_HydACPAN_23_020507: 6
+	#       :total: 8
+	lk_SpectralCounts = {:peptides => Hash.new, :proteins => Hash.new }
+	
 	File.open(as_Path, 'r') do |lk_File|
 		# skip header
 		ls_Line = lk_File.readline
@@ -192,9 +205,7 @@ def loadPsm(as_Path)
 		#if (lk_Line.slice(-3, 3).join(',') == 'targetFpr,actualFpr,eThreshold')
 		lb_HasFpr = lk_Line.slice(-3, 3).collect { |x| x.strip }.join(',').downcase == 'targetfpr,actualfpr,ethreshold'
 		
-		unless lb_HasFpr
-			puts 'Notice: No FPR is available for the results you specified.'
-		end
+		puts 'Notice: No FPR is available for the results you specified.' unless lb_HasFpr
 		
 		lk_File.each do |ls_Line|
 			li_EntryCount += 1
@@ -332,7 +343,7 @@ def loadPsm(as_Path)
 			lk_PeptideHash[ls_Peptide][:mods][lk_Mod[:peptide]][ls_Description][ls_Spot].push(ls_Scan)
 		end
 		lk_ScanHash[ls_Scan][:deflines].each do |ls_DefLine|
-			if (ls_DefLine[0, 12] == 'target_gpf__')
+			if (ls_DefLine.index('gpf_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:gpf] = true 
 			else
 				lk_PeptideHash[ls_Peptide][:found][:models] = true 
@@ -340,7 +351,6 @@ def loadPsm(as_Path)
 			end
 		end
 	end
-	
 	
 	# sort scans in lk_PeptideHash by e-value
 	lk_PeptideHash.keys.each do |ls_Peptide|
@@ -358,15 +368,34 @@ def loadPsm(as_Path)
 	end
 	
 	lk_Proteins = Hash.new
+	# lk_Proteins:
+	#   extgeneshsomething: [WLQYSEVIHAR, LYDEELQAIAK]
 	lk_ProteinIdentifyingModelPeptides.each do |ls_Peptide|
-		ls_Protein = lk_PeptideHash[ls_Peptide][:proteins].keys.first.sub('target_', '')
-		if !lk_Proteins.has_key?(ls_Protein)
-			lk_Proteins[ls_Protein] = Hash.new
-			lk_Proteins[ls_Protein][:spectralCount] = 0
-			lk_Proteins[ls_Protein][:peptides] = Hash.new
+		if (lk_PeptideHash[ls_Peptide][:proteins].size != 1)
+			puts 'ATTENTION: There was an internal error, probably you just stumbled upon a bug.'
+			puts "#{__FILE__}:#{__LINE__}"
+			exit 1
 		end
-		lk_Proteins[ls_Protein][:spectralCount] += lk_PeptideHash[ls_Peptide][:scans].size
-		lk_Proteins[ls_Protein][:peptides][ls_Peptide] = lk_PeptideHash[ls_Peptide][:scans].size
+		ls_Protein = lk_PeptideHash[ls_Peptide][:proteins].keys.first
+		lk_Proteins[ls_Protein] ||= Array.new
+		lk_Proteins[ls_Protein].push(ls_Peptide)
+		lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
+			lk_ScanParts = ls_Scan.split('.')
+			# remove trailing .dta if it's there
+			lk_ScanParts.slice!(-1, 1) if (lk_ScanParts.last == 'dta')
+			# determine spot name
+			ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
+			lk_SpectralCounts[:proteins][ls_Protein] ||= Hash.new
+			lk_SpectralCounts[:proteins][ls_Protein][:total] ||= 0
+			lk_SpectralCounts[:proteins][ls_Protein][:total] += 1
+			lk_SpectralCounts[:proteins][ls_Protein][ls_Spot] ||= 0
+			lk_SpectralCounts[:proteins][ls_Protein][ls_Spot] += 1
+			lk_SpectralCounts[:peptides][ls_Peptide] ||= Hash.new
+			lk_SpectralCounts[:peptides][ls_Peptide][:total] ||= 0
+			lk_SpectralCounts[:peptides][ls_Peptide][:total] += 1
+			lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] ||= 0
+			lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] += 1
+		end
 	end
 	
 	lk_Result = Hash.new
@@ -382,6 +411,7 @@ def loadPsm(as_Path)
 	lk_Result[:targetFpr] = lf_TargetFpr
 	lk_Result[:hasFpr] = lb_HasFpr
 	lk_Result[:hasGlobalFpr] = lb_GlobalFpr
+	lk_Result[:spectralCounts] = lk_SpectralCounts
 	
 	return lk_Result
 end
