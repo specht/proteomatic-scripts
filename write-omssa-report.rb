@@ -35,8 +35,9 @@ class WriteOmssaReport < ProteomaticScript
 		lk_Proteins = lk_Result[:proteins]
 		lk_ScoreThresholds = lk_Result[:scoreThresholds]
 		lk_ActualFpr = lk_Result[:actualFpr]
+		lk_SpectralCounts = lk_Result[:spectralCounts]
 		
-		lk_ProteinsBySpectralCount = lk_Proteins.keys.sort { |a, b| lk_Proteins[b][:spectralCount] <=> lk_Proteins[a][:spectralCount]}
+		lk_ProteinsBySpectralCount = lk_Proteins.keys.sort { |a, b| lk_SpectralCounts[:proteins][b][:total] <=> lk_SpectralCounts[:proteins][a][:total]}
 		lk_AmbiguousPeptides = (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).to_a.sort! do |x, y|
 			lk_PeptideHash[x][:scans].size == lk_PeptideHash[y][:scans].size ? x <=> y : lk_PeptideHash[y][:scans].size <=> lk_PeptideHash[x][:scans].size
 		end
@@ -148,7 +149,7 @@ class WriteOmssaReport < ProteomaticScript
 						lb_Open1 = true
 						lk_Out.print "<tr>" unless lb_Open0
 						lk_FoundInSpots = Set.new
-						lk_Proteins[ls_Protein][:peptides].keys.each do |ls_Peptide|
+						lk_Proteins[ls_Protein].each do |ls_Peptide|
 							lk_FoundInSpots.merge(lk_PeptideHash[ls_Peptide][:spots])
 						end
 						lk_FoundInSpots = lk_FoundInSpots.to_a
@@ -157,15 +158,15 @@ class WriteOmssaReport < ProteomaticScript
 						ls_FoundInSpots = lk_FoundInSpots.join(', ')
 						li_ToggleCounter += 1
 						ls_ToggleClass = "proteins-by-spectral-count-#{li_ToggleCounter}"
-						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein][:peptides].size}'>#{ls_Protein.sub('target_', '')} "
+						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein].size}'>#{ls_Protein.sub('target_', '')} "
 						lk_Out.print "<i>(<span class='toggle' onclick='toggle(\"#{ls_ToggleClass}\", \"inline\")'>found in:</span><span class='#{ls_ToggleClass}' style='display: none;'> #{ls_FoundInSpots}</span>)</i>" if lk_SpotKeys.size > 1
 						lk_Out.print "</td>"
-						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein][:peptides].size}'>#{lk_Proteins[ls_Protein][:spectralCount]}</td>"
-						lk_PeptidesSorted = lk_Proteins[ls_Protein][:peptides].keys.sort { |x, y| lk_Proteins[ls_Protein][:peptides][y] <=> lk_Proteins[ls_Protein][:peptides][x]}
+						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein].size}'>#{lk_SpectralCounts[:proteins][ls_Protein][:total]}</td>"
+						lk_PeptidesSorted = lk_Proteins[ls_Protein].sort { |x, y| lk_SpectralCounts[:peptides][y][:total] <=> lk_SpectralCounts[:peptides][x][:total]}
 						lk_PeptidesSorted.each do |ls_Peptide|
 							lk_Out.print "<tr>" unless lb_Open1
 							ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
-							lk_Out.print "<td><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td>#{lk_Proteins[ls_Protein][:peptides][ls_Peptide]}</td></tr>\n"
+							lk_Out.print "<td><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td>#{lk_SpectralCounts[:peptides][ls_Peptide][:total]}</td></tr>\n"
 							lb_Open0 = false
 							lb_Open1 = false
 						end
@@ -233,11 +234,11 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts "<h2 id='header-identified-proteins-by-distinct-peptide-count'>Identified proteins by distinct peptide count</h2>"
 					lk_Out.puts "<p>This table contains all model proteins that could be identified, sorted by the number of distinct peptides that identified the protein.</p>"
 					
-					lk_ProteinsByDistinctPeptideCount = lk_Proteins.keys.sort { |a, b| lk_Proteins[b][:peptides].size <=> lk_Proteins[a][:peptides].size}
+					lk_ProteinsByDistinctPeptideCount = lk_Proteins.keys.sort { |a, b| lk_Proteins[b].size <=> lk_Proteins[a].size}
 					lk_Out.puts '<table>'
 					lk_Out.puts '<tr><th>Protein</th><th>Distinct peptide count</th><th>Peptides</th></tr>'
 					lk_ProteinsByDistinctPeptideCount.each do |ls_Protein|
-						lk_Out.puts "<tr><td>#{ls_Protein}</td><td>#{lk_Proteins[ls_Protein][:peptides].size}</td><td>#{lk_Proteins[ls_Protein][:peptides].keys.sort.join(', ')}</td></tr>"
+						lk_Out.puts "<tr><td>#{ls_Protein}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.join(', ')}</td></tr>"
 					end
 					lk_Out.puts '</table>'
 				end
