@@ -158,7 +158,12 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 end
 
 
-def loadPsm(as_Path)
+# ae_ScoreThresholdType: :off, :min, :max
+def loadPsm(as_Path, ae_ScoreThresholdType = :off, af_ScoreThreshold = 0.0)
+	unless [:off, :min, :max].include?(ae_ScoreThresholdType)
+		puts 'Internal error: score threshold must be :off, :min, or :max.'
+		exit 1
+	end
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507.1058.1058.2.dta:
 	#  :e: 3.88761e-07
@@ -215,6 +220,11 @@ def loadPsm(as_Path)
 			ls_OriginalPeptide = lk_Line[2]
 			ls_Peptide = ls_OriginalPeptide.upcase
 			lf_E = BigDecimal.new(lk_Line[3])
+			if (ae_ScoreThresholdType == :min)
+				next unless lf_E >= af_ScoreThreshold
+			elsif (ae_ScoreThresholdType == :max)
+				next unless lf_E <= af_ScoreThreshold
+			end
 			ls_DefLine = lk_Line[9]
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[10]

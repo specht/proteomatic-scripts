@@ -25,7 +25,8 @@ require 'yaml'
 class WriteOmssaReport < ProteomaticScript
 	def run()
 		# merge OMSSA results
-		lk_Result = loadPsm(@input[:psmFile].first)
+		lk_ScoreThresholdType = {'off' => :off, 'min' => :min, 'max' => :max}
+		lk_Result = loadPsm(@input[:psmFile].first, lk_ScoreThresholdType[@param[:scoreThresholdType]], @param[:scoreThreshold])
 		
 		lk_ScanHash = lk_Result[:scanHash]
 		lk_PeptideHash = lk_Result[:peptideHash]
