@@ -24,14 +24,18 @@ require 'yaml'
 
 class CropPsm < ProteomaticScript
 	def run()
-		lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')	
+		lk_Result = Hash.new
+		if (@param[:scoreThresholdType] == 'fpr')
+			lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')	
+		end
 		
 		ls_Header = ''
 		File.open(@input[:omssaResults].first, 'r') { |lk_File| ls_Header = lk_File.readline.strip }
 		
 		if @output[:croppedPsm]
 			File.open(@output[:croppedPsm], 'w') do |lk_Out|
-				lk_Out.puts(ls_Header + ', targetFpr, actualFpr, eThreshold')
+				ls_Header += ', targetFpr, actualFpr, eThreshold' if @param[:scoreThresholdType] == 'fpr'
+				lk_Out.puts(ls_Header)
 				@input[:omssaResults].each do |ls_Path|
 					File.open(ls_Path, 'r') do |lk_In|
 						lk_In.readline
@@ -48,8 +52,16 @@ class CropPsm < ProteomaticScript
 							# is it a decoy match? skip it!
 							next if ls_DefLine.index('decoy_') == 0
 							# is the score too bad? skip it!
-							next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
-							lk_Out.puts ls_Line.sub('target_', '').strip + ", #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}"
+							if (@param[:scoreThresholdType] == 'fpr')
+								next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
+							elsif (@param[:scoreThresholdType] == 'min')
+								next if lf_E < @param[:scoreThreshold]
+							elsif (@param[:scoreThresholdType] == 'max')
+								next if lf_E > @param[:scoreThreshold]
+							end
+							lk_Out.print ls_Line.sub('target_', '').strip
+							lk_Out.print ", #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}" if @param[:scoreThresholdType] == 'fpr'
+							lk_Out.puts
 						end
 					end
 				end
