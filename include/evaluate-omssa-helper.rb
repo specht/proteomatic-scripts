@@ -17,6 +17,7 @@
 
 require 'bigdecimal'
 
+
 def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
@@ -159,7 +160,6 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 end
 
 
-# ae_ScoreThresholdType: :off, :min, :max
 def loadPsm(as_Path)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -217,11 +217,6 @@ def loadPsm(as_Path)
 			ls_OriginalPeptide = lk_Line[2]
 			ls_Peptide = ls_OriginalPeptide.upcase
 			lf_E = BigDecimal.new(lk_Line[3])
-			if (ae_ScoreThresholdType == :min)
-				next unless lf_E >= af_ScoreThreshold
-			elsif (ae_ScoreThresholdType == :max)
-				next unless lf_E <= af_ScoreThreshold
-			end
 			ls_DefLine = lk_Line[9]
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[10]
