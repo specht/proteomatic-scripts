@@ -55,11 +55,3 @@ parameters:
     label: Write quantitation candidate peptides
     type: flag
     default: true
-  - key: scoreThresholdType
-    type: enum
-    choices: ['off', 'min', 'max']
-    default: 'off'
-  - key: scoreThreshold
-    label: Score threshold
-    type: float
-    default: 1.0
