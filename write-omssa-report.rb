@@ -42,9 +42,6 @@ class WriteOmssaReport < ProteomaticScript
 			lk_PeptideHash[x][:scans].size == lk_PeptideHash[y][:scans].size ? x <=> y : lk_PeptideHash[y][:scans].size <=> lk_PeptideHash[x][:scans].size
 		end
 
-		#lk_GpfPeptides.to_a.sort.each { |x| puts ">#{x}\n#{x}\n" }
-		#exit 1
-		
 		puts "Unique peptides identified: #{lk_PeptideHash.size}."
 		puts "Peptides found by both GPF and models: #{(lk_GpfPeptides & lk_ModelPeptides).size}."
 		puts "Peptides found by GPF alone: #{(lk_GpfPeptides - lk_ModelPeptides).size}."
@@ -52,7 +49,7 @@ class WriteOmssaReport < ProteomaticScript
 		puts "Model peptides that identify a protein: #{lk_ProteinIdentifyingModelPeptides.size}"
 		puts "Model peptides that appear in more than one protein: #{(lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size}."
 		puts "Proteins identified: #{lk_Proteins.size}."
-			
+		
 		if @output[:htmlReport]
 			File.open(@output[:htmlReport], 'w') do |lk_Out|
 				lk_Spots = Hash.new()

@@ -18,7 +18,7 @@
 require 'bigdecimal'
 
 
-def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
+def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm = nil)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -63,6 +63,12 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold)
 			lf_Mass = lk_Line[4]
 			lf_TheoMass = lk_Line[12]
 			li_Charge = lk_Line[11].to_i
+			if af_MaxPpm
+				# calculate mass error in ppm
+				lf_ThisPpm = ((lf_Mass.to_f - lf_TheoMass.to_f).abs / lf_Mass.to_f) * 1000000.0
+				# skip this PSM if ppm is not good
+				next if lf_ThisPpm > af_MaxPpm
+			end
 			
 			# correct charge in scan name (because when there are multiple charges,
 			# only one version of the spectrum may have been sent to OMSSA, because
@@ -400,6 +406,15 @@ def loadPsm(as_Path)
 		end
 	end
 	
+	lk_SafeProteins = Set.new(lk_Proteins.keys.select do |ls_Protein|
+		li_DistinctPeptideCount = lk_Proteins[ls_Protein].size
+		li_GpfPeptideCount = 0
+		lk_Proteins[ls_Protein].each do |ls_Peptide|
+			li_GpfPeptideCount += 1 if lk_PeptideHash[ls_Peptide][:found].include?(:gpf)
+		end
+		(li_DistinctPeptideCount >= 2) || (li_GpfPeptideCount >= 1)
+	end)
+
 	lk_Result = Hash.new
 	
 	lk_Result[:scanHash] = lk_ScanHash
@@ -414,6 +429,7 @@ def loadPsm(as_Path)
 	lk_Result[:hasFpr] = lb_HasFpr
 	lk_Result[:hasGlobalFpr] = lb_GlobalFpr
 	lk_Result[:spectralCounts] = lk_SpectralCounts
+	lk_Result[:safeProteins] = lk_SafeProteins
 	
 	return lk_Result
 end

@@ -112,6 +112,7 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts '</html>'
 			end
 		end
+		
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
 				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
@@ -120,7 +121,8 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts ";#{lk_RunKeys.join(';') };;#{lk_RunKeys.join(';') };"
 				# collect proteins from all runs
 				lk_AllProteinsSet = Set.new
-				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:proteins].keys) }
+				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:safeProteins].to_a) }
+				puts "all proteins: #{lk_AllProteinsSet.size}"
 				lk_Proteins = lk_AllProteinsSet.to_a.sort { |x, y| String::natcmp(x, y) }
 				lk_Proteins.each do |ls_Protein|
 					lk_Out.print "\"#{ls_Protein}\";"
@@ -128,7 +130,7 @@ class CompareOmssa < ProteomaticScript
 					lk_Values = Array.new
 					ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:spectralCount] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:spectralCounts][:proteins][ls_Protein][:total] if lk_RunResults[ls_Key][:safeProteins].include?(ls_Protein)
 						lk_Values.push(li_Count)
 						"#{li_Count};"
 					end.join('')
@@ -138,7 +140,7 @@ class CompareOmssa < ProteomaticScript
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:peptides].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein].size if lk_RunResults[ls_Key][:safeProteins].include?(ls_Protein)
 						lk_Values.push(li_Count)
 						"#{li_Count};"
 					end.join('')

@@ -1,0 +1,26 @@
+group: OMSSA
+
+title: Analyze PSM
+
+description: >
+  Analyze peptide-spectral matches
+
+type: processor
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: analyzedPsm
+    label: analyzed PSM
+    format: csv
+    filename: psm-analyzed.csv
+    default: yes
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: geneModel
+    label: gene model
+    formats: [fasta-proteins]

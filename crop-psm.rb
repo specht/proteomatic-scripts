@@ -24,9 +24,10 @@ require 'yaml'
 
 class CropPsm < ProteomaticScript
 	def run()
+		lf_MaxPpm = @param[:maxPpm]
 		lk_Result = Hash.new
 		if (@param[:scoreThresholdType] == 'fpr')
-			lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')	
+			lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global', lf_MaxPpm)
 		end
 		
 		ls_Header = ''
@@ -49,6 +50,8 @@ class CropPsm < ProteomaticScript
 							end
 							lf_E = BigDecimal.new(lk_Line[3])
 							ls_DefLine = lk_Line[9]
+							lf_Mass = lk_Line[4].to_f
+							lf_TheoMass = lk_Line[12].to_f
 							# is it a decoy match? skip it!
 							next if ls_DefLine.index('decoy_') == 0
 							# is the score too bad? skip it!
@@ -59,6 +62,14 @@ class CropPsm < ProteomaticScript
 							elsif (@param[:scoreThresholdType] == 'max')
 								next if lf_E > @param[:scoreThreshold]
 							end
+							# is the ppm mass error too bad? skip it!
+							if lf_MaxPpm
+								# calculate mass error in ppm
+								lf_ThisPpm = ((lf_Mass - lf_TheoMass).abs / lf_Mass) * 1000000.0
+								# skip this PSM if ppm is not good
+								next if lf_ThisPpm > lf_MaxPpm
+							end
+							
 							lk_Out.print ls_Line.sub('target_', '').strip
 							lk_Out.print ", #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}" if @param[:scoreThresholdType] == 'fpr'
 							lk_Out.puts
