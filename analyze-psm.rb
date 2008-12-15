@@ -77,7 +77,7 @@ class AnalyzePsm < ProteomaticScript
 							next if lf_ThisPpm > 5.0
 							next if ls_Left == 'K' || ls_Left == 'R'
 							next if li_Stop > 100
-							next if lf_E >= 1e-4
+							next if lf_E >= 1e-8
 							
 							lk_Out.print ls_Line.strip
 							lk_Out.print ",#{sprintf('%1.4f', lf_ThisPpm)},#{ls_Left},#{ls_Right}"
