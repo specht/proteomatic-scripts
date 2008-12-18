@@ -71,7 +71,7 @@ class YamlReport < ProteomaticScript
 		end
 
 		lk_Info = Hash.new
-		lk_Info[:peptides] = lk_PeptideHash.size
+		lk_Info[:peptides] = lk_PeptideHash.keys
 		lk_Info[:proteins] = lk_Proteins.size
 		lk_Info[:modelPeptidesOnly] = (lk_ModelPeptides - lk_GpfPeptides).size
 		lk_Info[:modelAndGpfPeptides] = (lk_ModelPeptides & lk_GpfPeptides).size
