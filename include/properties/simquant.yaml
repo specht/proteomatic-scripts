@@ -51,7 +51,7 @@ parameters:
   - key: scanType
     label: Scans to analyze
     type: enum
-    choices: [{sim: SIM scans only}, {all: All MS1 scans}]
+    choices: [{sim: SIM scans only}, {all: All MS1 scans}, {ms1: MS1 scans only}]
     default: 'all'
   - key: isotopeCount
     label: Isotope count
@@ -71,13 +71,6 @@ parameters:
     default: 3
     min: 1
     max: 10
-  - key: cropUpper
-    label: Crop upper
-    type: float
-    default: 25.0
-    suffix: %
-    min: 0.0
-    max: 100.0
   - key: minSnr
     label: Minimum SNR
     type: float
@@ -99,6 +92,11 @@ parameters:
     min: 0.0
   - key: showPeptideInProtein
     label: Show peptide location within protein
+    group: SimQuant Report
+    type: flag
+    default: yes
+  - key: showElutionProfile
+    label: Show elution profile
     group: SimQuant Report
     type: flag
     default: yes

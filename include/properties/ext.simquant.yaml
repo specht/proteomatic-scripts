@@ -1,15 +1,15 @@
 title: SimQuant
 
-version: 0.1.12
+version: 0.1.13
 
 link: http://simquant.origo.ethz.ch/
 
 download:
-  linux: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.12-linux.tar.bz2'
-  win32: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.12-win32.zip'
-  macx: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.12-macx.tar.bz2'
+  linux: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.13-linux.tar.bz2'
+  win32: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.13-win32.zip'
+  macx: 'ftp://gpf.uni-muenster.de/download/simquant/simquant-0.1.13-macx.tar.bz2'
 
 path:
-  linux: simquant-0.1.12-linux
-  win32: simquant-0.1.12-win32
-  macx: simquant-0.1.12-macx
+  linux: simquant-0.1.13-linux
+  win32: simquant-0.1.13-win32
+  macx: simquant-0.1.13-macx
