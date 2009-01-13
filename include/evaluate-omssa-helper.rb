@@ -41,6 +41,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 	# read all PSM from all result files in ak_Files, record them in lk_ScanHash
 	li_EntryCount = 0
 	li_ErrorCount = 0
+	ls_ErrorLine = nil
 	ak_Files.each do |ls_Filename|
 		lk_File = File.open(ls_Filename, 'r')
 		
@@ -83,6 +84,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 				li_TestCharge = Integer(lk_ScanParts[-1])
 				if (li_TestCharge < 1 || (li_TestStopScan < li_TestStartScan))
 					li_ErrorCount += 1
+					ls_ErrorLine = ls_Scan
 					next
 				end
 			rescue StandardError => e
@@ -113,6 +115,8 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 	if (li_ErrorCount > 0)
 		puts "ATTENTION: The scan name was not as expected in #{li_ErrorCount} of #{li_EntryCount} lines, these lines have been ignored."
 		puts "The scan name is expected to end with (start scan).(end scan).(charge)."
+		puts "The last of these erroneous lines is:"
+		puts ls_ErrorLine
 	end
 	
 	lk_EThresholds = Hash.new
@@ -186,6 +190,7 @@ def loadPsm(as_Path)
 	# read all PSM from all result files in ak_Files, record them in lk_ScanHash
 	li_EntryCount = 0
 	li_ErrorCount = 0
+	ls_ErrorLine = nil
 	
 	lk_ScoreThreshold = Hash.new
 	lk_ActualFpr = Hash.new
@@ -248,6 +253,7 @@ def loadPsm(as_Path)
 				li_TestCharge = Integer(lk_ScanParts[-1])
 				if (li_TestCharge < 1 || (li_TestStopScan < li_TestStartScan))
 					li_ErrorCount += 1
+					ls_ErrorLine = ls_Scan
 					next
 				end
 			rescue StandardError => e
@@ -301,7 +307,8 @@ def loadPsm(as_Path)
 	if (li_ErrorCount > 0)
 		puts "ATTENTION: The scan name was not as expected in #{li_ErrorCount} of #{li_EntryCount} lines, these lines have been ignored."
 		puts "The scan name is expected to end with (start scan).(end scan).(charge)."
-		puts "The script will continue but BEWARE!"
+		puts "The last of these erroneous lines is:"
+		puts ls_ErrorLine
 	end
 	
 	# reconstruct score thresholds and actual fpr

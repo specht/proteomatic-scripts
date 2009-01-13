@@ -124,11 +124,13 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts '<table>'
 					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
 					lk_ScoreThresholds.keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
-						lk_Out.puts "<tr><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
+						lb_Good = false
+						lb_Good = true if lk_ActualFpr[ls_Spot] && lk_ActualFpr[ls_Spot] <= lk_Result[:targetFpr]
+						lk_Out.puts "<tr style='background-color: #{lb_Good ? '#bbddbb' : '#eebbbb'};'><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
 					end
 					lk_Out.puts '</table>'
 				else
-					lk_Out.puts "<p>Information on the statistical significance of the result is unavailable.</p>"
+					lk_Out.puts "<p>Information about the statistical significance of the results is unavailable.</p>"
 				end
 				
 				if @param[:writeIdentifiedProteinsBySpectralCount]
@@ -352,14 +354,54 @@ class WriteOmssaReport < ProteomaticScript
 				
 				if @param[:writeQuantitationCandidatePeptides]
 					lk_Out.puts "<h2 id='header-quantitation-candidate-peptides'>Quantitation candidate peptides</h2>"
-					lk_Out.puts "<p>In the following table, you find for each identified protein the spot that it</p>"
+					lk_Out.puts "<p>In the following table, you find all arginine-containing peptides. They might be suitable for SILAC quantitation.</p>"
+					
+					lk_Out.puts '<h3>Non-proline containing peptides</h3>'
+
 					lk_Out.puts '<table>'
-					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
+					lk_Out.puts '<tr><th>Protein</th><th>Peptide</th></tr>'
+					
+					lk_Proteins.keys.sort.each do |ls_Protein|
+						lk_LocalPeptides = lk_Proteins[ls_Protein].sort.select do |ls_Peptide|
+							(ls_Peptide.include?('R')) && (!ls_Peptide.include?('P'))
+						end
+						next if lk_LocalPeptides.empty?
+						lk_Out.puts "<tr><td rowspan='#{lk_LocalPeptides.size}'>#{ls_Protein}</td>"
+						lb_FirstRow = true
+						lk_LocalPeptides.each do |ls_Peptide|
+							lk_Out.puts "<tr>" unless lb_FirstRow
+							lk_Out.puts "<td>#{ls_Peptide}</td>"
+							lk_Out.puts "</tr>"
+							lb_FirstRow = false
+						end
+					end
+					lk_Out.puts '</table>'
+
+					lk_Out.puts '<h3>Proline containing peptides</h3>'
+					
+					lk_Out.puts '<table>'
+					lk_Out.puts '<tr><th>Protein</th><th>Peptide</th></tr>'
+					
+					lk_Proteins.keys.sort.each do |ls_Protein|
+						lk_LocalPeptides = lk_Proteins[ls_Protein].sort.select do |ls_Peptide|
+							(ls_Peptide.include?('R')) && (ls_Peptide.include?('P'))
+						end
+						next if lk_LocalPeptides.empty?
+						lk_Out.puts "<tr><td rowspan='#{lk_LocalPeptides.size}'>#{ls_Protein}</td>"
+						lb_FirstRow = true
+						lk_LocalPeptides.each do |ls_Peptide|
+							lk_Out.puts "<tr>" unless lb_FirstRow
+							lk_Out.puts "<td>#{ls_Peptide}</td>"
+							lk_Out.puts "</tr>"
+							lb_FirstRow = false
+						end
+					end
 					lk_Out.puts '</table>'
 				end
 				
 				lk_Out.puts '</body>'
 				lk_Out.puts '</html>'
+				exit
 			end
 		end
 	end
