@@ -51,7 +51,7 @@ parameters:
   - key: scanType
     label: Scans to analyze
     type: enum
-    choices: [{sim: SIM scans only}, {all: All MS1 scans}, {ms1: MS1 scans only}]
+    choices: [{sim: SIM scans only}, {all: All MS1 scans}, {full: Full scans only}]
     default: 'all'
   - key: isotopeCount
     label: Isotope count
@@ -77,13 +77,13 @@ parameters:
     default: 2.0
     min: 0.0
     step: 0.1
-  - key: maxOffCenter
-    label: Maximum off center
+  - key: massAccuracy
+    label: Mass accuracy
     type: float
-    suffix: %
-    default: 25.0
+    suffix: ppm
+    default: 5.0
     min: 0.0
-    max: 100.0
+    step: 0.1
   - key: maxTimeDifference
     label: Maximum scan time difference
     type: float

@@ -63,7 +63,6 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		#ls_TempPath = '/flipbook/spectra/quantification/temp-simquant.560.0'
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		ls_SvgPath = File::join(ls_TempPath, 'svg')
@@ -79,7 +78,7 @@ class SimQuant < ProteomaticScript
 			puts 'done.'
 		end
 		
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --cropUpper 1.0 --minSnr #{@param[:minSnr]} --maxOffCenter #{@param[:maxOffCenter] / 100.0} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
@@ -431,7 +430,7 @@ class SimQuant < ProteomaticScript
 					lk_Out.puts '<body>'
 					lk_Out.puts "<h1>SimQuant Report</h1>"
 					lk_Out.puts '<p>'
-					lk_Out.puts "Trying charge states #{@param[:minCharge]} to #{@param[:maxCharge]} .<br />"
+					lk_Out.puts "Trying charge states #{@param[:minCharge]} to #{@param[:maxCharge]}.<br />"
 					lk_Out.puts "Quantitation has been attempted in #{@param[:scanType] == 'sim' ? 'SIM scans only' : (@param[:scanType] == 'ms1' ? 'full scans only' : 'all MS1 scans')}, considering #{@param[:isotopeCount]} isotope peaks for both the unlabeled and the labeled ions.<br />"
 					lk_Out.puts '</p>'
 					
