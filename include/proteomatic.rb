@@ -664,6 +664,9 @@ class ProteomaticScript
 				@mk_Parameters.addParameter(lk_WriteFlag)
 			end
 		end
+		
+		@mk_Parameters.checkSanity()
+		
 		@mk_Output = lk_OutputFiles
 		@mk_Output.freeze
 

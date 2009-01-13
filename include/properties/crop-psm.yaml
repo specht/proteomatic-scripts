@@ -28,8 +28,8 @@ parameters:
     choices: ['off', 'min', 'max', 'fpr']
     default: 'fpr'
   - key: targetFpr # only for scoreThresholdType 'fpr'
-    enable: "#{scoreThresholdType} == 'fpr'"
     label: Target FPR
+    enabled: scoreThresholdType == 'fpr'
     type: float
     default: 0.1
     suffix: '%'
@@ -37,14 +37,17 @@ parameters:
     max: 100.0
     step: 0.1    
   - key: scoreThresholdScope # only for scoreThresholdType 'fpr'
-    enable: "#{scoreThresholdType} == 'fpr'"
     label: Score threshold scope
+    enabled:
+      - [scoreThresholdType == 'fpr']
     type: enum
     choices: [global, spot]
     default: global
   - key: scoreThreshold # only for scoreThresholdType 'min' and 'max'
-    enable: "#{scoreThresholdType} == 'min' || #{scoreThresholdType} == 'max'"
     label: Score threshold
+    enabled:
+      - scoreThresholdType == 'min'
+      - scoreThresholdType == 'max'
     type: float
     default: 1.0
   - key: maxPpm

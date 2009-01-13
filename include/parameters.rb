@@ -79,7 +79,20 @@ class Parameters
 		when 'csvString'
 			lk_FallbackDefaultValue = ''
 		end
-		ak_Parameter['default'] = lk_FallbackDefaultValue if !ak_Parameter.has_key?('default')
+		ak_Parameter['default'] = lk_FallbackDefaultValue unless ak_Parameter.has_key?('default')
+		if (ak_Parameter['enabled'])
+			lk_NewExpression = Array.new
+			lk_Expression = ak_Parameter['enabled']
+			lk_Expression = [lk_Expression] unless lk_Expression.class == Array
+			lk_NewExpression.push(Array.new)
+			lk_Expression.each do |lk_SubExpression|
+				lk_SubExpression = [lk_SubExpression] unless lk_SubExpression.class == Array
+				lk_SubExpression.each do |ls_Expression|
+					lk_NewExpression.last.push(ls_Expression)
+				end
+			end
+			ak_Parameter['enabled'] = lk_NewExpression
+		end
 		@mk_Parameters[ls_Key] = ak_Parameter
 		reset(ls_Key)
 	end
@@ -270,5 +283,19 @@ class Parameters
 			end
 		end
 		return ls_Result
+	end
+	
+	def checkSanity()
+		@mk_Parameters.each do |ls_Key, lk_Parameter| 
+			if (lk_Parameter['enabled'])
+				lk_Parameter['enabled'].each do |lk_Expression|
+					lk_Expression.each do |ls_Expression|
+						@mk_Parameters.keys.each do |ls_Key|
+							ls_Expression.strip!
+						end
+					end
+				end
+			end
+		end
 	end
 end
