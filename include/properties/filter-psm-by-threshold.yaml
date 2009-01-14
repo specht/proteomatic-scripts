@@ -1,0 +1,36 @@
+group: OMSSA/2. Filter PSM
+
+title: Filter by score threshold
+
+description: >
+  Crop peptide-spectral matches according to a score threshold.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: croppedPsm
+    label: cropped results
+    format: csv
+    filename: psm-filtered-by-threshold.csv
+    default: yes
+
+parameters:
+  - key: scoreThresholdType
+    label: Score threshold type
+    type: enum
+    choices: ['min', 'max']
+    default: 'max'
+  - key: scoreThreshold
+    label: Score threshold
+    type: float
+    default: 1.0
+    decimals: 10
+    step: 0.0001

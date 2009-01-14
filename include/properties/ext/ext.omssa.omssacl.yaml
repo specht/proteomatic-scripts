@@ -319,6 +319,7 @@ parameters:
     default: ''
     ignoreIfEmpty: true
     valuesFromProgram: '-ml'
+    valuesFromProgramProcessing: /(\d)+\s*:\s*(.+)/
 
   # Tweaks 
 

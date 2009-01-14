@@ -1,6 +1,6 @@
-group: OMSSA
+group: OMSSA/3. Report
 
-title: YAML report
+title: Write YAML report
 
 description: >
   Create a YAML report for peptide-spectral matching results.

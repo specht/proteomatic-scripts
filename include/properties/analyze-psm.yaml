@@ -3,7 +3,7 @@ group: OMSSA
 title: Analyze PSM
 
 description: >
-  Analyze peptide-spectral matches
+  Analyze peptide-spectral matches. This script is probably temporary and comes from the n-termini thing.
 
 type: processor
 

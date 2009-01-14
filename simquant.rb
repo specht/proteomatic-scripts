@@ -29,7 +29,7 @@ class SimQuant < ProteomaticScript
 	end
 	
 	def niceRatio(af_Value)
-		return sprintf('%1.2f', (af_Value < 1.0) ? (-1.0 / af_Value) : af_Value)
+		return sprintf('%s%1.2f', (af_Value < 1.0) ? '-' : '+', (af_Value < 1.0) ? (1.0 / af_Value) : af_Value)
 	end
 	
 	def meanAndStandardDeviation(ak_Values)

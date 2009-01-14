@@ -401,7 +401,6 @@ class WriteOmssaReport < ProteomaticScript
 				
 				lk_Out.puts '</body>'
 				lk_Out.puts '</html>'
-				exit
 			end
 		end
 	end

@@ -1,6 +1,6 @@
-group: OMSSA
+group: OMSSA/3. Report
 
-title: Write OMSSA report
+title: Write HTML report
 
 description: >
   Create a HTML report for peptide-spectral matching results.

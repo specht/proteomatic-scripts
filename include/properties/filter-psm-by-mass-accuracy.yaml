@@ -1,0 +1,33 @@
+group: OMSSA/2. Filter PSM
+
+title: Filter by mass accuracy
+
+description: >
+  Crop peptide-spectral matches according to a certain mass accuracy.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: croppedPsm
+    label: cropped results
+    format: csv
+    filename: psm-filtered-by-mass-accuracy.csv
+    default: yes
+
+parameters:
+  - key: maxPpm
+    label: Target mass accuracy
+    suffix: ppm
+    type: float
+    min: 0.0
+    decimals: 2
+    step: 0.01
+    default: 5.0
