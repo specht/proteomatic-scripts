@@ -20,6 +20,7 @@ require 'include/externaltools'
 require 'include/fasta'
 require 'include/fastercsv'
 require 'include/formats'
+require 'include/misc'
 require 'yaml'
 require 'fileutils'
 
@@ -138,13 +139,7 @@ class RunOmssa < ProteomaticScript
 			File.open(ls_TempResultPath, 'r') do |lk_File|
 				ls_Header = lk_File.readline.strip
 				lk_Out.puts "#{ls_Header}, retentionTime"
-				lk_Header = ls_Header.parse_csv()
-				lk_Header.push('retentionTime')
-				lk_HeaderMap = Hash.new
-				(0...lk_Header.size).each do |i|
-					ls_Key = lk_Header[i].dup.strip.downcase.gsub(/[\s\-\/]/, '')
-					lk_HeaderMap[ls_Key] = i
-				end
+				lk_HeaderMap = mapCsvHeader(ls_Header)
 				lk_File.each_line do |ls_Line|
 					ls_Line.strip!
 					lk_Line = ls_Line.parse_csv()

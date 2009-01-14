@@ -236,7 +236,7 @@ def loadPsm(as_Path)
 			lf_TheoMass = lk_Line[12]
 			li_Charge = lk_Line[11].to_i
 			if (ls_DefLine.index('target_') == 0 || ls_DefLine.index('decoy_') == 0)
-				puts "Error: Input file must not contain target and decoy results. Please use the 'Crop peptide-spectral matches' script first."
+				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script."
 				exit 1
 			end
 			

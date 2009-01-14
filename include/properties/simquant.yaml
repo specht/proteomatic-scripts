@@ -3,11 +3,13 @@ group: Quantitation
 title: SimQuant
 
 description: >
-   Perform quantitation on SIM scans. <br />
-   All specified spots are searched against all specified peptides. 
-   Peptides may be specified via text files and additionally in the 
-   peptides input field. <br />
-   <span style='background-color: #faa;'><b>Warning:</b> SimQuant is still in development. Use at your own risk.</span>
+   Perform quantitation on SIM scans. 
+   If possible, peptides are extracted from the PSM result list specified.
+   Additional peptides can be specified via input text files or the peptides
+   parameter. Gene models for these non-PSM peptides can be added as input
+   files to enable protein quantiation.
+   <br />
+   <span style='background-color: #eaa;'><b>Warning:</b> SimQuant is still in development. Use at your own risk.</span>
 
 type: processor
 
@@ -16,12 +18,17 @@ input:
     label: spectra
     formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
     min: 1
+  - key: psmFile
+    label: PSM list
+    formats: [csv]
+    max: 1
   - key: peptideFiles
     label: peptides
     formats: [txt]
   - key: modelFiles
     label: gene model
     formats: [fasta-proteins]
+	
 
 defaultOutputDirectory: spectraFiles
 
@@ -39,10 +46,15 @@ output:
 
 parameters:
   - key: peptides
+    type: string
     label: Peptides
     description: Multiple peptides can be separated by spaces or commas.
     default: ''
+  - key: excludeAminoAcids
     type: string
+    default: ''
+    label: Exclude peptides containing these amino acids
+    description: "If you have reason to believe that proline containing peptides will mess up your quantitation, enter 'P' here."
   - key: modification
     label: Modification
     type: enum
@@ -84,6 +96,7 @@ parameters:
     default: 5.0
     min: 0.0
     step: 0.1
+    description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
   - key: maxTimeDifference
     label: Maximum scan time difference
     type: float

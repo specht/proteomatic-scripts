@@ -17,6 +17,7 @@
 
 require 'include/proteomatic'
 require 'include/externaltools'
+require 'include/evaluate-omssa-helper'
 require 'include/fasta'
 require 'include/formats'
 require 'include/misc'
@@ -52,11 +53,48 @@ class SimQuant < ProteomaticScript
 	end
 	
 	def run()
-		lk_Peptides = @param[:peptides].split(%r{[,;\s/]+})
-		lk_Peptides.reject! { |x| x.strip.empty? }
+		lk_Peptides = Array.new
+		
+		# get peptides from PSM list
+		unless @input[:psmFile].empty?
+			lk_Result = loadPsm(@input[:psmFile].first) 
+			
+			lk_ScanHash = lk_Result[:scanHash]
+			lk_PeptideHash = lk_Result[:peptideHash]
+			lk_Proteins = lk_Result[:proteins]
+			lk_ScoreThresholds = lk_Result[:scoreThresholds]
+			lk_ActualFpr = lk_Result[:actualFpr]
+			
+			lk_Peptides += lk_PeptideHash.keys
+		end
+
+		# get peptides from parameters
+		lk_Peptides += @param[:peptides].split(%r{[,;\s/]+})
+		
+		# get peptides from peptides files
+		@input[:peptideFiles].each do |ls_Path|
+			lk_Peptides += File::read(ls_Path).split("\n")
+		end
 		
 		lk_Peptides.uniq!
 		lk_Peptides.collect! { |x| x.upcase }
+
+		lk_Peptides.reject! do |ls_Peptide|
+			# reject peptide if it's empty or if it does not contain arginine (R)
+			ls_Peptide.strip.empty? || (!ls_Peptide.include?('R'))
+		end
+
+		# handle amino acid exclusion list
+		ls_ExcludeListTemplate = 'ARNDCEQGHILKMFPSTWYV'
+		ls_ExcludeList = ''
+		(0...ls_ExcludeListTemplate.size).each do |i|
+			 ls_ExcludeList += ls_ExcludeListTemplate[i, 1] if (@param[:excludeAminoAcids].upcase.include?(ls_ExcludeListTemplate[i, 1]))
+		end
+		# ls_ExcludeList now contains all amino acids that should be chucked out
+		(0...ls_ExcludeList.size).each do |i|
+			lk_Peptides.reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }
+		end
+		
 		if lk_Peptides.empty? && @input[:peptideFiles].empty?
 			puts 'Error: no peptides have been specified.'
 			exit 1
@@ -64,11 +102,17 @@ class SimQuant < ProteomaticScript
 		
 		ls_TempPath = tempFilename('simquant')
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
+		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		ls_SvgPath = File::join(ls_TempPath, 'svg')
 		FileUtils::mkpath(ls_TempPath)
 		FileUtils::mkpath(ls_SvgPath)
 
+		# write all target peptides into one file
+		File::open(ls_PeptidesPath, 'w') do |lk_Out|
+			lk_Out.puts lk_Peptides.join("\n")
+		end
+		
 		lk_PeptideMatches = Hash.new
 		unless @input[:modelFiles].empty?
 			print 'Matching peptides to proteins...'
@@ -78,7 +122,7 @@ class SimQuant < ProteomaticScript
 			puts 'done.'
 		end
 		
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --maxTimeDifference #{@param[:maxTimeDifference]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\""
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
