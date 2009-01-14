@@ -108,7 +108,7 @@ class RunOmssa < ProteomaticScript
 		unless (lk_XmlFiles.empty?)
 			# convert spectra to MGF
 			puts 'Converting XML spectra to MGF format...'
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{@ms_TempPath}/mgf-in\" #{lk_XmlFiles.join(' ')}"
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.xml2mgf')}\" -b #{@param[:batchSize]} -o \"#{@ms_TempPath}/mgf-in\" -rt \"#{@ms_TempPath}/rt.yaml\" #{lk_XmlFiles.join(' ')}"
 			runCommand(ls_Command)
 			
 			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[@ms_TempPath + '/mgf-in*']

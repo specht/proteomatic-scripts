@@ -38,12 +38,6 @@ class FilterPsmByThreshold < ProteomaticScript
 						lk_In.readline
 						lk_In.each do |ls_Line|
 							lk_Line = ls_Line.parse_csv()
-							ls_Spot = '(global)'
-							unless @param[:scoreThresholdScope] == 'global'
-								ls_Scan = lk_Line[1]
-								lk_ScanParts = ls_Scan.split('.')
-								ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
-							end
 							lf_E = BigDecimal.new(lk_Line[3])
 							ls_DefLine = lk_Line[9]
 							lf_Mass = lk_Line[4].to_f
