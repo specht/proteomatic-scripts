@@ -18,6 +18,7 @@
 require 'include/proteomatic'
 require 'include/externaltools'
 require 'include/fasta'
+require 'include/fastercsv'
 require 'include/formats'
 require 'yaml'
 require 'fileutils'
@@ -82,7 +83,7 @@ class RunOmssa < ProteomaticScript
 				end
 			end
 		else
-			# yay, make it target decoy!
+			# yay, make it the real target mc decoy!
 			puts "Creating target-decoy database..."
 			ls_DatabasePath= tempFilename('target-decoy-database', ls_DatabaseTempPath);
 			ls_Command = "#{ExternalTools::binaryPath('simquant.decoyfasta')} --output \"#{ls_DatabasePath}\" --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
@@ -114,6 +115,8 @@ class RunOmssa < ProteomaticScript
 			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[@ms_TempPath + '/mgf-in*']
 		end
 		
+		lk_RetentionTimes = YAML::load_file(File::join(@ms_TempPath, 'rt.yaml'))
+		
 		# run OMSSA on each spectrum file
 		lk_OutFiles = Array.new
 		li_Counter = 0
@@ -125,9 +128,34 @@ class RunOmssa < ProteomaticScript
 		puts "\rRunning OMSSA: 100% done."
 		
 		# merge results
+		ls_TempResultPath = File::join(@ms_TempPath, 'temp-results.csv')
 		print "Merging OMSSA results..."
-		#exit
-		mergeCsvFiles(lk_OutFiles, @output[:resultFile])
+		mergeCsvFiles(lk_OutFiles, ls_TempResultPath)
+		puts 'done.'
+		
+		print "Injecting retention times into OMSSA results..."
+		File.open(@output[:resultFile], 'w') do |lk_Out|
+			File.open(ls_TempResultPath, 'r') do |lk_File|
+				ls_Header = lk_File.readline.strip
+				lk_Out.puts "#{ls_Header}, retentionTime"
+				lk_Header = ls_Header.parse_csv()
+				lk_Header.push('retentionTime')
+				lk_HeaderMap = Hash.new
+				(0...lk_Header.size).each do |i|
+					ls_Key = lk_Header[i].dup.strip.downcase.gsub(/[\s\-\/]/, '')
+					lk_HeaderMap[ls_Key] = i
+				end
+				lk_File.each_line do |ls_Line|
+					ls_Line.strip!
+					lk_Line = ls_Line.parse_csv()
+					ls_Band = lk_Line[lk_HeaderMap['filenameid']]
+					lk_Band = ls_Band.split('.')
+					ls_Key = "#{lk_Band.slice(0, lk_Band.size - 2).join('.')}"
+					ld_RetentionTime = lk_RetentionTimes[ls_Key]
+					lk_Out.puts "#{ls_Line},#{ld_RetentionTime}"
+				end
+			end
+		end
 		
 		puts "done."
 	end
