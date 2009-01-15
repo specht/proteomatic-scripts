@@ -24,10 +24,31 @@ require 'yaml'
 
 class FilterPsmByThreshold < ProteomaticScript
 	def run()
-		lf_MaxPpm = @param[:maxPpm]
+		# first check whether all headers are equal, because in the end they will be merged
+		ls_Header = nil
+		lk_HeaderMap = nil
+		@input[:omssaResults].each do |ls_Path|
+			File.open(ls_Path, 'r') do |lk_In|
+				# skip header
+				ls_Header = lk_In.readline.strip
+				lk_ThisHeaderMap = mapCsvHeader(ls_Header)
+				if (lk_HeaderMap)
+					if (lk_HeaderMap != lk_ThisHeaderMap)
+						puts "Error: The header lines of all input files are not identical (#{ls_Path} is different, for example)."
+						exit 1
+					end
+				end
+				lk_HeaderMap = lk_ThisHeaderMap
+			end
+		end
+
 		lk_Result = Hash.new
-		ls_Header = ''
-		File.open(@input[:omssaResults].first, 'r') { |lk_File| ls_Header = lk_File.readline.strip }
+		
+		# If we stumble across a PSM with target_ or decoy_ in front, obviously the results
+		# are to be treated with a fixed threshold because the FPR approach didn't work out
+		# well, because the result list was too small. In that case, we only give out a 
+		# warning once and just strip the leading target_ or decoy_
+		lb_GaveWarningAboutTargetDecoy = false
 		
 		if @output[:croppedPsm]
 			File.open(@output[:croppedPsm], 'w') do |lk_Out|
@@ -38,12 +59,16 @@ class FilterPsmByThreshold < ProteomaticScript
 						lk_In.readline
 						lk_In.each do |ls_Line|
 							lk_Line = ls_Line.parse_csv()
-							lf_E = BigDecimal.new(lk_Line[3])
-							ls_DefLine = lk_Line[9]
-							lf_Mass = lk_Line[4].to_f
-							lf_TheoMass = lk_Line[12].to_f
-							# is it a decoy match? skip it!
-							next if ls_DefLine.index('decoy_') == 0
+							lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
+							ls_DefLine = lk_Line[lk_HeaderMap['defline']]
+							if (ls_DefLine.index('target_') == 0) || (ls_DefLine.index('decoy_') == 0)
+								unless lb_GaveWarningAboutTargetDecoy
+									puts "Warning: The PSM lists you provided contain target/decoy results, which usually should be evaluated with a FPR filter. However, if the FPR approach didn't work out well because of to few results, you can still use a fixed threshold."
+									lb_GaveWarningAboutTargetDecoy = true
+								end
+								next if (ls_DefLine.index('decoy_')) == 0
+								ls_DefLine.delete!('target_') 
+							end
 							# is the score too bad? skip it!
 							if (@param[:scoreThresholdType] == 'fpr')
 								next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
@@ -52,16 +77,9 @@ class FilterPsmByThreshold < ProteomaticScript
 							elsif (@param[:scoreThresholdType] == 'max')
 								next if lf_E > @param[:scoreThreshold]
 							end
-							# is the ppm mass error too bad? skip it!
-							if lf_MaxPpm
-								# calculate mass error in ppm
-								lf_ThisPpm = ((lf_Mass - lf_TheoMass).abs / lf_Mass) * 1000000.0
-								# skip this PSM if ppm is not good
-								next if lf_ThisPpm > lf_MaxPpm
-							end
 							
 							lk_Out.print ls_Line.sub('target_', '').strip
-							lk_Out.print ", #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}" if @param[:scoreThresholdType] == 'fpr'
+							lk_Out.print ", #{@param[:scoreThresholdType]}, #{@param[:scoreThreshold]}"
 							lk_Out.puts
 						end
 					end

@@ -26,15 +26,33 @@ require 'yaml'
 
 class FilterPsmByFpr < ProteomaticScript
 	def run()
+		# first check whether all headers are equal, because in the end they will be merged
+		ls_Header = nil
+		lk_HeaderMap = nil
+		@input[:omssaResults].each do |ls_Path|
+			File.open(ls_Path, 'r') do |lk_In|
+				# skip header
+				ls_Header = lk_In.readline
+				lk_ThisHeaderMap = mapCsvHeader(ls_Header)
+				if (lk_HeaderMap)
+					if (lk_HeaderMap != lk_ThisHeaderMap)
+						puts "Error: The header lines of all input files are not identical (#{ls_Path} is different, for example)."
+						exit 1
+					end
+				end
+				lk_HeaderMap = lk_ThisHeaderMap
+			end
+		end
+
 		lk_Result = Hash.new
 		lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')
 		
 		ls_Header = ''
 		File.open(@input[:omssaResults].first, 'r') { |lk_File| ls_Header = lk_File.readline.strip }
-		
+
 		if @output[:croppedPsm]
 			File.open(@output[:croppedPsm], 'w') do |lk_Out|
-				ls_Header += ', targetFpr, actualFpr, eThreshold'
+				ls_Header += ', scoreThresholdType, targetFpr, actualFpr, scoreThreshold'
 				lk_Out.puts(ls_Header)
 				@input[:omssaResults].each do |ls_Path|
 					File.open(ls_Path, 'r') do |lk_In|
@@ -47,17 +65,15 @@ class FilterPsmByFpr < ProteomaticScript
 								lk_ScanParts = ls_Scan.split('.')
 								ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
 							end
-							lf_E = BigDecimal.new(lk_Line[3])
-							ls_DefLine = lk_Line[9]
-							lf_Mass = lk_Line[4].to_f
-							lf_TheoMass = lk_Line[12].to_f
+							lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
+							ls_DefLine = lk_Line[lk_HeaderMap['defline']]
 							# is it a decoy match? skip it!
 							next if ls_DefLine.index('decoy_') == 0
 							# is the score too bad? skip it!
 							next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
 							
 							lk_Out.print ls_Line.sub('target_', '').strip
-							lk_Out.print ", #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}"
+							lk_Out.print ", fpr, #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}"
 							lk_Out.puts
 						end
 					end

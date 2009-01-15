@@ -27,8 +27,23 @@ class CropPsmByMassAccuracy < ProteomaticScript
 		lf_MaxPpm = @param[:maxPpm]
 		lk_Result = Hash.new
 		
-		ls_Header = ''
-		File.open(@input[:omssaResults].first, 'r') { |lk_File| ls_Header = lk_File.readline.strip }
+		# first check whether all headers are equal, because in the end they will be merged
+		ls_Header = nil
+		lk_HeaderMap = nil
+		@input[:omssaResults].each do |ls_Path|
+			File.open(ls_Path, 'r') do |lk_In|
+				# skip header
+				ls_Header = lk_In.readline
+				lk_ThisHeaderMap = mapCsvHeader(ls_Header)
+				if (lk_HeaderMap)
+					if (lk_HeaderMap != lk_ThisHeaderMap)
+						puts "Error: The header lines of all input files are not identical (#{ls_Path} is different, for example)."
+						exit 1
+					end
+				end
+				lk_HeaderMap = lk_ThisHeaderMap
+			end
+		end
 
 		li_HitCount = 0
 		li_SelectCount = 0
@@ -37,12 +52,13 @@ class CropPsmByMassAccuracy < ProteomaticScript
 				lk_Out.puts(ls_Header)
 				@input[:omssaResults].each do |ls_Path|
 					File.open(ls_Path, 'r') do |lk_In|
+						# skip header
 						lk_In.readline
 						lk_In.each do |ls_Line|
 							li_HitCount += 1
 							lk_Line = ls_Line.parse_csv()
-							lf_Mass = lk_Line[4].to_f
-							lf_TheoMass = lk_Line[12].to_f
+							lf_Mass = lk_Line[lk_HeaderMap['mass']].to_f
+							lf_TheoMass = lk_Line[lk_HeaderMap['theomass']].to_f
 							# is the ppm mass error too bad? skip it!
 							# calculate mass error in ppm
 							lf_ThisPpm = ((lf_Mass - lf_TheoMass).abs / lf_Mass) * 1000000.0

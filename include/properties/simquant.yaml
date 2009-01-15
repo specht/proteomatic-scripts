@@ -42,7 +42,7 @@ output:
     label: CSV protein quantitation results
     format: csv
     filename: quantified-proteins.csv
-    default: yes
+    default: no
 
 parameters:
   - key: peptides
@@ -53,7 +53,7 @@ parameters:
   - key: excludeAminoAcids
     type: string
     default: ''
-    label: Exclude peptides containing these amino acids
+    label: Exclude amino acids
     description: "If you have reason to believe that proline containing peptides will mess up your quantitation, enter 'P' here."
   - key: modification
     label: Modification
@@ -97,12 +97,13 @@ parameters:
     min: 0.0
     step: 0.1
     description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
-  - key: maxTimeDifference
-    label: Maximum scan time difference
+  - key: maxIdentificationQuantitationTimeDifference
+    label: MS2 / SimQuant RT accuracy
     type: float
-    suffix: seconds
-    default: 60.0
+    suffix: minutes
+    default: 1.0
     min: 0.0
+    description: The maximum retention time difference between a MS2 identification and a SimQuant quantitation event for any peptide.
   - key: showPeptideInProtein
     label: Show peptide location within protein
     group: SimQuant Report

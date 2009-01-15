@@ -101,7 +101,7 @@ class WriteOmssaReport < ProteomaticScript
 				lk_SpotLinks = Array.new
 				lk_SpotKeys.each { |ls_Spot| lk_SpotLinks.push("<a href='#subheader-spot-#{ls_Spot}'>#{ls_Spot}</a>") }
 				
-				lk_Out.puts "<li><a href='#header-statistical-significance'>Statistical significance</a></li>"
+				lk_Out.puts "<li><a href='#header-overview-and-statistical-significance'>Overview and statistical significance</a></li>"
 				lk_Out.puts "<li><a href='#header-identified-proteins-by-spectral-count'>Identified proteins by spectral count</a></li>" if @param[:writeIdentifiedProteinsBySpectralCount]
 				lk_Out.puts "<li><a href='#header-identified-proteins-by-spot'>Identified proteins by spot</a> <span class='toggle' onclick='toggle(\"toc-proteins-by-spot-spots\", \"inline\")'>[show spots]</span><span class='toc-proteins-by-spot-spots' style='display: none;'><br />(#{lk_SpotLinks.join(', ')})</span></li>" if @param[:writeIdentifiedProteinsBySpot] && lk_SpotKeys.size > 1
 				lk_Out.puts "<li><a href='#header-identified-proteins-by-distinct-peptide-count'>Identified proteins by distinct peptide count</a></li>" if @param[:writeIdentifiedProteinsByDistinctPeptideCount]
@@ -111,9 +111,14 @@ class WriteOmssaReport < ProteomaticScript
 				lk_Out.puts "<li><a href='#header-quantitation-candidate-peptides'>Quantitation candidate peptides</a></li>" if @param[:writeQuantitationCandidatePeptides]
 				lk_Out.puts '</ol>'
 			
-				lk_Out.puts "<h2 id='header-statistical-significance'>Statistical significance</h2>"
-				if (lk_Result[:hasFpr])
-					#lk_Out.puts "<p>In the following table you find the E-value thresholds and actual false positive rates (FPR) that have been determined #{lk_Result[:hasGlobalFpr] ? 'globally' : 'for each spot'} in order to achieve a target FPR of #{sprintf('%1.2f', lk_Result[:targetFpr] * 100.0)}%.</p>"
+				lk_Out.puts "<h2 id='header-overview-and-statistical-significance'>Overview and statistical significance</h2>"
+				lk_Out.puts '<p>'
+				lk_Out.puts "Number of distinct peptides identified: #{lk_PeptideHash.keys.size}.<br />"
+				lk_Out.puts "Number of distinct peptides that unambiguously identify a gene model: #{lk_ProteinIdentifyingModelPeptides.size}.<br />"
+				lk_Out.puts "Number of proteins identified: #{lk_Proteins.size}.<br />"
+				lk_Out.puts '</p>'
+				lk_Out.puts '<h3>Statistical significance</h3>'
+				if (lk_Result[:scoreThresholdType] == 'fpr')
 					lk_Out.puts "<p>The results presented in this report have been conjured via a target-decoy approach, all resulting <acronym title='peptide-spectral matches'>PSM</acronym> have been cropped with a target <acronym title='false positive rate'>FPR</acronym> of #{sprintf('%1.2f', lk_Result[:targetFpr] * 100.0)}%. "
 					if lk_Result[:hasGlobalFpr]
 						lk_Out.puts "The score threshold has been determined globally."
@@ -129,6 +134,9 @@ class WriteOmssaReport < ProteomaticScript
 						lk_Out.puts "<tr style='background-color: #{lb_Good ? '#bbddbb' : '#eebbbb'};'><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
 					end
 					lk_Out.puts '</table>'
+				elsif (lk_Result[:scoreThresholdType] == 'min' || lk_Result[:scoreThresholdType] == 'max')
+					lk_Out.puts "<p>The results presented in this report have been filtered with a fixed score threshold of #{sprintf('%1.2e', lk_Result[:scoreThresholds].values.first)}."
+					lk_Out.puts "</p>"
 				else
 					lk_Out.puts "<p>Information about the statistical significance of the results is unavailable.</p>"
 				end

@@ -16,6 +16,8 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'bigdecimal'
+require 'include/fastercsv'
+require 'include/misc'
 
 
 def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm = nil)
@@ -46,24 +48,28 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 		lk_File = File.open(ls_Filename, 'r')
 		
 		# skip header
-		lk_File.readline
+		lk_HeaderMap = mapCsvHeader(lk_File.readline)
 		
 		lk_File.each do |ls_Line|
 			li_EntryCount += 1
 			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
 			lk_Line = ls_Line.parse_csv()
-			ls_Scan = lk_Line[1]
-			ls_OriginalPeptide = lk_Line[2]
+			ls_Scan = lk_Line[lk_HeaderMap['filenameid']]
+			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']]
 			ls_Peptide = ls_OriginalPeptide.upcase
-			lf_E = BigDecimal.new(lk_Line[3])
+			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 
-			ls_DefLine = lk_Line[9]
+			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
+			unless (ls_DefLine.index('target_') == 0) || (ls_DefLine.index('decoy_') == 0)
+				puts "Error: There is a PSM which does not come from a target/decoy search in #{ls_Filename}."
+				exit 1
+			end
 			lk_Mods = Array.new
-			ls_Mods = lk_Line[10]
+			ls_Mods = lk_Line[lk_HeaderMap['mods']]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
-			lf_Mass = lk_Line[4]
-			lf_TheoMass = lk_Line[12]
-			li_Charge = lk_Line[11].to_i
+			lf_Mass = lk_Line[lk_HeaderMap['mass']]
+			lf_TheoMass = lk_Line[lk_HeaderMap['theomass']]
+			li_Charge = lk_Line[lk_HeaderMap['charge']].to_i
 			if af_MaxPpm
 				# calculate mass error in ppm
 				lf_ThisPpm = ((lf_Mass.to_f - lf_TheoMass.to_f).abs / lf_Mass.to_f) * 1000000.0
@@ -197,6 +203,7 @@ def loadPsm(as_Path)
 	lf_TargetFpr = nil
 	lb_HasFpr = false
 	lb_GlobalFpr = false
+	ls_ScoreThresholdType = nil
 	
 	# lk_SpectralCounts:
 	#   :peptides:
@@ -210,35 +217,65 @@ def loadPsm(as_Path)
 	#       MT_HydACPAN_23_020507: 6
 	#       :total: 8
 	lk_SpectralCounts = {:peptides => Hash.new, :proteins => Hash.new }
+	lk_PeptideInProtein = Hash.new
 	
 	File.open(as_Path, 'r') do |lk_File|
-		# skip header
-		ls_Line = lk_File.readline
-		lk_Line = ls_Line.parse_csv()
-		#if (lk_Line.slice(-3, 3).join(',') == 'targetFpr,actualFpr,eThreshold')
-		lb_HasFpr = lk_Line.slice(-3, 3).collect { |x| x.strip }.join(',').downcase == 'targetfpr,actualfpr,ethreshold'
-		
-		puts 'Notice: No FPR is available for the results you specified.' unless lb_HasFpr
+		# read header
+		ls_Header = lk_File.readline
+		lk_HeaderMap = mapCsvHeader(ls_Header)
+		lb_FirstLineComing = true
+		lb_HasFpr = nil
+		lb_HasFixedScoreThreshold = nil
 		
 		lk_File.each do |ls_Line|
 			li_EntryCount += 1
 			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
 			lk_Line = ls_Line.parse_csv()
-			ls_Scan = lk_Line[1]
-			ls_OriginalPeptide = lk_Line[2]
+			
+			if (lb_FirstLineComing)
+				lb_FirstLineComing = false
+				
+				ls_ScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']] if (lk_HeaderMap.include?('scorethresholdtype'))
+				ls_ScoreThresholdType = ls_ScoreThresholdType.downcase.strip if ls_ScoreThresholdType
+				lb_HasFpr = ls_ScoreThresholdType == 'fpr'
+				lb_HasFixedScoreThreshold = ls_ScoreThresholdType == 'min' || ls_ScoreThresholdType == 'max'
+
+				print 'Statistical significance: '
+				if (lb_HasFpr)
+					puts 'FPR (adaptive score threshold).'
+				elsif (lb_HasFixedScoreThreshold)
+					puts 'fixed score threshold.'
+				else
+					puts 'none at all!'
+				end
+			end
+			ls_Scan = lk_Line[lk_HeaderMap['filenameid']]
+			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']]
 			ls_Peptide = ls_OriginalPeptide.upcase
-			lf_E = BigDecimal.new(lk_Line[3])
-			ls_DefLine = lk_Line[9]
+			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
+			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
 			lk_Mods = Array.new
-			ls_Mods = lk_Line[10]
+			ls_Mods = lk_Line[lk_HeaderMap['mods']]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
-			lf_Mass = lk_Line[4]
-			lf_TheoMass = lk_Line[12]
-			li_Charge = lk_Line[11].to_i
+			lf_Mass = lk_Line[lk_HeaderMap['mass']]
+			lf_TheoMass = lk_Line[lk_HeaderMap['theomass']]
+			li_Charge = lk_Line[lk_HeaderMap['charge']].to_i
+			li_Start = lk_Line[lk_HeaderMap['start']].to_i
+			lf_RetentionTime = lk_Line[lk_HeaderMap['retentiontime']].to_f
+
 			if (ls_DefLine.index('target_') == 0 || ls_DefLine.index('decoy_') == 0)
-				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script."
+				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script. If you are unsatisfied with the results of the FPR filter, you can alternatively filter by a fixed score threshold."
 				exit 1
 			end
+			
+			lk_PeptideInProtein[ls_Peptide] ||= Hash.new
+			lk_PeptideInProtein[ls_Peptide][ls_DefLine] ||= Array.new
+			lb_AlreadyThere = false
+			li_CorrectedStart = li_Start - 1
+			lk_PeptideInProtein[ls_Peptide][ls_DefLine].each do |lk_Info|
+				lb_AlreadyThere = true if lk_Info['start'] == li_CorrectedStart
+			end
+			lk_PeptideInProtein[ls_Peptide][ls_DefLine].push({'start' => li_CorrectedStart}) unless lb_AlreadyThere
 			
 			# correct charge in scan name (because when there are multiple charges,
 			# only one version of the spectrum may have been sent to OMSSA, because
@@ -268,22 +305,41 @@ def loadPsm(as_Path)
 			ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
 			
 			if (lb_HasFpr)
-				lf_ThisTargetFpr = lk_Line[-3].to_f
+				lf_ThisTargetFpr = lk_Line[lk_HeaderMap['targetfpr']].to_f
 				lf_TargetFpr ||= lf_ThisTargetFpr
 				if (lf_TargetFpr != lf_ThisTargetFpr)
 					puts "Error: Target FPR is not constant throughout the whole file."
 					exit 1
 				end
-				lf_ThisActualFpr = lk_Line[-2].to_f
+				lf_ThisActualFpr = lk_Line[lk_HeaderMap['actualfpr']].to_f
 				lk_ActualFpr[ls_Spot] ||= lf_ThisActualFpr
 				if (lf_ThisActualFpr != lk_ActualFpr[ls_Spot])
-					puts "Error: Actual FPR is not constant per spot throughout the whole file."
+					puts "Error: Actual FPR is not constant per band throughout the whole file."
 					exit 1
 				end
-				lf_ThisScoreThreshold = BigDecimal.new(lk_Line[-1])
+				lf_ThisScoreThreshold = BigDecimal.new(lk_Line[lk_HeaderMap['scorethreshold']])
 				lk_ScoreThreshold[ls_Spot] ||= lf_ThisScoreThreshold
 				if (lf_ThisScoreThreshold != lk_ScoreThreshold[ls_Spot])
-					puts "Error: Score threshold is not constant per spot throughout the whole file."
+					puts "Error: Score threshold is not constant per band throughout the whole file."
+					exit 1
+				end
+				ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
+				ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
+				if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
+					puts "Error: Score threshold type is not constant throughout the whole file."
+					exit 1
+				end
+			elsif (lb_HasFixedScoreThreshold)
+				lf_ThisScoreThreshold = BigDecimal.new(lk_Line[lk_HeaderMap['scorethreshold']])
+				lk_ScoreThreshold[ls_Spot] ||= lf_ThisScoreThreshold
+				if (lf_ThisScoreThreshold != lk_ScoreThreshold[ls_Spot])
+					puts "Error: Score threshold is not constant per band throughout the whole file."
+					exit 1
+				end
+				ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
+				ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
+				if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
+					puts "Error: Score threshold type is not constant throughout the whole file."
 					exit 1
 				end
 			end
@@ -294,9 +350,11 @@ def loadPsm(as_Path)
 				lk_ScanHash[ls_Scan][:peptides] = {ls_Peptide => {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass} }
 				lk_ScanHash[ls_Scan][:deflines] = [ls_DefLine]
 				lk_ScanHash[ls_Scan][:e] = lf_E;
+				lk_ScanHash[ls_Scan][:retentionTime] = lf_RetentionTime
 				lk_ScanHash[ls_Scan][:mods] = Array.new
 				lk_ScanHash[ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
 			elsif (lf_E == lk_ScanHash[ls_Scan][:e])
+				# update scan hash
 				lk_ScanHash[ls_Scan][:peptides][ls_Peptide] = {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass}
 				lk_ScanHash[ls_Scan][:deflines].push(ls_DefLine)
 				lk_ScanHash[ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
@@ -433,10 +491,11 @@ def loadPsm(as_Path)
 	lk_Result[:scoreThresholds] = lk_ScoreThreshold
 	lk_Result[:actualFpr] = lk_ActualFpr
 	lk_Result[:targetFpr] = lf_TargetFpr
-	lk_Result[:hasFpr] = lb_HasFpr
+	lk_Result[:scoreThresholdType] = ls_ScoreThresholdType
 	lk_Result[:hasGlobalFpr] = lb_GlobalFpr
 	lk_Result[:spectralCounts] = lk_SpectralCounts
 	lk_Result[:safeProteins] = lk_SafeProteins
+	lk_Result[:peptideInProtein] = lk_PeptideInProtein
 	
 	return lk_Result
 end
