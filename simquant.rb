@@ -171,6 +171,11 @@ class SimQuant < ProteomaticScript
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		
+		li_ChuckedOutBecauseOfTimeDifference = 0
+		li_ChuckedOutBecauseOfNoMs2Identification = 0
+		lk_UnidenifiedPeptides = Set.new
+		lk_TooHighTimeDifferencePeptides = Set.new
+		
 		# chuck out quantitation events that have no corresponding MS2 identification event
 		lk_Results['results'].each do |ls_Spot, lk_SpotResults|
 			lk_SpotResults.keys.each do |ls_Peptide|
@@ -179,11 +184,22 @@ class SimQuant < ProteomaticScript
 					if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
 						lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
 							lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit['retentionTime']).abs <= @param[:maxIdentificationQuantitationTimeDifference])
+							li_ChuckedOutBecauseOfTimeDifference if lb_RejectThis
+							lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
 						end
+					else
+						li_ChuckedOutBecauseOfNoMs2Identification += 1
+						lk_UnidenifiedPeptides.add(ls_Peptide)
 					end
 					lb_RejectThis
 				end
 			end
+		end
+
+		if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
+			puts 'Attention: Some quantitation events have been removed.'
+			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification} (#{lk_UnidenifiedPeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfNoMs2Identification > 0
+			puts "...because the time difference between MS2 identification and quantitation: #{li_ChuckedOutBecauseOfTimeDifference} (#{lk_TooHighTimeDifferencePeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfTimeDifference > 0
 		end
 		
 		# chuck out empty entries
