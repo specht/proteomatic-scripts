@@ -85,7 +85,8 @@ class CompareOmssa < ProteomaticScript
 					lk_Values = Array.new
 					ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:spectralCount] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						#li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:spectralCount] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:spectralCounts][:proteins][ls_Protein][:total] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"<td>#{li_Count}</td>"
 					end.join('')
@@ -95,7 +96,7 @@ class CompareOmssa < ProteomaticScript
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
-						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein][:peptides].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
 						"<td>#{li_Count}</td>"
 					end.join('')

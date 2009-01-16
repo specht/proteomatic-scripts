@@ -226,6 +226,7 @@ def loadPsm(as_Path)
 		lb_FirstLineComing = true
 		lb_HasFpr = nil
 		lb_HasFixedScoreThreshold = nil
+		lb_OldFormatWithoutScoreThresholdType = false
 		
 		lk_File.each do |ls_Line|
 			li_EntryCount += 1
@@ -237,6 +238,17 @@ def loadPsm(as_Path)
 				
 				ls_ScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']] if (lk_HeaderMap.include?('scorethresholdtype'))
 				ls_ScoreThresholdType = ls_ScoreThresholdType.downcase.strip if ls_ScoreThresholdType
+				# if no score threshold type is given, but we have targetfpr, 
+				# actualfpr, and scorethreshold, make it fpr!
+				unless (ls_ScoreThresholdType)
+					if (lk_HeaderMap.include?('targetfpr') && lk_HeaderMap.include?('actualfpr') && lk_HeaderMap.include?('ethreshold'))
+						# we have an old format here, in which scorethreshold is called ethreshold
+						# make it FPR!
+						lk_HeaderMap['scorethreshold'] = lk_HeaderMap['ethreshold']
+						ls_ScoreThresholdType = 'fpr'
+						lb_OldFormatWithoutScoreThresholdType = true
+					end
+				end
 				lb_HasFpr = ls_ScoreThresholdType == 'fpr'
 				lb_HasFixedScoreThreshold = ls_ScoreThresholdType == 'min' || ls_ScoreThresholdType == 'max'
 
@@ -324,11 +336,13 @@ def loadPsm(as_Path)
 					puts "Error: Score threshold is not constant per band throughout the whole file."
 					exit 1
 				end
-				ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
-				ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
-				if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
-					puts "Error: Score threshold type is not constant throughout the whole file."
-					exit 1
+				unless lb_OldFormatWithoutScoreThresholdType
+					ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
+					ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
+					if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
+						puts "Error: Score threshold type is not constant throughout the whole file."
+						exit 1
+					end
 				end
 			elsif (lb_HasFixedScoreThreshold)
 				lf_ThisScoreThreshold = BigDecimal.new(lk_Line[lk_HeaderMap['scorethreshold']])
@@ -337,11 +351,13 @@ def loadPsm(as_Path)
 					puts "Error: Score threshold is not constant per band throughout the whole file."
 					exit 1
 				end
-				ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
-				ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
-				if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
-					puts "Error: Score threshold type is not constant throughout the whole file."
-					exit 1
+				unless lb_OldFormatWithoutScoreThresholdType
+					ls_ThisScoreThresholdType = lk_Line[lk_HeaderMap['scorethresholdtype']].strip
+					ls_ScoreThresholdType ||= ls_ThisScoreThresholdType
+					if (ls_ScoreThresholdType != ls_ThisScoreThresholdType)
+						puts "Error: Score threshold type is not constant throughout the whole file."
+						exit 1
+					end
 				end
 			end
 			
