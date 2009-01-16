@@ -68,6 +68,14 @@ class SimQuant < ProteomaticScript
 			lk_ActualFpr = lk_Result[:actualFpr]
 			lk_PeptideInProtein = lk_Result[:peptideInProtein]
 			
+			lk_ScanHash.each do |ls_Scan, lk_Scan|
+				unless (lk_Scan[:retentionTime])
+					puts 'Error: The PSM list you specified does not contain any retention time information.'
+					puts 'SimQuant cannot continue without that information. Please re-run the OMSSA search to get a PSM list which includes retention times.'
+					exit 1
+				end
+			end
+			
 			lk_Peptides += lk_PeptideHash.keys
 		end
 		
@@ -173,7 +181,7 @@ class SimQuant < ProteomaticScript
 		
 		li_ChuckedOutBecauseOfTimeDifference = 0
 		li_ChuckedOutBecauseOfNoMs2Identification = 0
-		lk_UnidenifiedPeptides = Set.new
+		lk_UnidentifiedPeptides = Set.new
 		lk_TooHighTimeDifferencePeptides = Set.new
 		
 		# chuck out quantitation events that have no corresponding MS2 identification event
@@ -189,7 +197,7 @@ class SimQuant < ProteomaticScript
 						end
 					else
 						li_ChuckedOutBecauseOfNoMs2Identification += 1
-						lk_UnidenifiedPeptides.add(ls_Peptide)
+						lk_UnidentifiedPeptides.add(ls_Peptide)
 					end
 					lb_RejectThis
 				end
@@ -198,7 +206,7 @@ class SimQuant < ProteomaticScript
 
 		if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
 			puts 'Attention: Some quantitation events have been removed.'
-			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification} (#{lk_UnidenifiedPeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfNoMs2Identification > 0
+			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification} (#{lk_UnidentifiedPeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfNoMs2Identification > 0
 			puts "...because the time difference between MS2 identification and quantitation: #{li_ChuckedOutBecauseOfTimeDifference} (#{lk_TooHighTimeDifferencePeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfTimeDifference > 0
 		end
 		

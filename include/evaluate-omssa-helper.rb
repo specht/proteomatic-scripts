@@ -261,7 +261,8 @@ def loadPsm(as_Path)
 			lf_TheoMass = lk_Line[lk_HeaderMap['theomass']]
 			li_Charge = lk_Line[lk_HeaderMap['charge']].to_i
 			li_Start = lk_Line[lk_HeaderMap['start']].to_i
-			lf_RetentionTime = lk_Line[lk_HeaderMap['retentiontime']].to_f
+			lf_RetentionTime = nil
+			lf_RetentionTime = lk_Line[lk_HeaderMap['retentiontime']].to_f if lk_HeaderMap.include?('retentiontime')
 
 			if (ls_DefLine.index('target_') == 0 || ls_DefLine.index('decoy_') == 0)
 				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script. If you are unsatisfied with the results of the FPR filter, you can alternatively filter by a fixed score threshold."
