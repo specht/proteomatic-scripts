@@ -95,7 +95,12 @@ class SimQuant < ProteomaticScript
 		lk_Peptides.collect! do |ls_Peptide|
 			if ls_Peptide.include?('.')
 				lk_Peptide = ls_Peptide.split('.')
-				ls_Peptide = lk_Peptide[1] if (lk_Peptide.size == 3)
+				if (lk_Peptide.size == 3)
+					ls_Peptide = lk_Peptide[1] 
+				else
+					puts "Error: A bad peptide was encountered: #{ls_Peptide}."
+					exit 1
+				end
 			end
 			ls_Peptide
 		end
@@ -879,7 +884,6 @@ class SimQuant < ProteomaticScript
 					
 					lk_Out.puts '</body>'
 					lk_Out.puts '</html>'
-					exit
 				end
 			end
 		end
