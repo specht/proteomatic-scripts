@@ -127,8 +127,8 @@ class SimQuant < ProteomaticScript
 			exit 1
 		end
 		
-		#ls_TempPath = tempFilename('simquant')
-		ls_TempPath = '/flipbook/spectra/mia_quant/temp-simquant20090116-16213-q0ww9f-0'
+		ls_TempPath = tempFilename('simquant')
+		#ls_TempPath = '/flipbook/spectra/mia_quant/temp-simquant20090116-16213-q0ww9f-0'
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
@@ -182,7 +182,7 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\""
-		#runCommand(ls_Command, true)
+		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		
@@ -891,3 +891,4 @@ class SimQuant < ProteomaticScript
 end
 
 lk_Object = SimQuant.new
+
