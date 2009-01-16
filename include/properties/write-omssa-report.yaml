@@ -48,7 +48,3 @@ parameters:
     label: Write modified peptides
     type: flag
     default: true
-  - key: writeQuantitationCandidatePeptides
-    label: Write quantitation candidate peptides
-    type: flag
-    default: true

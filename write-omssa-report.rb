@@ -108,7 +108,6 @@ class WriteOmssaReport < ProteomaticScript
 				lk_Out.puts "<li><a href='#header-new-gpf-peptides'>Additional peptides identified by GPF</a></li>" if (lk_GpfPeptides - lk_ModelPeptides).size > 0 && @param[:writeAdditionalPeptidesIdentifiedByGPF]
 				lk_Out.puts "<li><a href='#header-ambiguous-peptides'>Identified peptides that appear in more than one model protein</a></li>" if (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size > 0 && @param[:writeAmbiguousPeptides]
 				lk_Out.puts "<li><a href='#header-modified-peptides'>Modified peptides</a></li>" if @param[:writeModifiedPeptides]
-				lk_Out.puts "<li><a href='#header-quantitation-candidate-peptides'>Quantitation candidate peptides</a></li>" if @param[:writeQuantitationCandidatePeptides]
 				lk_Out.puts '</ol>'
 			
 				lk_Out.puts "<h2 id='header-overview-and-statistical-significance'>Overview and statistical significance</h2>"
@@ -164,7 +163,7 @@ class WriteOmssaReport < ProteomaticScript
 						end
 						lk_FoundInSpots = lk_FoundInSpots.to_a
 						lk_FoundInSpots.sort! { |x, y| String::natcmp(x, y) }
-						lk_FoundInSpots.collect! { |x| "<a href='#subheader-spot-#{x}'>#{x}</a>" }
+						lk_FoundInSpots.collect! { |x| "<a href='#subheader-spot-#{x}'>#{x}</a> (#{lk_SpectralCounts[:proteins][ls_Protein][x]})" }
 						ls_FoundInSpots = lk_FoundInSpots.join(', ')
 						li_ToggleCounter += 1
 						ls_ToggleClass = "proteins-by-spectral-count-#{li_ToggleCounter}"
@@ -358,53 +357,6 @@ class WriteOmssaReport < ProteomaticScript
 					else
 						lk_Out.puts '<p>No modified peptides have been found.</p>'
 					end
-				end
-				
-				if @param[:writeQuantitationCandidatePeptides]
-					lk_Out.puts "<h2 id='header-quantitation-candidate-peptides'>Quantitation candidate peptides</h2>"
-					lk_Out.puts "<p>In the following table, you find all arginine-containing peptides. They might be suitable for SILAC quantitation.</p>"
-					
-					lk_Out.puts '<h3>Non-proline containing peptides</h3>'
-
-					lk_Out.puts '<table>'
-					lk_Out.puts '<tr><th>Protein</th><th>Peptide</th></tr>'
-					
-					lk_Proteins.keys.sort.each do |ls_Protein|
-						lk_LocalPeptides = lk_Proteins[ls_Protein].sort.select do |ls_Peptide|
-							(ls_Peptide.include?('R')) && (!ls_Peptide.include?('P'))
-						end
-						next if lk_LocalPeptides.empty?
-						lk_Out.puts "<tr><td rowspan='#{lk_LocalPeptides.size}'>#{ls_Protein}</td>"
-						lb_FirstRow = true
-						lk_LocalPeptides.each do |ls_Peptide|
-							lk_Out.puts "<tr>" unless lb_FirstRow
-							lk_Out.puts "<td>#{ls_Peptide}</td>"
-							lk_Out.puts "</tr>"
-							lb_FirstRow = false
-						end
-					end
-					lk_Out.puts '</table>'
-
-					lk_Out.puts '<h3>Proline containing peptides</h3>'
-					
-					lk_Out.puts '<table>'
-					lk_Out.puts '<tr><th>Protein</th><th>Peptide</th></tr>'
-					
-					lk_Proteins.keys.sort.each do |ls_Protein|
-						lk_LocalPeptides = lk_Proteins[ls_Protein].sort.select do |ls_Peptide|
-							(ls_Peptide.include?('R')) && (ls_Peptide.include?('P'))
-						end
-						next if lk_LocalPeptides.empty?
-						lk_Out.puts "<tr><td rowspan='#{lk_LocalPeptides.size}'>#{ls_Protein}</td>"
-						lb_FirstRow = true
-						lk_LocalPeptides.each do |ls_Peptide|
-							lk_Out.puts "<tr>" unless lb_FirstRow
-							lk_Out.puts "<td>#{ls_Peptide}</td>"
-							lk_Out.puts "</tr>"
-							lb_FirstRow = false
-						end
-					end
-					lk_Out.puts '</table>'
 				end
 				
 				lk_Out.puts '</body>'
