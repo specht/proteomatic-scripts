@@ -526,7 +526,104 @@ class ProteomaticScript
 		end
 	end
 	private :showFileDependencies
+
 	
+	def mergeFilenames(ak_Names)
+		lk_Names = ak_Names.dup
+
+		# split into numbers/non-numbers
+		ls_AllPattern = nil
+		lk_AllParts = nil
+		lk_Names.each do |x|
+			ls_Pattern = nil
+			lk_Parts = Array.new
+			(0...x.size).each do |i|
+				lb_IsDigit = (/\d/ =~ x[i, 1])
+				ls_Marker = lb_IsDigit ? '0' : 'a'
+				unless ls_Pattern
+					ls_Pattern = ls_Marker 
+					lk_Parts.push('')
+				end
+				unless ls_Pattern[-1, 1] == ls_Marker
+					ls_Pattern += ls_Marker 
+					lk_Parts.push('')
+				end
+				lk_Parts.last << x[i, 1]
+			end
+	
+			# check whether pattern is constant
+			if ls_AllPattern
+				if (ls_AllPattern != ls_Pattern)
+					return ''
+				end
+			else
+				ls_AllPattern = ls_Pattern
+			end
+	
+			# convert number strings to numbers
+			(0...lk_Parts.size).each { |i| lk_Parts[i] = lk_Parts[i].to_i if ls_Pattern[i, 1] == '0' }
+
+			# create part sets when they don't exist on first iteration
+			unless lk_AllParts
+				lk_AllParts = Array.new
+				(0...lk_Parts.size).each { |i| lk_AllParts.push(Set.new) }
+			end
+	
+			# insert parts into part sets
+			(0...lk_Parts.size).each { |i| lk_AllParts[i].add(lk_Parts[i]) }
+		end
+
+		ls_MergedName = ''
+
+		(0...ls_AllPattern.size).each do |i|
+			lk_Part = lk_AllParts[i].to_a.sort
+			if (lk_Part.size == 1)
+				ls_MergedName << lk_Part.first.to_s
+			else
+				if (ls_AllPattern[i, 1] == '0')
+					# we have multiple entries and it's a number part, try to find ranges!
+					li_Start = nil
+					li_Stop = nil
+					li_Last = nil
+					lk_OldPart = lk_Part.dup
+					lk_Part = Array.new
+					lk_OldPart.each do |i|
+						unless li_Start 
+							li_Start = i
+							li_Stop = i 
+							li_Last = i
+							next
+						end
+						if i == li_Last + 1
+							# extend range
+							li_Stop = i
+							li_Last = i
+							next
+						else
+							if (li_Start == li_Stop)
+								lk_Part << "#{li_Start}"
+							else
+								lk_Part << "#{li_Start}-#{li_Stop}"
+							end
+							li_Start = i
+							li_Last = i
+							li_Stop = i
+						end
+					end
+					if (li_Start == li_Stop)
+						lk_Part << "#{li_Start}"
+					else
+						lk_Part << "#{li_Start}-#{li_Stop}"
+					end
+				end
+				ls_MergedName << lk_Part.join(',')
+			end
+		end
+		return ls_MergedName
+	end
+	private :mergeFilenames
+
+
 	def loadDescription()
 		# load script parameters and external tools
 		@ms_ScriptName = File.basename($0).sub('.defunct.', '.').sub('.rb', '')
@@ -681,6 +778,20 @@ class ProteomaticScript
 				puts "Internal error: Invalid default output directory specified for this script."
 				exit 1
 			end
+			
+			# check whether we have prefix proposal settings, if not, generate one
+			unless @mk_ScriptProperties.has_key?('proposePrefix')
+				@mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
+				puts "Auto-set prefix proposal: #{@mk_ScriptProperties['proposePrefix']}"
+			end
+			
+			# check whether prefix proposal entries are sane
+			@mk_ScriptProperties['proposePrefix'].each do |x|
+				unless @mk_Input['groups'].has_key?(x)
+					puts "Script error: proposePrefix contains non-existent input group."
+					exit 1
+				end
+			end
 		end
 		raise ProteomaticArgumentException, "Error#{lk_Errors.size > 1 ? "s:\n": ": "}" + lk_Errors.join("\n") unless lk_Errors.empty?
 	end
@@ -806,6 +917,26 @@ class ProteomaticScript
 		@output.each_key { |ls_Key| @output[ls_Key] += '.proteomatic.part' }
 
 		raise ProteomaticArgumentException, "Error#{lk_Errors.size > 1 ? "s:\n": ": "}" + lk_Errors.join("\n") unless lk_Errors.empty?
+		
+		if (lk_Arguments.include?('--proposePrefix'))
+			lk_Prefix = Array.new
+			@mk_ScriptProperties['proposePrefix'].each do |ls_Group|
+				lk_PrefixFiles = @input[ls_Group.intern]
+				lk_PrefixFiles.collect! { |x| File::basename(x).split('.').first }
+				lk_Prefix << mergeFilenames(lk_PrefixFiles)
+			end
+			lk_Prefix.reject! { |x| x.strip.empty? }
+			ls_Prefix = lk_Prefix.join('-')
+			ls_Prefix << '-' unless ls_Prefix.empty?
+			puts '--proposePrefix'
+			puts ls_Prefix
+			exit 0
+		end
+
+		if (lk_Arguments.include?('--dryRun'))
+			puts 'Dry run ok. Stopping.'
+			exit 0
+		end
 	end
 	
 	

@@ -19,7 +19,7 @@ output:
   - key: croppedPsm
     label: cropped results
     format: csv
-    filename: psm-filtered-by-mass-accuracy.csv
+    filename: filtered-by-mass-accuracy.csv
     default: yes
 
 parameters:

@@ -17,6 +17,9 @@ input:
     label: database
     formats: [fasta-proteins]
     min: 1
+    
+proposePrefix:
+  - spectra
 
 defaultOutputDirectory: spectra
     

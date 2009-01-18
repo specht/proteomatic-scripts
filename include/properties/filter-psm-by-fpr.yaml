@@ -19,7 +19,7 @@ output:
   - key: croppedPsm
     label: cropped results
     format: csv
-    filename: psm-filtered-by-fpr.csv
+    filename: filtered-by-fpr.csv
     default: yes
 
 parameters:
