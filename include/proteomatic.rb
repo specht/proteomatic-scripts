@@ -529,6 +529,7 @@ class ProteomaticScript
 
 	
 	def mergeFilenames(ak_Names)
+		return nil if ak_Names.empty?
 		lk_Names = ak_Names.dup
 
 		# split into numbers/non-numbers
@@ -554,7 +555,7 @@ class ProteomaticScript
 			# check whether pattern is constant
 			if ls_AllPattern
 				if (ls_AllPattern != ls_Pattern)
-					return ''
+					return nil
 				end
 			else
 				ls_AllPattern = ls_Pattern
@@ -602,6 +603,8 @@ class ProteomaticScript
 						else
 							if (li_Start == li_Stop)
 								lk_Part << "#{li_Start}"
+							elsif(li_Start + 1 == li_Stop)
+								lk_Part << "#{li_Start},#{li_Stop}"
 							else
 								lk_Part << "#{li_Start}-#{li_Stop}"
 							end
@@ -612,6 +615,8 @@ class ProteomaticScript
 					end
 					if (li_Start == li_Stop)
 						lk_Part << "#{li_Start}"
+					elsif(li_Start + 1 == li_Stop)
+						lk_Part << "#{li_Start},#{li_Stop}"
 					else
 						lk_Part << "#{li_Start}-#{li_Stop}"
 					end
@@ -782,7 +787,6 @@ class ProteomaticScript
 			# check whether we have prefix proposal settings, if not, generate one
 			unless @mk_ScriptProperties.has_key?('proposePrefix')
 				@mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
-				puts "Auto-set prefix proposal: #{@mk_ScriptProperties['proposePrefix']}"
 			end
 			
 			# check whether prefix proposal entries are sane
@@ -858,6 +862,26 @@ class ProteomaticScript
 			ls_OutputDirectory = File::dirname(@ms_FileDefiningOutputDirectory) if @ms_FileDefiningOutputDirectory
 		end
 		
+		if (lk_Arguments.include?('--proposePrefix'))
+			lk_Prefix = Array.new
+			@mk_ScriptProperties['proposePrefix'].each do |ls_Group|
+				lk_PrefixFiles = @input[ls_Group.intern]
+				lk_PrefixFiles.collect! { |x| File::basename(x).split('.').first }
+				ls_Merged = mergeFilenames(lk_PrefixFiles)
+				unless ls_Merged
+					puts 'Sorry, unable to merge file names.'
+					exit 1
+				end
+				lk_Prefix << ls_Merged
+			end
+			lk_Prefix.reject! { |x| x.strip.empty? }
+			ls_Prefix = lk_Prefix.join('-')
+			ls_Prefix << '-' unless ls_Prefix.empty?
+			puts '--proposePrefix'
+			puts ls_Prefix
+			exit 0
+		end
+
 		if ls_OutputDirectory == nil && !@mk_Output.empty?
 			lk_Errors.push("Unable to determine output directory.")
 		else
@@ -918,21 +942,6 @@ class ProteomaticScript
 
 		raise ProteomaticArgumentException, "Error#{lk_Errors.size > 1 ? "s:\n": ": "}" + lk_Errors.join("\n") unless lk_Errors.empty?
 		
-		if (lk_Arguments.include?('--proposePrefix'))
-			lk_Prefix = Array.new
-			@mk_ScriptProperties['proposePrefix'].each do |ls_Group|
-				lk_PrefixFiles = @input[ls_Group.intern]
-				lk_PrefixFiles.collect! { |x| File::basename(x).split('.').first }
-				lk_Prefix << mergeFilenames(lk_PrefixFiles)
-			end
-			lk_Prefix.reject! { |x| x.strip.empty? }
-			ls_Prefix = lk_Prefix.join('-')
-			ls_Prefix << '-' unless ls_Prefix.empty?
-			puts '--proposePrefix'
-			puts ls_Prefix
-			exit 0
-		end
-
 		if (lk_Arguments.include?('--dryRun'))
 			puts 'Dry run ok. Stopping.'
 			exit 0
