@@ -30,7 +30,5 @@ parameters:
     default: 'max'
   - key: scoreThreshold
     label: Score threshold
-    type: float
+    type: string
     default: 1.0
-    decimals: 10
-    step: 0.0001

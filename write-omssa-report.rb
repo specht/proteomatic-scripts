@@ -175,7 +175,9 @@ class WriteOmssaReport < ProteomaticScript
 						lk_PeptidesSorted.each do |ls_Peptide|
 							lk_Out.print "<tr>" unless lb_Open1
 							ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
-							lk_Out.print "<td><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td>#{lk_SpectralCounts[:peptides][ls_Peptide][:total]}</td></tr>\n"
+							lb_FoundUnmodified = lk_PeptideHash[ls_Peptide][:foundUnmodified]
+							lb_FoundModified = !lk_PeptideHash[ls_Peptide][:mods].empty?
+							lk_Out.print "<td><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(lb_FoundModified) ? '(<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>modified</a>' + (lb_FoundUnmodified ? ' and unmodified' : '') + ')</span>' : ''}</td><td>#{lk_SpectralCounts[:peptides][ls_Peptide][:total]}</td></tr>\n"
 							lb_Open0 = false
 							lb_Open1 = false
 						end
@@ -330,7 +332,7 @@ class WriteOmssaReport < ProteomaticScript
 									unless lb_FoundAny
 										lk_Out.puts '<p>These peptides have been found with modifications.</p>'
 										lk_Out.puts '<table>'
-										lk_Out.puts '<tr><th>Peptide</th><th>Modified peptide</th><th>Description</th><th>Spot</th><th>Scan</th></tr>'
+										lk_Out.puts '<tr><th>Peptide</th><th>Modified peptide</th><th>Description</th><th>Scan</th></tr>'
 										lb_FoundAny = true
 									end
 									lk_Out.puts "<tr>"
@@ -339,14 +341,14 @@ class WriteOmssaReport < ProteomaticScript
 										lb_PeptideRow = false
 									end
 									if (lb_ModifiedPeptideRow)
-										lk_Out.puts "<td rowspan='#{li_ModifiedPeptideRowCount}'>#{ls_Mod}</td>"
+										lk_Out.puts "<td rowspan='#{li_ModifiedPeptideRowCount}'>#{ls_Mod.upcase}</td>"
 										lb_ModifiedPeptideRow = false
 									end
 									if (lb_DescriptionRow)
 										lk_Out.puts "<td rowspan='#{li_DescriptionRowCount}'>#{ls_Description}</td>"
 										lb_DescriptionRow = false
 									end
-									lk_Out.puts "<td>#{ls_Spot}</td><td>#{lk_PeptideHash[ls_Peptide][:mods][ls_ModifiedPeptide][ls_Description][ls_Spot].sort { |a, b| String::natcmp(a, b)}.join(', ')}</td>"
+									lk_Out.puts "<td>#{lk_PeptideHash[ls_Peptide][:mods][ls_ModifiedPeptide][ls_Description][ls_Spot].sort { |a, b| String::natcmp(a, b)}.join(', ')}</td>"
 									lk_Out.puts "</tr>"
 								end
 							end

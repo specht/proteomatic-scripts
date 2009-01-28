@@ -269,6 +269,7 @@ def loadPsm(as_Path)
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[lk_HeaderMap['mods']]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
+			lb_IsUnmodified = lk_Mods.empty?
 			lf_Mass = lk_Line[lk_HeaderMap['mass']]
 			lf_TheoMass = lk_Line[lk_HeaderMap['theomass']]
 			li_Charge = lk_Line[lk_HeaderMap['charge']].to_i
@@ -407,6 +408,7 @@ def loadPsm(as_Path)
 	#  :spots: (MT_HydACPAN_1_300407) (set)
 	#  :found: {gpf, models}
 	#  :proteins: {x => true, y => true}
+	#  :foundUnmodified: true
 	#  :mods:
 	#    WLQYsEVIHAR:
 	#      'yada yada':
@@ -420,8 +422,10 @@ def loadPsm(as_Path)
 			lk_PeptideHash[ls_Peptide][:spots] = Set.new
 			lk_PeptideHash[ls_Peptide][:found] = Hash.new
 			lk_PeptideHash[ls_Peptide][:proteins] = Hash.new
+			lk_PeptideHash[ls_Peptide][:foundUnmodified] = false
 			lk_PeptideHash[ls_Peptide][:mods] = Hash.new
 		end
+		lk_PeptideHash[ls_Peptide][:foundUnmodified] = true if (!lk_ScanHash[ls_Scan][:mods]) || (lk_ScanHash[ls_Scan][:mods].empty?)
 		lk_PeptideHash[ls_Peptide][:scans].push(ls_Scan)
 		ls_Spot = ls_Scan[0, ls_Scan.index('.')]
 		lk_PeptideHash[ls_Peptide][:spots].add(ls_Spot)

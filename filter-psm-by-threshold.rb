@@ -50,6 +50,9 @@ class FilterPsmByThreshold < ProteomaticScript
 		# warning once and just strip the leading target_ or decoy_
 		lb_GaveWarningAboutTargetDecoy = false
 		
+		ld_ScoreThreshold = @param[:scoreThreshold].to_f
+		puts "Removing all PSM with a score of #{@param[:scoreThresholdType] == 'min' ? 'less' : 'more'} than #{ld_ScoreThreshold}."
+		
 		if @output[:croppedPsm]
 			File.open(@output[:croppedPsm], 'w') do |lk_Out|
 				ls_Header += ', scoreThresholdType, scoreThreshold'
@@ -70,16 +73,14 @@ class FilterPsmByThreshold < ProteomaticScript
 								ls_DefLine.delete!('target_') 
 							end
 							# is the score too bad? skip it!
-							if (@param[:scoreThresholdType] == 'fpr')
-								next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
-							elsif (@param[:scoreThresholdType] == 'min')
-								next if lf_E < @param[:scoreThreshold]
+							if (@param[:scoreThresholdType] == 'min')
+								next if lf_E < ld_ScoreThreshold
 							elsif (@param[:scoreThresholdType] == 'max')
-								next if lf_E > @param[:scoreThreshold]
+								next if lf_E > ld_ScoreThreshold
 							end
 							
 							lk_Out.print ls_Line.sub('target_', '').strip
-							lk_Out.print ", #{@param[:scoreThresholdType]}, #{@param[:scoreThreshold]}"
+							lk_Out.print ", #{@param[:scoreThresholdType]}, #{ld_ScoreThreshold}"
 							lk_Out.puts
 						end
 					end
