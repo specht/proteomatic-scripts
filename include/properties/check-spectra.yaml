@@ -14,3 +14,6 @@ input:
     min: 1
 
 defaultOutputDirectory: spectra
+
+needs:
+  - ext.simquant
