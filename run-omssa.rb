@@ -40,6 +40,31 @@ class RunOmssa < ProteomaticScript
 		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
 		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
 		runCommand(ls_Command)
+		
+		# inject filename/id because when running a DTA, it seems to be missing
+		if fileMatchesFormat(as_SpectrumFilename, 'dta')
+			ls_FixedResult = ''
+			File.open(ls_OutFilename, 'r') do |lk_File|
+				ls_Header = lk_File.readline.strip
+				ls_FixedResult += ls_Header + "\n"
+				lk_HeaderMap = mapCsvHeader(ls_Header)
+				lk_File.each_line do |ls_Line|
+					ls_Line.strip!
+					lk_Line = ls_Line.parse_csv()
+					ls_Id = lk_Line[lk_HeaderMap['filenameid']]
+					ls_Id ||= ''
+					ls_Id.strip! unless ls_Id.empty?
+					if (ls_Id.empty?)
+						ls_Id = File::basename(as_SpectrumFilename)
+						lk_Line[lk_HeaderMap['filenameid']] = ls_Id
+						ls_FixedResult += FasterCSV.generate { |csv| csv << lk_Line }
+					else
+						ls_FixedResult += ls_Line + "\n"
+					end
+				end
+			end
+			File.open(ls_OutFilename, 'w') { |f| f.print(ls_FixedResult) }
+		end	
 
 		File::delete('test.dta') if File.exists?('test.dta') && !lb_TestDtaExisted
 		
@@ -116,7 +141,9 @@ class RunOmssa < ProteomaticScript
 			lk_PreparedSpectraFiles = lk_PreparedSpectraFiles + Dir[@ms_TempPath + '/mgf-in*']
 		end
 		
-		lk_RetentionTimes = YAML::load_file(File::join(@ms_TempPath, 'rt.yaml'))
+		ls_RtPath = File::join(@ms_TempPath, 'rt.yaml')
+		lk_RetentionTimes = Hash.new
+		lk_RetentionTimes = YAML::load_file(ls_RtPath) if File::exists?(ls_RtPath)
 		
 		# run OMSSA on each spectrum file
 		lk_OutFiles = Array.new
@@ -134,25 +161,28 @@ class RunOmssa < ProteomaticScript
 		mergeCsvFiles(lk_OutFiles, ls_TempResultPath)
 		puts 'done.'
 		
-		print "Injecting retention times into OMSSA results..."
-		File.open(@output[:resultFile], 'w') do |lk_Out|
-			File.open(ls_TempResultPath, 'r') do |lk_File|
-				ls_Header = lk_File.readline.strip
-				lk_Out.puts "#{ls_Header}, retentionTime"
-				lk_HeaderMap = mapCsvHeader(ls_Header)
-				lk_File.each_line do |ls_Line|
-					ls_Line.strip!
-					lk_Line = ls_Line.parse_csv()
-					ls_Band = lk_Line[lk_HeaderMap['filenameid']]
-					lk_Band = ls_Band.split('.')
-					ls_Key = "#{lk_Band.slice(0, lk_Band.size - 2).join('.')}"
-					ld_RetentionTime = lk_RetentionTimes[ls_Key]
-					lk_Out.puts "#{ls_Line},#{ld_RetentionTime}"
+		unless (lk_RetentionTimes.empty?)
+			print "Injecting retention times into OMSSA results..."
+			File.open(@output[:resultFile], 'w') do |lk_Out|
+				File.open(ls_TempResultPath, 'r') do |lk_File|
+					ls_Header = lk_File.readline.strip
+					lk_Out.puts "#{ls_Header}, retentionTime"
+					lk_HeaderMap = mapCsvHeader(ls_Header)
+					lk_File.each_line do |ls_Line|
+						ls_Line.strip!
+						lk_Line = ls_Line.parse_csv()
+						ls_Band = lk_Line[lk_HeaderMap['filenameid']]
+						lk_Band = ls_Band.split('.')
+						ls_Key = "#{lk_Band.slice(0, lk_Band.size - 2).join('.')}"
+						ld_RetentionTime = lk_RetentionTimes[ls_Key]
+						lk_Out.puts "#{ls_Line},#{ld_RetentionTime}"
+					end
 				end
 			end
+			puts "done."
+		else
+			FileUtils::cp(ls_TempResultPath, @output[:resultFile])
 		end
-		
-		puts "done."
 	end
 end
 
