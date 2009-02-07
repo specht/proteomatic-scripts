@@ -18,7 +18,7 @@ defaultOutputDirectory: spectra
 output:
   - key: fasFile
     label: PEAKS peptides
-    format: fasta-proteins
+    format: fasta
     filename: peaks-results.fas
     default: yes
   - key: annFile

@@ -1,3 +1,2 @@
 extensions: ['.gpfindex']
-detection: return true
 description: GPF index

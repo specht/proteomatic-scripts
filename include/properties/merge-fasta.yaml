@@ -10,7 +10,7 @@ type: processor
 input:
   - key: databases
     label: FASTA database
-    formats: [fasta-proteins, fasta-nucleotides]
+    formats: [fasta]
     min: 2
 
 defaultOutputDirectory: databases
@@ -18,6 +18,6 @@ defaultOutputDirectory: databases
 output:
   - key: merged
     label: merged database
-    format: fasta-proteins
+    format: fasta
     filename: merged-database.fasta
     default: yes

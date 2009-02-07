@@ -12,7 +12,7 @@ type: processor
 input:
   - key: databases
     label: FASTA database
-    formats: [fasta-proteins, fasta-nucleotides]
+    formats: [fasta]
     min: 1
 
 defaultOutputDirectory: databases

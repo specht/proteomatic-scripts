@@ -1,3 +1,2 @@
 extensions: ['.html']
-detection: return true
 description: HTML

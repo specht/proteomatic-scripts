@@ -1,3 +1,2 @@
 extensions: ['.yaml']
-detection: return true
 description: YAML

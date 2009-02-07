@@ -15,7 +15,7 @@ input:
     min: 1
   - key: databases
     label: database
-    formats: [fasta-proteins]
+    formats: [fasta]
     min: 1
     
 proposePrefix:

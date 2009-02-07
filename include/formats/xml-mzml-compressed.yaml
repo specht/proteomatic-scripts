@@ -1,3 +1,2 @@
 extensions: ['.mzML.zip', '.mzML.gz', '.mzML.bz2']
-detection: return true
 description: mzML (compressed)

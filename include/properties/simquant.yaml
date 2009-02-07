@@ -27,7 +27,7 @@ input:
     formats: [txt]
   - key: modelFiles
     label: gene model
-    formats: [fasta-proteins]
+    formats: [fasta]
 	
 
 defaultOutputDirectory: spectraFiles

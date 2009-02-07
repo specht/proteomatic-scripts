@@ -1,15 +1,2 @@
 extensions: ['.dta']
-detection: |
-  lk_File = File.open(as_Filename, 'r')
-  ls_Line = lk_File.readline.strip
-  lk_Line = ls_Line.split(' ')
-  return false if lk_Line.size != 2
-  Float(lk_Line[0].strip) rescue return false
-  Integer(lk_Line[1].strip) rescue return false
-  ls_Line = lk_File.readline.strip
-  lk_Line = ls_Line.split(' ')
-  return false if lk_Line.size != 2
-  Float(lk_Line[0].strip) rescue return false
-  Float(lk_Line[1].strip) rescue return false
-  return true
 description: Peaks list

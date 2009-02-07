@@ -219,7 +219,12 @@ class Parameters
 		end
 		lk_Groups.each do |ls_Group|
 			# print group title
-			ls_Result += "#{underline(ls_Group, '-')}\n"
+			# but strip leading '{int}' !
+			ls_CleanGroup = ls_Group.dup
+			if ls_CleanGroup.index('{') == 0
+				ls_CleanGroup.sub!(/\{\d+\}/, '')
+			end
+			ls_Result += "#{underline(ls_CleanGroup, '-')}\n"
 			# print options
 			@mk_ParametersOrder.each do |ls_Key|
 				lk_Parameter = parameter(ls_Key)

@@ -48,8 +48,6 @@ def fileMatchesFormat(as_Filename, as_Format)
 		end
 	end
 	return false unless lb_ExtensionMatches
-	# try detection by reading some bytes
-	eval(lk_Format['detection']) rescue return false
 	# if we came through this, throw in a return true 'for good measure'
 	return true
 end

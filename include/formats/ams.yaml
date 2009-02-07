@@ -1,3 +1,2 @@
 extensions: ['.ams']
-detection: return true
 description: AutoMS import

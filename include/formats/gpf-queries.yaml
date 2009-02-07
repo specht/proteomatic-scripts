@@ -1,4 +1,2 @@
 extensions: ['.gpfqueries']
-detection: |
-  return true
 description: GPF queries

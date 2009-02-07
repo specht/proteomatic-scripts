@@ -1,3 +1,2 @@
 extensions: ['.xhtml']
-detection: return true
 description: XHTML

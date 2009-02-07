@@ -1,9 +1,2 @@
 extensions: ['.mzML']
-detection: |
-  lk_File = File.open(as_Filename, 'r')
-  ls_Line = '<?'
-  while ls_Line[0, 2] == '<?'
-    ls_Line = lk_File.readline
-  end
-  return ls_Line[0, 5] == '<mzML' || ls_Line[0, 12] == '<indexedmzML'
 description: mzML

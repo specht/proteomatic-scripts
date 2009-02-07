@@ -12,7 +12,7 @@ type: converter
 input:
   - key: genome
     label: genome
-    formats: [fasta-nucleotides]
+    formats: [fasta]
     min: 1
 
 defaultOutputDirectory: genome

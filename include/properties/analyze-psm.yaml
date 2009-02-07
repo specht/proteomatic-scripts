@@ -23,4 +23,4 @@ input:
     min: 1
   - key: geneModel
     label: gene model
-    formats: [fasta-proteins]
+    formats: [fasta]

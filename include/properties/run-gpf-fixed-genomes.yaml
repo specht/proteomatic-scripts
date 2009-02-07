@@ -13,7 +13,7 @@ type: processor
 input:
   - key: predictions
     label: GPF queries
-    formats: [fasta-proteins, gpf-queries]
+    formats: [fasta, gpf-queries]
     min: 1
 
 defaultOutputDirectory: predictions
@@ -21,7 +21,7 @@ defaultOutputDirectory: predictions
 output:
   - key: gpfPeptides
     label: GPF peptides
-    format: fasta-proteins-peaks
+    format: fasta
     filename: gpf-peptides.fasta
     default: yes
   - key: gpfResults
