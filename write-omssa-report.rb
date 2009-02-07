@@ -134,7 +134,6 @@ class WriteOmssaReport < ProteomaticScript
 					end
 					lk_Out.puts '</table>'
 				elsif (lk_Result[:scoreThresholdType] == 'min' || lk_Result[:scoreThresholdType] == 'max')
-					puts lk_Result.to_yaml
 					lk_Out.puts "<p>The results presented in this report have been filtered with a fixed score threshold of #{sprintf('%1.2e', lk_Result[:scoreThresholds].values.first)}."
 					lk_Out.puts "</p>"
 				else
