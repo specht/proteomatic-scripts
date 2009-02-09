@@ -17,7 +17,7 @@ defaultOutputDirectory: omssaResults
 
 output:
   - key: croppedPsm
-    label: cropped results
+    label: filtered results
     format: csv
     filename: filtered-by-threshold.csv
     default: yes

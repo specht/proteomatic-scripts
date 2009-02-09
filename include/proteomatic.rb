@@ -90,7 +90,7 @@ class ProteomaticScriptDaemon
 					# load and apply arguments
 					lk_Arguments = YAML::load_file(File::join(@ms_TempPath, ls_NextTicket, 'arguments.yaml'))
 					lk_Arguments = lk_Arguments.select { |x| x[0, 14] != '----ignore----' }
-					lk_Arguments.push('-[output]directory')
+					lk_Arguments.push('-outputDirectory')
 					lk_Arguments.push(File::join(@ms_TempPath, ls_NextTicket, 'out'))
 					lb_Exception = false
 					$stdout = File.new(File::join(@ms_TempPath, ls_NextTicket, 'stdout.txt'), 'w')
@@ -116,7 +116,7 @@ class ProteomaticScriptDaemon
 						lk_Mapping = YAML::load_file(File::join(@ms_TempPath, ls_NextTicket, 'file-mapping.yaml'))
 						ls_Path = lk_Mapping[@mk_Script.fileDefiningOutputDirectory()]
 						lk_Files['directory'] = File::dirname(ls_Path) if (!lk_Files.has_key?('directory')) && ls_Path
-						lk_Files['prefix'] = @mk_Script.param('[output]prefix')
+						lk_Files['prefix'] = @mk_Script.param('outputPrefix')
 						File.open(File.join(@ms_TempPath, ls_NextTicket, 'output-files.yaml'), 'w') do |lk_File| 
 							lk_File.puts lk_Files.to_yaml
 						end
@@ -433,6 +433,8 @@ class ProteomaticScript
 		if @mk_Input
 			ls_Result << "!!!begin input\n"
 			@mk_Input['groupOrder'].each do |ls_Group|
+				ls_Result += "#{@mk_Input['groups'][ls_Group]['key']}\n"
+				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']}\n"
 				ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join(' | ')}"
 				ls_Range = ''
 				ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
@@ -457,6 +459,7 @@ class ProteomaticScript
 				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
 				ls_Result += "(#{ls_Format})"
 				ls_Result += "\n"
+				ls_Result += @mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('/') + "\n"
 			end
 			ls_Result << "!!!end input\n"
 			if @ms_DefaultOutputDirectoryGroup
@@ -699,7 +702,14 @@ class ProteomaticScript
 		end
 		
 		# add script parameters
-		@mk_ScriptProperties['parameters'].each { |lk_Parameter| @mk_Parameters.addParameter(lk_Parameter) }
+		@mk_ScriptProperties['parameters'].each do |lk_Parameter| 
+			if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
+				puts "Internal error: Parameter key must not start with 'input' or 'output'."
+				puts lk_Parameter.to_yaml
+				exit 1
+			end
+			@mk_Parameters.addParameter(lk_Parameter)
+		end
 		
 		# handle input files
 		lk_InputFormats = Hash.new
@@ -732,10 +742,10 @@ class ProteomaticScript
 
 		# handle output files
 		if @mk_ScriptProperties.has_key?('output')
-			lk_Directory = {'group' => 'Output files', 'key' => '[output]directory', 
+			lk_Directory = {'group' => 'Output files', 'key' => 'outputDirectory', 
 				'label' => 'Output directory', 'type' => 'string', 'default' => '', 'colspan' => 2}
 			@mk_Parameters.addParameter(lk_Directory)
-			lk_Prefix = {'group' => 'Output files', 'key' => '[output]prefix', 
+			lk_Prefix = {'group' => 'Output files', 'key' => 'outputPrefix', 
 				'label' => 'Output file prefix', 'type' => 'string', 'default' => '', 'colspan' => 2}
 			@mk_Parameters.addParameter(lk_Prefix)
 		end
@@ -753,7 +763,7 @@ class ProteomaticScript
 			if (@ms_ScriptType == 'processor')
 				ls_Key = lk_OutputFile['key']
 				ls_Key[0, 1] = ls_Key[0, 1].upcase
-				lk_WriteFlag = {'group' => 'Output files', 'key' => "[output]write#{ls_Key}",
+				lk_WriteFlag = {'group' => 'Output files', 'key' => "outputWrite#{ls_Key}",
 					'label' => "Write #{ls_Label}", 'type' => 'flag',
 					'filename' => lk_OutputFile['filename']}
 				if (lk_OutputFile.has_key?('force'))
@@ -812,8 +822,8 @@ class ProteomaticScript
 
 		lk_Files = lk_Arguments.select { |ls_Path| File::file?(ls_Path) }
 		lk_Arguments -= lk_Files
-		lk_Directories = [@param['[output]directory'.intern]]
-		lk_Directories = Array.new if !@param['[output]directory'.intern] || @param['[output]directory'.intern].empty?
+		lk_Directories = [@param['outputDirectory'.intern]]
+		lk_Directories = Array.new if !@param['outputDirectory'.intern] || @param['outputDirectory'.intern].empty?
 
 		lk_Errors = Array.new
 		
@@ -889,8 +899,8 @@ class ProteomaticScript
 				@mk_Output.each do |ls_Key, lk_OutputFile|
 					ls_FirstUpKey = ls_Key.dup
 					ls_FirstUpKey[0, 1] = ls_FirstUpKey[0, 1].upcase
-					if @param["[output]write#{ls_FirstUpKey}".intern]
-						ls_Path = File.join(ls_OutputDirectory, @param['[output]prefix'.intern] + lk_OutputFile['filename'])
+					if @param["outputWrite#{ls_FirstUpKey}".intern]
+						ls_Path = File.join(ls_OutputDirectory, @param['outputPrefix'.intern] + lk_OutputFile['filename'])
 						# ignore prefix if in daemon mode
 						ls_Path = File.join(ls_OutputDirectory, lk_OutputFile['filename']) if @mb_Daemon
 						@output[ls_Key.intern] = ls_Path
@@ -915,7 +925,7 @@ class ProteomaticScript
 						@param.keys.each do |ls_Param|
 							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', @param[ls_Param])
 						end
-						ls_OutPath = File::join(ls_Directory, @param['[output]prefix'.intern] + ls_OutFilename)
+						ls_OutPath = File::join(ls_Directory, @param['outputPrefix'.intern] + ls_OutFilename)
 						if (File::exists?(ls_OutPath))
 							lk_ExistingFiles.push(ls_Path)
 							puts "Notice: #{ls_OutPath} already exists - #{ls_Path} will be skipped."
