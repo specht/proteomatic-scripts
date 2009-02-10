@@ -431,10 +431,11 @@ class ProteomaticScript
 		ls_Result << "---getParameters\n"
 		ls_Result << @mk_Parameters.parametersString()
 		if @mk_Input
-			ls_Result << "!!!begin input\n"
 			@mk_Input['groupOrder'].each do |ls_Group|
-				ls_Result += "#{@mk_Input['groups'][ls_Group]['key']}\n"
-				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']}\n"
+				ls_Result << "!!!begin input\n"
+				ls_Result += "key\n#{@mk_Input['groups'][ls_Group]['key']}\n"
+				ls_Result += "label\n#{@mk_Input['groups'][ls_Group]['label']}\n"
+				ls_Result += "description\n";
 				ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join(' | ')}"
 				ls_Range = ''
 				ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
@@ -459,9 +460,11 @@ class ProteomaticScript
 				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
 				ls_Result += "(#{ls_Format})"
 				ls_Result += "\n"
-				ls_Result += @mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('/') + "\n"
+				ls_Result += "extensions\n" + @mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('/') + "\n"
+				ls_Result += "min\n#{@mk_Input['groups'][ls_Group]['min']}\n" if @mk_Input['groups'][ls_Group]['min']
+				ls_Result += "max\n#{@mk_Input['groups'][ls_Group]['max']}\n" if @mk_Input['groups'][ls_Group]['max']
+				ls_Result << "!!!end input\n"
 			end
-			ls_Result << "!!!end input\n"
 			if @ms_DefaultOutputDirectoryGroup
 				ls_Result << "!!!begin defaultOutputDirectory\n"
 				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['label']}\n"
