@@ -824,6 +824,14 @@ class ProteomaticScript
 		@mk_Parameters.keys().each { |ls_Key| @param[ls_Key.intern] = @mk_Parameters.value(ls_Key) }
 
 		lk_Files = lk_Arguments.select { |ls_Path| File::file?(ls_Path) }
+		
+		# if --proposePrefix was specified, all arguments following --proposePrefix
+		# are taken as filenames, regardless of whether they actually exist
+		if (lk_Arguments.include?('--proposePrefix'))
+			li_Index = lk_Arguments.index('--proposePrefix')
+			lk_Files += lk_Arguments[li_Index + 1, lk_Arguments.size - li_Index - 1] if (li_Index < lk_Arguments.size - 1)
+		end
+
 		lk_Arguments -= lk_Files
 		lk_Directories = [@param['outputDirectory'.intern]]
 		lk_Directories = Array.new if !@param['outputDirectory'.intern] || @param['outputDirectory'.intern].empty?
