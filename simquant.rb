@@ -186,6 +186,7 @@ class SimQuant < ProteomaticScript
 		# chuck out quantitation events that have no corresponding MS2 identification event
 		if @param[:useMaxIdentificationQuantitationTimeDifference]
 			lk_Results['results'].each do |ls_Spot, lk_SpotResults|
+				# TODO: crashes here if lk_SpotResults is nil
 				lk_SpotResults.keys.each do |ls_Peptide|
 					lk_Results['results'][ls_Spot][ls_Peptide].reject! do |lk_Hit|
 						lb_RejectThis = true
