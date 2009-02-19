@@ -1,0 +1,25 @@
+group: OMSSA
+
+title: Export to AMS
+
+description: >
+  Export a PSM list to the AMS file format.
+
+type: converter
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: omssaResults
+    label: AMS file
+    format: ams
+    filename: '#{basename}.ams'
+    default: yes
+
+parameters:
