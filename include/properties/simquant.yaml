@@ -23,7 +23,7 @@ input:
     formats: [csv]
     max: 1
   - key: peptideFiles
-    label: peptides
+    label: peptide
     formats: [txt]
   - key: modelFiles
     label: gene model

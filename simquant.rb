@@ -70,6 +70,11 @@ class SimQuant < ProteomaticScript
 			end
 			
 			lk_Peptides += lk_PeptideHash.keys
+		else
+			if (@param[:useMaxIdentificationQuantitationTimeDifference])
+				puts 'You need to specify at least one PSM list file if you require a MS2 event close to every quantitation event.'
+				exit
+			end
 		end
 		
 		# get peptides from parameters
@@ -120,7 +125,7 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		#ls_TempPath = '/flipbook/spectra/quantitation/temp-simquant20090128-12319-1su1oke-0'
+		#ls_TempPath = '/home/michael/mnt/h/Micha/mia SIM scans/temp-simquant20090219-10680-1cgb19y-0'
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
@@ -186,13 +191,15 @@ class SimQuant < ProteomaticScript
 		# chuck out quantitation events that have no corresponding MS2 identification event
 		if @param[:useMaxIdentificationQuantitationTimeDifference]
 			lk_Results['results'].each do |ls_Spot, lk_SpotResults|
-				# TODO: crashes here if lk_SpotResults is nil
+				next unless lk_SpotResults
 				lk_SpotResults.keys.each do |ls_Peptide|
 					lk_Results['results'][ls_Spot][ls_Peptide].reject! do |lk_Hit|
 						lb_RejectThis = true
 						if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
 							lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
-								lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit['retentionTime']).abs <= @param[:maxIdentificationQuantitationTimeDifference])
+								# ls_Spot comes from SimQuant
+								ls_Ms2Spot = ls_Scan.split('.').first
+								lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit['retentionTime']).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
 								li_ChuckedOutBecauseOfTimeDifference if lb_RejectThis
 								lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
 							end
@@ -214,13 +221,17 @@ class SimQuant < ProteomaticScript
 		
 		# chuck out empty entries
 		lk_Results['results'].each do |ls_Spot, lk_SpotResults|
+			unless lk_SpotResults
+				lk_Results['results'].delete(ls_Spot)
+				next
+			end
 			lk_SpotResults.keys.each do |ls_Peptide|
 				lk_Results['results'][ls_Spot].delete(ls_Peptide) if lk_SpotResults[ls_Peptide].empty?
 			end
-			lk_Results['results'].delete(ls_Spot) if lk_Results['results'][ls_Spot].empty?
+			lk_Results['results'].delete(ls_Spot) if (!lk_Results['results'][ls_Spot]) || lk_Results['results'][ls_Spot].empty?
 		end
 		
-		
+
 		if ((!lk_Results.include?('results')) || (lk_Results['results'].class != Hash) || (lk_Results['results'].size == 0))
 			puts 'No peptides could be quantified.'
 		else
@@ -555,7 +566,10 @@ class SimQuant < ProteomaticScript
 					lk_Out.puts '</p>'
 					
 					lk_QuantifiedPeptides = Array.new
-					lk_Results['results'].each { |ls_Spot, lk_SpotResults| lk_QuantifiedPeptides += lk_SpotResults.keys }
+					lk_Results['results'].each do |ls_Spot, lk_SpotResults| 
+						next unless lk_SpotResults
+						lk_QuantifiedPeptides += lk_SpotResults.keys
+					end
 					lk_UnmatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
 						(!lk_PeptideInProtein[ls_Peptide]) || lk_PeptideInProtein[ls_Peptide].empty?
 					end
@@ -590,6 +604,7 @@ class SimQuant < ProteomaticScript
 					lk_PeptideMergedResults = Hash.new
 					lk_Results['results'].keys.each do |ls_Spot|
 						lk_PeptideMergedResults[ls_Spot] = Hash.new
+						next unless lk_Results['results'][ls_Spot]
 						lk_Results['results'][ls_Spot].keys.each do |ls_Peptide|
 							lk_PeptideMergedResults[ls_Spot][ls_Peptide] = Hash.new
 							# determine merged ratio/snr
@@ -815,6 +830,7 @@ class SimQuant < ProteomaticScript
 						lk_Out.puts "<td colspan='5'><b>#{ls_Spot}</b></td>"
 						lk_Out.puts "</tr>"
 						
+						next unless lk_Results['results'][ls_Spot]
 						lk_Results['results'][ls_Spot].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Peptide|
 							lk_Out.puts "<tr><td style='border: none' colspan='5'></td></tr>"
 							lk_Out.puts "<tr style='background-color: #eee;' id='#{ls_Spot}-#{ls_Peptide}'><td id='peptide-#{ls_Peptide}'><b>#{ls_Peptide}</b></td>"

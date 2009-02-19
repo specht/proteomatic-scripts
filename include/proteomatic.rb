@@ -385,7 +385,7 @@ class ProteomaticScript
 	def help()
 		ls_Result = ''
 		ls_Result += "#{underline(@ms_Title + ' (a Proteomatic script)', '=')}\n"
-		ls_Result += indent(wordwrap("Description: #{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
+		ls_Result += indent(wordwrap("#{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
 		if @mk_Input
 			ls_Result += "#{underline('Input files', '-')}\n"
 			@mk_Input['groupOrder'].each do |ls_Group|
@@ -705,15 +705,17 @@ class ProteomaticScript
 		end
 		
 		# add script parameters
-		@mk_ScriptProperties['parameters'].each do |lk_Parameter| 
-			if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
-				puts "Internal error: Parameter key must not start with 'input' or 'output'."
-				puts lk_Parameter.to_yaml
-				exit 1
+		if @mk_ScriptProperties['parameters']
+			@mk_ScriptProperties['parameters'].each do |lk_Parameter| 
+				if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
+					puts "Internal error: Parameter key must not start with 'input' or 'output'."
+					puts lk_Parameter.to_yaml
+					exit 1
+				end
+				@mk_Parameters.addParameter(lk_Parameter)
 			end
-			@mk_Parameters.addParameter(lk_Parameter)
 		end
-		
+			
 		# handle input files
 		lk_InputFormats = Hash.new
 		lk_InputGroups = Hash.new
@@ -920,6 +922,8 @@ class ProteomaticScript
 			elsif (@ms_ScriptType == 'converter')
 				@mk_Output.keys.each do |ls_OutputGroup|
 					lk_ExistingFiles = Array.new
+					puts ls_OutputGroup
+					puts @input.to_yaml
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
 						ls_Basename = File::basename(ls_Path).dup
