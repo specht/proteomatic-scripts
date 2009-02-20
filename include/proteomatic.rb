@@ -393,7 +393,6 @@ class ProteomaticScript
 				ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
 				ls_Range += 'max' if @mk_Input['groups'][ls_Group]['max']
 				ls_Result += '- '
-				ls_FileLabel = ''
 				if (ls_Range == 'min')
 					ls_Result += "at least #{@mk_Input['groups'][ls_Group]['min']} "
 					ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['min'] != 1 ? 's' : ''} "
@@ -408,6 +407,8 @@ class ProteomaticScript
 						ls_Result += "at least #{@mk_Input['groups'][ls_Group]['min']}, but no more than #{@mk_Input['groups'][ls_Group]['max']} "
 						ls_FileLabel = 'files '
 					end
+				else
+					ls_FileLabel = 'files '
 				end
 				ls_Result += 'optional: ' if (ls_Range == '')
 				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
@@ -429,6 +430,14 @@ class ProteomaticScript
 	def getParameters()
 		ls_Result = ''
 		ls_Result << "---getParameters\n"
+		ls_Result << "!!!begin info\n"
+		ls_Result << "type\n#{@ms_ScriptType}\n"
+		if (@ms_ScriptType == 'converter')
+			ls_Result << "converterKey\n#{@mk_Output.values.first['key']}\n"
+			ls_Result << "converterLabel\n#{@mk_Output.values.first['label']}\n"
+			ls_Result << "converterFilename\n#{@mk_Output.values.first['filename']}\n"
+		end
+		ls_Result << "!!!end info\n"
 		ls_Result << @mk_Parameters.parametersString()
 		if @mk_Input
 			@mk_Input['groupOrder'].each do |ls_Group|
@@ -455,6 +464,8 @@ class ProteomaticScript
 						ls_Result += "at least #{@mk_Input['groups'][ls_Group]['min']}, but no more than #{@mk_Input['groups'][ls_Group]['max']} "
 						ls_FileLabel = 'files '
 					end
+				else
+					ls_FileLabel = 'files '
 				end
 				ls_Result += 'optional: ' if (ls_Range == '')
 				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
@@ -757,6 +768,10 @@ class ProteomaticScript
 
 		lk_OutputFiles = Hash.new
 		@mk_ScriptProperties['output'].each do |lk_OutputFile|
+			if (@m_ScriptType == 'converter' && (!lk_OutFiles.empty?))
+				puts 'Internal error: Only one output file group allowed for converter scripts.'
+				exit 1
+			end
 			unless lk_OutputFile.has_key?('key')
 				puts "Internal error: Output file has no key."
 				exit 1

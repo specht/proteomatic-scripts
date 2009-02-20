@@ -1,9 +1,9 @@
 group: OMSSA
 
-title: Export to AMS
+title: Convert PSM lists to AMS
 
 description: >
-  Export a PSM list to the AMS file format.
+  Convert a PSM list to the AMS file format for use with 2DB.
 
 type: converter
 
@@ -23,6 +23,3 @@ output:
     label: AMS file
     format: ams
     filename: '#{basename}.ams'
-    default: yes
-
-parameters:
