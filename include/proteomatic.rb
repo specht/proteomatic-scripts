@@ -922,8 +922,6 @@ class ProteomaticScript
 			elsif (@ms_ScriptType == 'converter')
 				@mk_Output.keys.each do |ls_OutputGroup|
 					lk_ExistingFiles = Array.new
-					puts ls_OutputGroup
-					puts @input.to_yaml
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
 						ls_Basename = File::basename(ls_Path).dup

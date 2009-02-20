@@ -12,6 +12,9 @@ input:
     label: OMSSA results
     formats: [csv]
     min: 1
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
 
 defaultOutputDirectory: omssaResults
 
