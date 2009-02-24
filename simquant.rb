@@ -322,6 +322,11 @@ class SimQuant < ProteomaticScript
 					end
 				end
 			end
+			if @output[:yamlReport]
+				File.open(@output[:yamlReport], 'w') do |lk_Out|
+						lk_Out.puts lk_Results.to_yaml
+				end
+			end
 			if @output[:xhtmlReport]
 				File.open(@output[:xhtmlReport], 'w') do |lk_Out|
 					lk_Out.puts "<?xml version='1.0' encoding='utf-8' ?>"

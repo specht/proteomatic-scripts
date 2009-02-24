@@ -38,6 +38,11 @@ output:
     format: xhtml
     filename: quantitation-results.xhtml
     default: yes
+  - key: yamlReport
+    label: YAML report
+    format: yaml
+    filename: quantitation-results.yaml
+    default: yes
   - key: proteinCsv
     label: CSV protein quantitation results
     format: csv
