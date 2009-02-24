@@ -265,11 +265,19 @@ class Parameters
 	end
 	
 	def applyParameters(ak_Parameters)
-		@mk_Parameters.each do |ls_Key, lk_Parameter|
-			if (ak_Parameters.include?("-" + ls_Key))
-				li_Index = ak_Parameters.index("-" + ls_Key)
-				lk_Slice = ak_Parameters.slice!(li_Index, 2)
-				set(ls_Key, lk_Slice[1])
+		while (!ak_Parameters.empty?)
+			ls_Key = ak_Parameters.first.dup
+			if (ls_Key[0, 1] == '-')
+				ls_Key.slice!(0)
+				if (@mk_Parameters.include?(ls_Key))
+					ak_Parameters.slice!(0)
+					ls_Value = ak_Parameters.slice!(0)
+					set(ls_Key, ls_Value)
+				else
+					break
+				end
+			else
+				break
 			end
 		end
 	end

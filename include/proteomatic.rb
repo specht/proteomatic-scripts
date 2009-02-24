@@ -386,6 +386,11 @@ class ProteomaticScript
 		ls_Result = ''
 		ls_Result += "#{underline(@ms_Title + ' (a Proteomatic script)', '=')}\n"
 		ls_Result += indent(wordwrap("#{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
+		ls_Result += "Usage:\n    ruby #{$0} [options] [input files]\n\n"
+		ls_Result += indent(wordwrap("Options:\n--help           print this help\n" +
+			"--proposePrefix  propose a prefix depending on the input files specified\n"), 4, false)
+		ls_Result += "\n"
+		ls_Result += @mk_Parameters.helpString()
 		if @mk_Input
 			ls_Result += "#{underline('Input files', '-')}\n"
 			@mk_Input['groupOrder'].each do |ls_Group|
@@ -418,7 +423,6 @@ class ProteomaticScript
 				ls_Result += "\n"
 			end
 		end
-		ls_Result += @mk_Parameters.helpString()
 		if @mk_Input && @ms_DefaultOutputDirectoryGroup
 			ls_Result += "#{underline('Output directory', '-')}\n"
 			ls_Result += wordwrap("Unless an output directory is specified, the output files will be written to the directory of the first #{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['label']} file.")
@@ -833,6 +837,12 @@ class ProteomaticScript
 
 	def applyArguments(ak_Arguments)
 		lk_Arguments = ak_Arguments.dup
+		
+		lb_ProposePrefix = false
+		if (lk_Arguments.include?('--proposePrefix'))
+			lk_Arguments.delete('--proposePrefix')
+			lb_ProposePrefix = true
+		end
 
 		# digest parameters
 		@mk_Parameters.keys().each { |ls_Key| @mk_Parameters.reset(ls_Key) }
@@ -840,16 +850,18 @@ class ProteomaticScript
 		@param = Hash.new
 		@mk_Parameters.keys().each { |ls_Key| @param[ls_Key.intern] = @mk_Parameters.value(ls_Key) }
 
-		lk_Files = lk_Arguments.select { |ls_Path| File::file?(ls_Path) }
-		
-		# if --proposePrefix was specified, all arguments following --proposePrefix
-		# are taken as filenames, regardless of whether they actually exist
-		if (lk_Arguments.include?('--proposePrefix'))
-			li_Index = lk_Arguments.index('--proposePrefix')
-			lk_Files += lk_Arguments[li_Index + 1, lk_Arguments.size - li_Index - 1] if (li_Index < lk_Arguments.size - 1)
+		lk_Files = lk_Arguments.dup
+		# check whether all files are there if not in propose prefix mode
+		unless lb_ProposePrefix
+			lk_Files.each do |ls_Path|
+				unless File::file?(ls_Path)
+					puts "Error: Unable to open file #{ls_Path}."
+					exit 1
+				end
+			end
 		end
-
-		lk_Arguments -= lk_Files
+		
+		lk_Arguments.clear
 		lk_Directories = [@param['outputDirectory'.intern]]
 		lk_Directories = Array.new if !@param['outputDirectory'.intern] || @param['outputDirectory'.intern].empty?
 
@@ -900,7 +912,7 @@ class ProteomaticScript
 			ls_OutputDirectory = File::dirname(@ms_FileDefiningOutputDirectory) if @ms_FileDefiningOutputDirectory
 		end
 		
-		if (lk_Arguments.include?('--proposePrefix'))
+		if lb_ProposePrefix
 			lk_Prefix = Array.new
 			@mk_ScriptProperties['proposePrefix'].each do |ls_Group|
 				lk_PrefixFiles = @input[ls_Group.intern]
