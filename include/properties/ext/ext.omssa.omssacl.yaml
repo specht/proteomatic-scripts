@@ -62,7 +62,7 @@ parameters:
     step: 0.01
     
   # Preprocessing
-    
+    	
   - key: lowIntensityCutoff 
     group: Preprocessing
     commandLine: -cl
@@ -74,7 +74,7 @@ parameters:
     max: 1.0
     step: 0.01
     decimals: 2
-# the following two options have been disabled according to Mr. Geer    
+# the following two options have been disabled according to Lewis Geer    
 #  - key: highIntensityCutoff
 #    group: Preprocessing
 #    commandLine: -ch

@@ -71,11 +71,9 @@ class YamlReport < ProteomaticScript
 		end
 
 		lk_Info = Hash.new
-		lk_Info[:peptides] = lk_PeptideHash.keys
-		lk_Info[:proteins] = lk_Proteins.size
-		lk_Info[:modelPeptidesOnly] = (lk_ModelPeptides - lk_GpfPeptides).size
-		lk_Info[:modelAndGpfPeptides] = (lk_ModelPeptides & lk_GpfPeptides).size
-		lk_Info[:gpfPeptidesOnly] = (lk_GpfPeptides - lk_ModelPeptides).size
+		lk_Info[:peptides] = Hash.new
+		lk_Info[:peptides][:models] = lk_ModelPeptides.to_a.sort
+		lk_Info[:peptides][:gpf] = lk_GpfPeptides.to_a.sort
 		
 		lk_Info[:safeProteins] = lk_Proteins.keys.select do |ls_Protein|
 			li_DistinctPeptideCount = lk_Proteins[ls_Protein].size
@@ -98,11 +96,13 @@ class YamlReport < ProteomaticScript
 			(lk_Proteins[ls_Protein].size >= 2)
 		end.size
 		
+=begin		
 		lk_GpfInfo = YAML::load_file('/home/michael/mia/all-gpf-again-hits-classified.yaml')
 		lk_Info[:gpfInfo] = Hash.new
 		lk_Info[:gpfInfo][:all] = dumpGpfInfo(lk_GpfInfo, lk_GpfPeptides.to_a)
 		lk_Info[:gpfInfo][:gpfOnly] =  dumpGpfInfo(lk_GpfInfo, (lk_GpfPeptides - lk_ModelPeptides).to_a)
 		lk_Info[:gpfInfo][:modelsAndGpf] = dumpGpfInfo(lk_GpfInfo, (lk_ModelPeptides & lk_GpfPeptides).to_a)
+=end		
 		if @output[:yamlReport]
 			File.open(@output[:yamlReport], 'w') do |lk_Out|
 				lk_Out.puts lk_Info.to_yaml

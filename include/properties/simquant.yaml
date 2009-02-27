@@ -113,6 +113,10 @@ parameters:
     default: 1.0
     min: 0.0
     description: The maximum retention time difference between a MS2 identification and a SimQuant quantitation event for any peptide.
+  - key: printStatistics
+    label: Print quantiation failure statistics
+    type: flag
+    default: no
   - key: showPeptideInProtein
     label: Show peptide location within protein
     group: SimQuant Report
