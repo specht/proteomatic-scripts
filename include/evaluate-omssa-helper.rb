@@ -49,8 +49,19 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 		
 		# skip header
 		lk_HeaderMap = mapCsvHeader(lk_File.readline)
+		li_LineNumber = 1
 		
 		lk_File.each do |ls_Line|
+			li_LineNumber += 1
+			lk_Line = Array.new
+			begin
+				lk_Line = ls_Line.parse_csv()
+			rescue StandardError => e
+				puts "Something is wrong with line #{li_LineNumber}:"
+				puts ls_Line
+				puts e
+				exit 1
+			end
 			li_EntryCount += 1
 			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
 			lk_Line = ls_Line.parse_csv()
