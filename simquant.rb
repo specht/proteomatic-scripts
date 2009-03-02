@@ -182,11 +182,13 @@ class SimQuant < ProteomaticScript
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
+		li_QuantiationEventCount = 0
 		
 		# replace all floats with BigDecimals
 		if (lk_Results['results'])
 			lk_Results['results'].each do |ls_Band, lk_Band|
 				lk_Band.each do |ls_Peptide, lk_Matches|
+				li_QuantiationEventCount += lk_Matches.size
 					(0...lk_Matches.size).each do |li_MatchIndex|
 						lk_Value = lk_Matches[li_MatchIndex]['snr']
 						if (lk_Value.class == String)
@@ -207,7 +209,7 @@ class SimQuant < ProteomaticScript
 		
 		# chuck out quantitation events that have no corresponding MS2 identification event
 		if @param[:useMaxIdentificationQuantitationTimeDifference]
-			
+			puts "Quantiation events before RT filtering: #{li_QuantiationEventCount}."
 			lk_Results['results'].each do |ls_Spot, lk_SpotResults|
 				next unless lk_SpotResults
 				lk_SpotResults.keys.each do |ls_Peptide|
@@ -234,7 +236,9 @@ class SimQuant < ProteomaticScript
 		if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
 			puts 'Attention: Some quantitation events have been removed.'
 			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification}" if li_ChuckedOutBecauseOfNoMs2Identification > 0
-			puts "...because the time difference between MS2 identification and quantitation: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
+			puts "...because the SimQuant/MS2 RT difference was too high: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
+		else
+			puts "No quantitation events have been removed." if @param[:useMaxIdentificationQuantitationTimeDifference]
 		end
 		
 		# chuck out empty entries
