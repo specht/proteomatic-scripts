@@ -60,9 +60,9 @@ class RunPeaks < ProteomaticScript
 		
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} \"Trypsin with Phosphorylation\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
-        ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
-        print 'Running PEAKS...'
+		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} #{ls_ParamFile} \"Trypsin with Phosphorylation\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
+		ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
+		print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
 		Dir::chdir(ls_TempPath)
 		runCommand(ls_Command)
