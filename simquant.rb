@@ -218,7 +218,7 @@ class SimQuant < ProteomaticScript
 								# ls_Spot comes from SimQuant
 								ls_Ms2Spot = ls_Scan.split('.').first
 								lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit['retentionTime']).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
-								li_ChuckedOutBecauseOfTimeDifference if lb_RejectThis
+								li_ChuckedOutBecauseOfTimeDifference += 1 if lb_RejectThis
 								lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
 							end
 						else
