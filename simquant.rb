@@ -214,6 +214,7 @@ class SimQuant < ProteomaticScript
 				next unless lk_SpotResults
 				lk_SpotResults.keys.each do |ls_Peptide|
 					lk_Results['results'][ls_Spot][ls_Peptide].reject! do |lk_Hit|
+						puts ls_Spot if ls_Peptide == 'WLQYSEVIHAR'
 						puts lk_Hit.to_yaml if ls_Peptide == 'WLQYSEVIHAR'
 						lb_RejectThis = true
 						lb_RejectedDueToTimeDifference = false
