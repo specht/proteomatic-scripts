@@ -207,6 +207,7 @@ class SimQuant < ProteomaticScript
 		
 		# chuck out quantitation events that have no corresponding MS2 identification event
 		if @param[:useMaxIdentificationQuantitationTimeDifference]
+			
 			lk_Results['results'].each do |ls_Spot, lk_SpotResults|
 				next unless lk_SpotResults
 				lk_SpotResults.keys.each do |ls_Peptide|
@@ -232,8 +233,8 @@ class SimQuant < ProteomaticScript
 
 		if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
 			puts 'Attention: Some quantitation events have been removed.'
-			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification} (#{lk_UnidentifiedPeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfNoMs2Identification > 0
-			puts "...because the time difference between MS2 identification and quantitation: #{li_ChuckedOutBecauseOfTimeDifference} (#{lk_TooHighTimeDifferencePeptides.to_a.sort.join(', ')})" if li_ChuckedOutBecauseOfTimeDifference > 0
+			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification}" if li_ChuckedOutBecauseOfNoMs2Identification > 0
+			puts "...because the time difference between MS2 identification and quantitation: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
 		end
 		
 		# chuck out empty entries
