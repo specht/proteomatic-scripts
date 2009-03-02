@@ -215,13 +215,13 @@ class SimQuant < ProteomaticScript
 				lk_SpotResults.keys.each do |ls_Peptide|
 					lk_Results['results'][ls_Spot][ls_Peptide].reject! do |lk_Hit|
 						puts ls_Spot if ls_Peptide == 'WLQYSEVIHAR'
-						puts lk_Hit.to_yaml if ls_Peptide == 'WLQYSEVIHAR'
+						#puts lk_Hit.to_yaml if ls_Peptide == 'WLQYSEVIHAR'
 						lb_RejectThis = true
 						lb_RejectedDueToTimeDifference = false
 						if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
 							lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
-								puts lk_PeptideHash[ls_Peptide][:scans].to_yaml if ls_Peptide == 'WLQYSEVIHAR'
-								puts lk_ScanHash[ls_Scan].to_yaml if ls_Peptide == 'WLQYSEVIHAR'
+								#puts lk_PeptideHash[ls_Peptide][:scans].to_yaml if ls_Peptide == 'WLQYSEVIHAR'
+								#puts lk_ScanHash[ls_Scan].to_yaml if ls_Peptide == 'WLQYSEVIHAR'
 								# ls_Spot comes from SimQuant
 								ls_Ms2Spot = ls_Scan.split('.').first
 								lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit['retentionTime']).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
