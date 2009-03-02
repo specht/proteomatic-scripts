@@ -21,17 +21,10 @@ require 'include/proteomatic'
 require 'yaml'
 require 'fileutils'
 
+
 class RunPeaks < ProteomaticScript
 	def run()
-		ls_PeaksConfig = ''
-		ls_PeaksConfig += "<combine_result_files>1</combine_result_files>\n"
-		ls_PeaksConfig += "<delete_temp>1</delete_temp>\n"
-		ls_PeaksConfig += "<max_charge>2</max_charge>\n"
-		ls_PeaksConfig += "<enzyme>Trypsin without PTMs</enzyme>\n"
-		ls_PeaksConfig += "<frag_tol>1</frag_tol>\n"
-		ls_PeaksConfig += "<instrument>-i</instrument>\n"
-		ls_PeaksConfig += "<output_num>10</output_num>\n"
-		ls_PeaksConfig += "<par_tol>1.5</par_tol>\n"
+		ls_PeaksConfig = DATA.read
 		
 		ls_TempPath = tempFilename('peaks')
 		ls_TempInPath = File::join(ls_TempPath, 'in')
@@ -67,7 +60,7 @@ class RunPeaks < ProteomaticScript
 		
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} \"Trypsin without PTMs\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 1"
+		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} \"Trypsin with Phosphorylation\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
         ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
         print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
@@ -83,3 +76,27 @@ class RunPeaks < ProteomaticScript
 end
 
 lk_Object = RunPeaks.new
+
+__END__
+<?xml version="1.0" encoding="UTF-8"?>
+<PEAKS_Properties>
+<combine_result_files>1</combine_result_files>
+<delete_temp>1</delete_temp>
+<max_charge>2</max_charge>
+<enzyme>Trypsin with Phosphorylation</enzyme>
+<frag_tol>1</frag_tol>
+<instrument>-i</instrument>
+<output_num>10</output_num>
+<par_tol>1.5</par_tol>
+<user_residue_list version="1.0">
+<res_ptm_set name="Trypsin with Phosphorylation">
+<enzyme>Trypsin</enzyme>
+<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>RK</res_c_term>
+<varied_modi>
+<modi>Phosphorylation</modi>
+</varied_modi>
+</res_ptm_set>
+</user_residue_list>
+</PEAKS_Properties>

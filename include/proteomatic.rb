@@ -44,7 +44,7 @@ class ProteomaticScriptDaemon
 
 		# set up paths
 		@ms_ScriptPath = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-		@ms_TempPath = File.join(@ms_ScriptPath, 'jobs', File.basename($0).sub!('.rb', ''))
+		@ms_TempPath = File.join(@ms_ScriptPath, 'jobs', File.basename($0).sub('.rb', ''))
 		FileUtils.mkpath(@ms_TempPath)
 		
 		# find pending jobs
@@ -92,6 +92,7 @@ class ProteomaticScriptDaemon
 					lk_Arguments = lk_Arguments.select { |x| x[0, 14] != '----ignore----' }
 					lk_Arguments.push('-outputDirectory')
 					lk_Arguments.push(File::join(@ms_TempPath, ls_NextTicket, 'out'))
+					puts lk_Arguments.to_yaml
 					lb_Exception = false
 					$stdout = File.new(File::join(@ms_TempPath, ls_NextTicket, 'stdout.txt'), 'w')
 					$stderr = File.new(File::join(@ms_TempPath, ls_NextTicket, 'stderr.txt'), 'w')
@@ -388,7 +389,8 @@ class ProteomaticScript
 		ls_Result += indent(wordwrap("#{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
 		ls_Result += "Usage:\n    ruby #{$0} [options] [input files]\n\n"
 		ls_Result += indent(wordwrap("Options:\n--help           print this help\n" +
-			"--proposePrefix  propose a prefix depending on the input files specified\n"), 4, false)
+			"--proposePrefix  propose a prefix depending on the input files specified\n" +
+			"--daemon [uri]   run this script as a daemon"), 4, false)
 		ls_Result += "\n"
 		ls_Result += @mk_Parameters.helpString()
 		if @mk_Input
@@ -761,14 +763,14 @@ class ProteomaticScript
 		@mk_Input.freeze
 
 		# handle output files
-		if @mk_ScriptProperties.has_key?('output')
+		#if @mk_ScriptProperties.has_key?('output')
 			lk_Directory = {'group' => 'Output files', 'key' => 'outputDirectory', 
 				'label' => 'Output directory', 'type' => 'string', 'default' => '', 'colspan' => 2}
 			@mk_Parameters.addParameter(lk_Directory)
 			lk_Prefix = {'group' => 'Output files', 'key' => 'outputPrefix', 
 				'label' => 'Output file prefix', 'type' => 'string', 'default' => '', 'colspan' => 2}
 			@mk_Parameters.addParameter(lk_Prefix)
-		end
+		#end
 
 		lk_OutputFiles = Hash.new
 		@mk_ScriptProperties['output'].each do |lk_OutputFile|

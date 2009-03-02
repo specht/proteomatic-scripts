@@ -1,19 +1,19 @@
-group: OMSSA
+group: OMSSA/Miscellaneous
 
 title: Analyze PSM
 
 description: >
-  Analyze peptide-spectral matches. This script is probably temporary and comes from the n-termini thing.
+  Analyze peptide-spectral matches.
 
 type: processor
 
 defaultOutputDirectory: omssaResults
 
 output:
-  - key: analyzedPsm
-    label: analyzed PSM
-    format: csv
-    filename: psm-analyzed.csv
+  - key: psmAnalysis
+    label: PSM analysis
+    format: xhtml
+    filename: psm-analysis.xhtml
     default: yes
 
 input:
@@ -21,6 +21,3 @@ input:
     label: OMSSA results
     formats: [csv]
     min: 1
-  - key: geneModel
-    label: gene model
-    formats: [fasta]

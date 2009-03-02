@@ -169,3 +169,29 @@ def mapCsvHeader(as_Header)
 	end
 	return lk_HeaderMap
 end
+
+
+def printStyleSheet(ak_Target = $STDOUT)
+	ak_Target.puts '<style type=\'text/css\'>'
+	ak_Target.puts 'body {font-family: Verdana; font-size: 10pt;}'
+	ak_Target.puts 'h1 {font-size: 14pt;}'
+	ak_Target.puts 'h2 {font-size: 12pt; border-top: 1px solid #888; border-bottom: 1px solid #888; padding-top: 0.2em; padding-bottom: 0.2em; background-color: #e8e8e8; }'
+	ak_Target.puts 'h3 {font-size: 10pt; }'
+	ak_Target.puts 'h4 {font-size: 10pt; font-weight: normal;}'
+	ak_Target.puts 'ul {padding-left: 0;}'
+	ak_Target.puts 'ol {padding-left: 0;}'
+	ak_Target.puts 'li {margin-left: 2em;}'
+	ak_Target.puts '.default { }'
+	ak_Target.puts '.nonDefault { background-color: #ada;}'
+	ak_Target.puts 'table {border-collapse: collapse;} '
+	ak_Target.puts 'table tr {text-align: left; font-size: 10pt;}'
+	ak_Target.puts 'table th, table td {vertical-align: top; border: 1px solid #888; padding: 0.2em;}'
+	ak_Target.puts 'table tr.sub th, table tr.sub td {vertical-align: top; border: 1px dashed #888; padding: 0.2em;}'
+	ak_Target.puts 'table th {font-weight: bold;}'
+	ak_Target.puts '.gpf-confirm { background-color: #aed16f; }'
+	ak_Target.puts '.toggle { padding: 0.2em; border: 1px solid #888; background-color: #f0f0f0; }'
+	ak_Target.puts '.toggle:hover { cursor: pointer; border: 1px solid #000; background-color: #ddd; }'
+	ak_Target.puts '.clickableCell { text-align: center; }'
+	ak_Target.puts '.clickableCell:hover { cursor: pointer; }'
+	ak_Target.puts '</style>'
+end
