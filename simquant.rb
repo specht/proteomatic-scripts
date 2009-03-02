@@ -125,7 +125,7 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		#ls_TempPath = '/home/michael/mnt/h/Micha/mia SIM scans/temp-simquant20090219-10680-1cgb19y-0'
+		#ls_TempPath = "/home/michael/mnt/x/AK Hippler/Ingrid/CAS9/1. Batch/WTWCAN_Mix_130109/Quant full scan/1 % FPR, 10 ppm, no MS2/temp-simquant.3720.0"
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
@@ -182,6 +182,23 @@ class SimQuant < ProteomaticScript
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
+		
+		# replace all floats with BigDecimals
+		if (lk_Results['results'])
+			lk_Results['results'].each do |ls_Band, lk_Band|
+				lk_Band.each do |ls_Peptide, lk_Matches|
+					(0...lk_Matches.size).each do |li_MatchIndex|
+						lk_Value = lk_Matches[li_MatchIndex]['snr']
+						if (lk_Value.class == String)
+							lk_Value = BigDecimal.new(lk_Value)
+						elsif (lk_Value.class == Float)
+							lk_Value = BigDecimal.new(lk_Value.to_s)
+						end
+						lk_Results['results'][ls_Band][ls_Peptide][li_MatchIndex]['snr'] = lk_Value
+					end
+				end
+			end
+		end
 		
 		li_ChuckedOutBecauseOfTimeDifference = 0
 		li_ChuckedOutBecauseOfNoMs2Identification = 0
