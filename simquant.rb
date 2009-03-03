@@ -187,6 +187,7 @@ class SimQuant < ProteomaticScript
 		# replace all floats with BigDecimals
 		if (lk_Results['results'])
 			lk_Results['results'].each do |ls_Band, lk_Band|
+				next unless lk_Band
 				lk_Band.each do |ls_Peptide, lk_Matches|
 				li_QuantiationEventCount += lk_Matches.size
 					(0...lk_Matches.size).each do |li_MatchIndex|

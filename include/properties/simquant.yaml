@@ -7,7 +7,7 @@ description: >
    If possible, peptides are extracted from the PSM result list specified.
    Additional peptides can be specified via input text files or the peptides
    parameter. Gene models for these non-PSM peptides can be added as input
-   files to enable protein quantiation.
+   files to enable protein quantitation.
    <br />
    <span style='background-color: #eaa;'><b>Warning:</b> SimQuant is still in development. Use at your own risk.</span>
 
@@ -103,7 +103,7 @@ parameters:
     step: 0.1
     description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
   - key: useMaxIdentificationQuantitationTimeDifference
-    label: Require a MS2 event close to every quantiation event
+    label: Require a MS2 event close to every quantitation event
     type: flag
     default: yes
   - key: maxIdentificationQuantitationTimeDifference
@@ -114,7 +114,7 @@ parameters:
     min: 0.0
     description: The maximum retention time difference between a MS2 identification and a SimQuant quantitation event for any peptide.
   - key: printStatistics
-    label: Print quantiation failure statistics
+    label: Print quantitation failure statistics
     type: flag
     default: no
   - key: showPeptideInProtein
