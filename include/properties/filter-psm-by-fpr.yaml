@@ -37,3 +37,8 @@ parameters:
     type: enum
     choices: [global, 'per band']
     default: global
+  - key: beStrict
+    label: Be strict about target FPR
+    type: flag
+    default: yes
+    description: Be strict about the target FPR.

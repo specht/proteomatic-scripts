@@ -68,7 +68,7 @@ class AnalyzePsm < ProteomaticScript
 							ls_ScanId = lk_Line[lk_Header['filenameid']].split('.').slice(0, 2).join('.')
 							lf_Mass = lk_Line[lk_Header['mass']].to_f
 							lf_TheoMass = lk_Line[lk_Header['theomass']].to_f
-							lf_Ppm = ((lf_Mass - lf_TheoMass).abs / lf_Mass) * 1000000.0
+							lf_Ppm = ((lf_Mass - lf_TheoMass).abs / lf_TheoMass) * 1000000.0
 							lk_Psm = {
 								:peptide => lk_Line[lk_Header['peptide']].upcase, 
 								:score => BigDecimal.new(lk_Line[lk_Header['evalue']]),

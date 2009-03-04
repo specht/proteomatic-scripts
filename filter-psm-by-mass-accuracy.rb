@@ -61,7 +61,7 @@ class CropPsmByMassAccuracy < ProteomaticScript
 							lf_TheoMass = lk_Line[lk_HeaderMap['theomass']].to_f
 							# is the ppm mass error too bad? skip it!
 							# calculate mass error in ppm
-							lf_ThisPpm = ((lf_Mass - lf_TheoMass).abs / lf_Mass) * 1000000.0
+							lf_ThisPpm = ((lf_Mass - lf_TheoMass).abs / lf_TheoMass) * 1000000.0
 							# skip this PSM if ppm is not good
 							next if lf_ThisPpm > lf_MaxPpm
 							li_SelectCount += 1

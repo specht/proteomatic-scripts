@@ -47,7 +47,7 @@ output:
     label: CSV protein quantitation results
     format: csv
     filename: quantified-proteins.csv
-    default: no
+    default: yes
 
 parameters:
   - key: peptides
@@ -116,7 +116,7 @@ parameters:
   - key: printStatistics
     label: Print quantitation failure statistics
     type: flag
-    default: no
+    default: yes
   - key: showPeptideInProtein
     label: Show peptide location within protein
     group: SimQuant Report
