@@ -26,6 +26,17 @@ class RunPeaks < ProteomaticScript
 	def run()
 		ls_PeaksConfig = DATA.read
 		
+		ls_VariableMods = ''
+		if @param[:variableModifications] && !@param[:variableModifications].empty?
+			ls_VariableMods = "<varied_modi>\n"
+			ls_VariableMods += @param[:variableModifications].split(',').collect { |x| "<modi>#{x}</modi>\n" }.join('')
+			ls_VariableMods += "</varied_modi>\n"
+		end
+		
+		ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
+		
+		puts ls_PeaksConfig
+		
 		ls_TempPath = tempFilename('peaks')
 		ls_TempInPath = File::join(ls_TempPath, 'in')
 		ls_TempOutPath = File::join(ls_TempPath, 'out')
@@ -60,7 +71,7 @@ class RunPeaks < ProteomaticScript
 		
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} #{ls_ParamFile} \"Trypsin with Phosphorylation\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
+		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} #{ls_ParamFile} \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
 		ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
 		print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
@@ -89,14 +100,12 @@ __END__
 <output_num>10</output_num>
 <par_tol>1.5</par_tol>
 <user_residue_list version="1.0">
-<res_ptm_set name="Trypsin with Phosphorylation">
+<res_ptm_set name="Proteomatic resptm">
 <enzyme>Trypsin</enzyme>
 <res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
 <res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
 <res_c_term>RK</res_c_term>
-<varied_modi>
-<modi>Phosphorylation</modi>
-</varied_modi>
+#{VARIABLE_MODS}
 </res_ptm_set>
 </user_residue_list>
 </PEAKS_Properties>

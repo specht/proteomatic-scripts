@@ -56,7 +56,7 @@ class MassCalc < ProteomaticScript
 			lk_PeptideHash[ls_Peptide] = Hash.new
 			(1..3).each do |li_Charge|
 				ld_Mz = (ld_Mass + ld_Hydrogen * li_Charge) / li_Charge
-				lk_PeptideHash[ls_Peptide][li_Charge.to_s] = sprintf('%1.4f', ld_Mz)
+				lk_PeptideHash[ls_Peptide][li_Charge.to_s] = sprintf('%1.5f', ld_Mz)
 			end
 			lk_FragmentMasses = Array.new
 			ld_Mass = ld_Water
@@ -64,7 +64,7 @@ class MassCalc < ProteomaticScript
 				ls_AminoAcid = ls_Peptide[-1 - i, 1]
 				ld_Mass += lk_Masses[ls_AminoAcid]
 				ld_Mz = ld_Mass + ld_Hydrogen
-				lk_FragmentMasses.push(sprintf("%1.4f", ld_Mz))
+				lk_FragmentMasses.push(sprintf("%1.5f", ld_Mz))
 			end
 			lk_PeptideHash[ls_Peptide]['yions'] = lk_FragmentMasses.join(', ')
 		end

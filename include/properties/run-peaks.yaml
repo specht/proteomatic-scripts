@@ -25,7 +25,7 @@ output:
     label: PEAKS annotation
     format: xml-peaks-ann
     filename: peaks-results.ann
-    default: no
+    default: yes
 
 parameters:
   - key: precursorIonTolerance
@@ -40,7 +40,64 @@ parameters:
     default: 1.0
     suffix: Da
     min: 0.0
-
+  - key: variableModifications
+    label: Variable modifications
+    type: csvString
+    default: ''
+    choices:
+      - 4-hydroxynonenal (HNE)
+      - Acetylation
+      - Acrylamide adduct
+      - Amidation
+      - Applied Biosystems cleavable ICAT(TM) heavy
+      - Applied Biosystems cleavable ICAT(TM) light
+      - Applied Biosystems iTRAQ(TM) multiplexed quantitation chemistry
+      - Applied Biosystems original ICAT(TM) d0
+      - Applied Biosystems original ICAT(TM) d8
+      - Beta-methylthiolation
+      # disabled because of evil comma! - Biotinyl-iodoacetamidyl-3,6-dioxaoctanediamine
+      - Biotinylation
+      - C-Mannosylation
+      - Carbamidomethylation
+      - Carbamylation
+      - Citrullination
+      - Deamidation
+      - Dimethylation
+      - Farnesylation
+      - Flavin adenine dinucleotide
+      - Formylation
+      - Gamma-carboxyglutamic acid
+      - Geranyl-geranyl
+      - Glucosylation Glycation
+      - Guanidination
+      - Homoserine
+      - Homoserine lactone
+      - Hydroxylation
+      - Iodoacetic acid derivative
+      - Lipoyl
+      - Methyl ester
+      - Methylation
+      - Myristoylation
+      - N-acyl diglyceride cysteine -- tripalmitate
+      - N-isopropylcarboxamidomethyl
+      - N-Succinimidyl-3-morpholine acetate
+      - O-GlcNAc
+      - O18 label
+      - Oxidation
+      - Palmitoylation
+      - Phosphopantetheine
+      - Phosphorylation
+      - Pyridoxal phosphate
+      - Pyro-glu from E
+      - Pyro-glu from Q
+      - Pyrrolidone carboxylic acid
+      - S-carbamoylmethylcysteine cyclization(N-terminus)
+      - S-pyridylethylation
+      - Sodium adduct
+      - Sulfation
+      - Sulphone
+      - Trimethylation
+	
 needs:
   - config
   - ext.simquant

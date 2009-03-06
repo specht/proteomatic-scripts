@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'yaml'
 require 'include/misc'
 require 'include/externaltools'
+require 'set'
+require 'yaml'
 
 
 class Parameters
@@ -178,6 +179,20 @@ class Parameters
 				puts "Internal error: Invalid value for parameter #{as_Key}: #{ak_Value}."
 				exit 1
 			end
+		when 'csvString'
+			lk_Values = Set.new(ak_Value.split(','))
+			@mk_Parameters[as_Key]['choices'].each do |lk_Choice|
+				if (lk_Choice.class == Hash)
+					lk_Values -= lk_Choice.keys.first
+				else
+					lk_Values -= lk_Choice
+				end
+			end
+			unless lk_Values.empty?
+				puts "Error: Invalid value#{lk_Values.size == 1 ? '' : 's'} #{lk_Values.to_a.join(', ')}."
+				exit(1)
+			end
+			@mk_Parameters[as_Key]['value'] = ak_Value
 		else
 			@mk_Parameters[as_Key]['value'] = ak_Value
 		end
