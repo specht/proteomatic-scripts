@@ -21,6 +21,11 @@ output:
     format: csv
     filename: filtered-by-fpr.csv
     default: yes
+  - key: scoreThresholds
+    label: score thresholds
+    format: yaml
+    filename: score-thresholds.yaml
+    default: no
 
 parameters:
   - key: targetFpr

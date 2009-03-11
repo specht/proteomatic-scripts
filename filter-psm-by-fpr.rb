@@ -47,6 +47,8 @@ class FilterPsmByFpr < ProteomaticScript
 		lk_Result = Hash.new
 		lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')
 		
+		puts 'Warning: No PSM remaining.' if (lk_Result[:scoreThresholds].empty?)
+		
 		ls_Header = ''
 		File.open(@input[:omssaResults].first, 'r') { |lk_File| ls_Header = lk_File.readline.strip }
 
@@ -65,6 +67,7 @@ class FilterPsmByFpr < ProteomaticScript
 								lk_ScanParts = ls_Scan.split('.')
 								ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
 							end
+							next unless lk_Result[:actualFpr][ls_Spot]
 							lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 							ls_DefLine = lk_Line[lk_HeaderMap['defline']]
 							# is it a decoy match? skip it!
@@ -80,6 +83,19 @@ class FilterPsmByFpr < ProteomaticScript
 						end
 					end
 				end
+			end
+		end
+		if @output[:scoreThresholds]
+			File.open(@output[:scoreThresholds], 'w') do |lk_Out|
+				lk_Hash = Hash.new
+				lb_DestroyResults = false
+				lk_Hash['actualFpr'] = lk_Result[:actualFpr]
+				lk_Hash['targetFpr'] = @param[:targetFpr] / 100.0
+				lk_Hash['scoreThresholds'] = Hash.new
+				lk_Result[:scoreThresholds].each do |ls_Spot, lk_Threshold|
+					lk_Hash['scoreThresholds'][ls_Spot] = lk_Threshold.to_f
+				end
+				lk_Out.puts lk_Hash.to_yaml
 			end
 		end
 	end

@@ -57,6 +57,8 @@ class AugustusCollect < ProteomaticScript
 		lk_AllModelPeptides = Set.new
 		lk_AllPeptideOccurences = Hash.new
 		@input[:psmFiles].each do |ls_Path|
+			#next unless ls_Path.index("Kurs")
+			puts ls_Path
 			# merge OMSSA results
 			lk_Result = loadPsm(ls_Path)
 			
@@ -90,7 +92,27 @@ class AugustusCollect < ProteomaticScript
 		lk_Info[:peptides][:gpf] = lk_AllGpfPeptides.to_a.sort
 		lk_Info[:peptideOccurences] = lk_AllPeptideOccurences
 		
-		puts lk_Info.to_yaml
+		#puts lk_Info.to_yaml
+		lk_AllPeptides = Set.new(lk_Info[:peptides][:models]) | Set.new(lk_Info[:peptides][:models])
+		puts "got #{lk_AllPeptides.size} peptides."
+		
+		gpfPeptides = Set.new
+
+		File.open('/home/michael/ak-hippler-alignments/gpf-results.yaml') do |file|
+			file.each_line do |line|
+				next unless line.index('"') == 0
+				line.strip!
+				line.gsub!('peptide=', '')
+				line.gsub!('"', '')
+				line.gsub!(':', '')
+				gpfPeptides.add(line)
+			end
+		end
+		
+		puts "got #{(lk_AllPeptides - gpfPeptides).size} new peptides."
+		puts "#{(lk_AllPeptides - gpfPeptides).collect { |x| '>' + x + "\n" + x + "\n" }.join('')}"
+
+		
 
 =begin		
 		lk_PeptideSet = Set.new

@@ -1,15 +1,15 @@
 title: GPF
 
-version: 2.1.1
+version: 2.1.2
 
 link: http://gpf.origo.ethz.ch/
 
 download:
-  linux: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.1-linux.tar.bz2
-  win32: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.1-win32.zip
-  macx: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.1-macx.tar.bz2
+  linux: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.2-linux.tar.bz2
+  win32: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.2-win32.zip
+  macx: ftp://gpf.uni-muenster.de/download/gpf/gpf-2.1.2-macx.tar.bz2
 
 path:
-  linux: gpf-2.1.1-linux
-  win32: gpf-2.1.1-win32
-  macx: gpf-2.1.1-macx
+  linux: gpf-2.1.2-linux
+  win32: gpf-2.1.2-win32
+  macx: gpf-2.1.2-macx
