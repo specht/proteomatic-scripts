@@ -25,7 +25,7 @@ defaultOutputDirectory: spectra
     
 output:
   - key: resultFile
-    label: OMSSA result file
+    label: OMSSA results
     format: csv
     filename: omssa-results.csv
     default: yes

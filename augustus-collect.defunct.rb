@@ -111,8 +111,10 @@ class AugustusCollect < ProteomaticScript
 		
 		puts "got #{(lk_AllPeptides - gpfPeptides).size} new peptides."
 		puts "#{(lk_AllPeptides - gpfPeptides).collect { |x| '>' + x + "\n" + x + "\n" }.join('')}"
-
 		
+# 		lk_GpfOnlyPeptides = lk_AllGpfPeptides - lk_AllModelPeptides
+# 		puts "got #{lk_GpfOnlyPeptides.size} GPF only peptides."
+# 		lk_GpfOnlyPeptides.to_a.sort.each { |x| puts ">gpf__#{x}\n#{x}" }
 
 =begin		
 		lk_PeptideSet = Set.new

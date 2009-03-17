@@ -790,7 +790,7 @@ class ProteomaticScript
 				ls_Key = lk_OutputFile['key']
 				ls_Key[0, 1] = ls_Key[0, 1].upcase
 				lk_WriteFlag = {'group' => 'Output files', 'key' => "outputWrite#{ls_Key}",
-					'label' => "Write #{ls_Label}", 'type' => 'flag',
+					'label' => ls_Label, 'type' => 'flag',
 					'filename' => lk_OutputFile['filename']}
 				if (lk_OutputFile.has_key?('force'))
 					lk_WriteFlag['force'] = lk_OutputFile['force'] == true ? 'yes' : 'no'
