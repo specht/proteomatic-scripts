@@ -326,7 +326,7 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		@ms_FileTrackerUri = "http://localhost:5555"
+		@ms_FileTrackerUri = "http://peaks.uni-muenster.de:5555"
 		#@ms_FileTrackerUri = nil
 		if (File::exists?('config/filetracker.config.yaml'))
 			@ms_FileTrackerUri = YAML::load_file('config/filetracker.config.yaml')['fileTrackerUri']
@@ -1050,7 +1050,7 @@ class ProteomaticScript
 			@input[ls_Key].each do |ls_Path|
 				next unless File::exists?(ls_Path)
 				lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
-				lk_FileInfo[:input_file] = true
+				lk_FileInfo['input_file'] = true
 				lk_Files.push(lk_FileInfo)
 			end
 		end
@@ -1058,7 +1058,7 @@ class ProteomaticScript
 			ls_Path = @output[ls_Key].sub('.proteomatic.part', '')
 			next unless File::exists?(ls_Path)
 			lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
-			lk_FileInfo[:input_file] = false
+			lk_FileInfo['input_file'] = false
 			lk_Files.push(lk_FileInfo)
 		end
 			
