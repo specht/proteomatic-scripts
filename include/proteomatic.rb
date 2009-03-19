@@ -1039,7 +1039,7 @@ class ProteomaticScript
 			lk_Digest = Digest::MD5.new()
 			File.open(as_Path, 'r') do |lk_File|
 				while !lk_File.eof?
-					ls_Chunk = lk_File.read(1024 * 1024) # read 1M
+					ls_Chunk = lk_File.read(8 * 1024 * 1024) # read 8M
 					lk_Digest << ls_Chunk
 				end
 			end
