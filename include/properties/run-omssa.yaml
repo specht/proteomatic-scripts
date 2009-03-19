@@ -74,3 +74,6 @@ needs:
   - ext.omssa
   - ext.blast
   - ext.simquant
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

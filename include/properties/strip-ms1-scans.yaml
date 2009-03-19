@@ -32,3 +32,7 @@ parameters:
 needs:
   - ext.7zip
   - ext.simquant
+
+filetracker:
+  - dontMd5InputFiles: [mzMlFiles]
+  - dontMd5OutputFiles: [mzMlFiles]

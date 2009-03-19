@@ -42,3 +42,7 @@ needs:
 
 externalParameters: 
   - pwiz.msconvert
+
+filetracker:
+  - dontMd5InputFiles: [rawFiles]
+  - dontMd5OutputFiles: [rawFiles]

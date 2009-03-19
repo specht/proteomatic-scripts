@@ -135,4 +135,6 @@ parameters:
     
 needs:
   - ext.simquant
-  
+
+filetracker:
+  - dontMd5InputFiles: [spectraFiles]

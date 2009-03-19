@@ -26,3 +26,7 @@ output:
 needs:
   - ext.gpf
   
+  
+filetracker:
+  - dontMd5InputFiles: [genome]
+  - dontMd5OutputFiles: [genome]

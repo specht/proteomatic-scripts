@@ -74,3 +74,6 @@ parameters:
 needs:
   - ext.gpf
   
+  
+filetracker:
+  - dontMd5InputFiles: [genome]

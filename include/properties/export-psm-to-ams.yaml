@@ -23,3 +23,6 @@ output:
     label: AMS file
     format: ams
     filename: '#{basename}.ams'
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

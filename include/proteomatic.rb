@@ -733,7 +733,17 @@ class ProteomaticScript
 				@mk_Parameters.addParameter(lk_Parameter)
 			end
 		end
-			
+		
+		# handle filetracker options
+		@mk_DontMd5InputFiles = Array.new
+		@mk_DontMd5OutputFiles = Array.new
+		if @mk_ScriptProperties['filetracker']
+			@mk_ScriptProperties['filetracker'].each do |lk_Parameter|
+				@mk_DontMd5InputFiles = lk_Parameter.values.first if lk_Parameter.keys.first == 'dontMd5InputFiles'
+				@mk_DontMd5OutputFiles = lk_Parameter.values.first if lk_Parameter.keys.first == 'dontMd5OutputFiles'
+			end
+		end
+		
 		# handle input files
 		lk_InputFormats = Hash.new
 		lk_InputGroups = Hash.new
@@ -1020,10 +1030,21 @@ class ProteomaticScript
 	
 	def getFileInfo(as_Path, ab_Md5)
 		lk_Info = Hash.new
-		lk_Info[:basename] = File::basename(as_Path)
-		lk_Info[:directory] = File::dirname(as_Path)
-		lk_Info[:size] = File::size(as_Path)
-		lk_Info[:md5] = Digest::MD5.hexdigest(File::read(as_Path))
+		lk_Info['basename'] = File::basename(as_Path)
+		lk_Info['directory'] = File::dirname(as_Path)
+		lk_Info['size'] = File::size(as_Path)
+		lk_Info['ctime'] = File::ctime(as_Path)
+		lk_Info['mtime'] = File::mtime(as_Path)
+		if ab_Md5
+			lk_Digest = Digest::MD5.new()
+			File.open(as_Path, 'r') do |lk_File|
+				while !lk_File.eof?
+					ls_Chunk = lk_File.read(1024 * 1024) # read 1M
+					lk_Digest << ls_Chunk
+				end
+			end
+			lk_Info['md5'] = lk_Digest.hexdigest
+		end
 		
 		return lk_Info
 	end
@@ -1049,7 +1070,7 @@ class ProteomaticScript
 		@input.each_key do |ls_Key|
 			@input[ls_Key].each do |ls_Path|
 				next unless File::exists?(ls_Path)
-				lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+				lk_FileInfo = getFileInfo(ls_Path, !(@mk_DontMd5InputFiles.include?(ls_Key.to_s)))
 				lk_FileInfo['input_file'] = true
 				lk_Files.push(lk_FileInfo)
 			end
@@ -1057,11 +1078,13 @@ class ProteomaticScript
 		@output.each_key do |ls_Key|
 			ls_Path = @output[ls_Key].sub('.proteomatic.part', '')
 			next unless File::exists?(ls_Path)
-			lk_FileInfo = getFileInfo(ls_Path, File::size(ls_Path) < 10 * 1024 * 1024)
+			lb_DoMd5 = !(@mk_DontMd5OutputFiles.include?(ls_Key.to_s))
+			lb_DoMd5 = @mk_DontMd5OutputFiles.empty? if @ms_ScriptType == 'converter'
+			lk_FileInfo = getFileInfo(ls_Path, lb_DoMd5)
 			lk_FileInfo['input_file'] = false
 			lk_Files.push(lk_FileInfo)
 		end
-			
+		
 		ls_RunInfo = {'run' => lk_Info, 'files' => lk_Files}.to_yaml
 		#File.open("filetracker.yaml", 'w') { |f| f.puts(ls_RunInfo) }
 		begin

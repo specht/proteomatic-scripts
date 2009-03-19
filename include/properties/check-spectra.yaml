@@ -17,3 +17,6 @@ defaultOutputDirectory: spectra
 
 needs:
   - ext.simquant
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

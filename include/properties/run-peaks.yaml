@@ -101,3 +101,6 @@ parameters:
 needs:
   - config
   - ext.simquant
+
+filetracker:
+  - dontMd5InputFiles: [spectra]
