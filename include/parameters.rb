@@ -120,7 +120,6 @@ class Parameters
             ls_Value += " #{lk_Parameter['suffix']}" if lk_Parameter.has_key?('suffix')
 		when 'string'
 			ls_Value = as_Value
-            ls_Value = '-' if ls_Value.empty?
 		when 'enum'
 			as_Value = as_Value.to_s unless as_Value.class == String
 			@mk_Parameters[as_Key]['choices'].each do |lk_Choice|

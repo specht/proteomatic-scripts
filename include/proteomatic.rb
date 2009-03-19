@@ -326,7 +326,8 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		@ms_FileTrackerUri = nil
+		@ms_FileTrackerUri = "http://localhost:5555"
+		#@ms_FileTrackerUri = nil
 		if (File::exists?('config/filetracker.config.yaml'))
 			@ms_FileTrackerUri = YAML::load_file('config/filetracker.config.yaml')['fileTrackerUri']
 		end
@@ -385,7 +386,7 @@ class ProteomaticScript
 	
 	def help()
 		ls_Result = ''
-		ls_Result += "#{underline(@ms_Title + ' (a Proteomatic script)', '=')}\n"
+		ls_Result += "#{underline("#{@ms_Title} (a Proteomatic script, version #{@ms_Version})", '=')}\n"
 		ls_Result += indent(wordwrap("#{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
 		ls_Result += "Usage:\n    ruby #{$0} [options] [input files]\n\n"
 		ls_Result += indent(wordwrap("Options:\n--help           print this help\n" +
@@ -1033,14 +1034,15 @@ class ProteomaticScript
 		print "Submitting run to file tracker at #{@ms_FileTrackerUri}..."
 		
 		lk_Info = Hash.new
-		lk_Info[:user] = @ms_UserName
-		lk_Info[:host] = @ms_HostName
-		lk_Info[:script_uri] = @ms_ScriptName + '.rb'
-		lk_Info[:script_title] = @ms_Title
-		lk_Info[:script_version] = @ms_Version
-		lk_Info[:start_time] = @mk_StartTime
-		lk_Info[:end_time] = @mk_EndTime
-		lk_Info[:parameters] = @mk_Parameters.humanReadableConfigurationHash()
+		lk_Info['version'] = @ms_Version
+		lk_Info['user'] = @ms_UserName
+		lk_Info['host'] = @ms_HostName
+		lk_Info['script_uri'] = @ms_ScriptName + '.rb'
+		lk_Info['script_title'] = @ms_Title
+		lk_Info['script_version'] = @ms_Version
+		lk_Info['start_time'] = @mk_StartTime
+		lk_Info['end_time'] = @mk_EndTime
+		lk_Info['parameters'] = @mk_Parameters.humanReadableConfigurationHash()
 		
 		lk_Files = Array.new
 		
@@ -1060,9 +1062,12 @@ class ProteomaticScript
 			lk_Files.push(lk_FileInfo)
 		end
 			
+		ls_RunInfo = {'run' => lk_Info, 'files' => lk_Files}.to_yaml
+		#File.open("filetracker.yaml", 'w') { |f| f.puts(ls_RunInfo) }
 		begin
-			lk_Response = Net::HTTP.post_form(URI.parse(@ms_FileTrackerUri + '/submit'),
-				{'run' => lk_Info.to_yaml, 'files' => lk_Files.to_yaml})
+			lk_Uri = URI.parse(@ms_FileTrackerUri + '/upload')
+			#lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => ls_RunInfo})
+			lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => ls_RunInfo})
 				
 			if (lk_Response.code[0, 3] == "200")
 				puts " done."
