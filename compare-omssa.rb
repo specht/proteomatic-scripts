@@ -33,9 +33,19 @@ class CompareOmssa < ProteomaticScript
 			lk_RunResults[ls_Key] = loadPsm(ls_Path)
 		end
 		
+		lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
+		
+		# collect proteins from all runs
+		lk_AllProteinsSet = Set.new
+		if (@param[:useSafeProteins])
+			lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:safeProteins].to_a) }
+		else
+			lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:proteins].keys) }
+		end
+		lk_Proteins = lk_AllProteinsSet.to_a.sort { |x, y| String::natcmp(x, y) }
+		
 		if @output[:htmlReport]
 			File.open(@output[:htmlReport], 'w') do |lk_Out|
-				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
 				
 				lk_Out.puts '<html>'
 				lk_Out.puts '<head>'
@@ -75,10 +85,6 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts '<table>'
 				lk_Out.puts "<tr><th rowspan='2'>Protein</th><th colspan='#{lk_RunKeys.size}'>Spectra count</th><th rowspan='2'>std. dev.</th><th colspan='#{lk_RunKeys.size}'>Distinct peptide count</th><th rowspan='2'>std. dev.</th></tr>"
 				lk_Out.puts "<tr>#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }</tr>"
-				# collect proteins from all runs
-				lk_AllProteinsSet = Set.new
-				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:proteins].keys) }
-				lk_Proteins = lk_AllProteinsSet.to_a.sort { |x, y| String::natcmp(x, y) }
 				lk_Proteins.each do |ls_Protein|
 					lk_Out.print "<tr><td>#{ls_Protein}</td>"
 					
@@ -116,15 +122,9 @@ class CompareOmssa < ProteomaticScript
 		
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
-				lk_RunKeys = lk_RunResults.keys.sort { |x, y| String::natcmp(x, y) }
 				ls_PlaceHolder = ';' * lk_RunKeys.size
 				lk_Out.puts "Protein;Spectra count#{ls_PlaceHolder}std. dev.;Distinct peptide count#{ls_PlaceHolder}std. dev."
 				lk_Out.puts ";#{lk_RunKeys.join(';') };;#{lk_RunKeys.join(';') };"
-				# collect proteins from all runs
-				lk_AllProteinsSet = Set.new
-				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:safeProteins].to_a) }
-				puts "all proteins: #{lk_AllProteinsSet.size}"
-				lk_Proteins = lk_AllProteinsSet.to_a.sort { |x, y| String::natcmp(x, y) }
 				lk_Proteins.each do |ls_Protein|
 					lk_Out.print "\"#{ls_Protein}\";"
 					
