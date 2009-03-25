@@ -51,6 +51,28 @@ class AugustusCollect < ProteomaticScript
 		return lk_Result
 	end
 	
+	def dumpSplitInfo(ak_Peptides, ak_Info)
+		lk_ImmediatePeptides = Set.new()
+		lk_IntronSplitPeptides = Set.new()
+		lk_TripletSplitPeptides = Set.new()
+		lk_EvenSplitPeptides = Set.new()
+		ak_Peptides.each do |ls_Peptide|
+			lk_ImmediatePeptides << ls_Peptide if ak_Info[ls_Peptide][:immediate]
+			lk_IntronSplitPeptides << ls_Peptide if ak_Info[ls_Peptide][:intronSplit]
+			lk_TripletSplitPeptides << ls_Peptide if ak_Info[ls_Peptide][:tripletSplit]
+			lk_EvenSplitPeptides << ls_Peptide if ak_Info[ls_Peptide][:evenSplit]
+		end
+		puts "(#{(lk_ImmediatePeptides + lk_IntronSplitPeptides).size} total)"
+		puts
+		puts "immediate only peptides: #{(lk_ImmediatePeptides - lk_IntronSplitPeptides).size} (#{sprintf('%1.1f', (lk_ImmediatePeptides - lk_IntronSplitPeptides).size.to_f * 100.0 / (lk_ImmediatePeptides + lk_IntronSplitPeptides).size)}%)."
+		puts "both peptides: #{(lk_ImmediatePeptides & lk_IntronSplitPeptides).size} (#{sprintf('%1.1f', (lk_ImmediatePeptides & lk_IntronSplitPeptides).size.to_f * 100.0 / (lk_ImmediatePeptides + lk_IntronSplitPeptides).size)}%)."
+		lk_TripletSplitOnlyPeptides = lk_TripletSplitPeptides - lk_EvenSplitPeptides - lk_ImmediatePeptides
+		puts "intron peptides (w/o triplet split only): #{(lk_IntronSplitPeptides - lk_ImmediatePeptides - lk_TripletSplitOnlyPeptides).size} (#{sprintf('%1.1f', (lk_IntronSplitPeptides - lk_ImmediatePeptides - lk_TripletSplitOnlyPeptides).size.to_f * 100.0 / (lk_ImmediatePeptides + lk_IntronSplitPeptides).size)}%)."
+		puts "triplet split only peptides: #{lk_TripletSplitOnlyPeptides.size} (#{sprintf('%1.1f', lk_TripletSplitOnlyPeptides.size.to_f * 100.0 / (lk_ImmediatePeptides + lk_IntronSplitPeptides).size)}%)."
+		puts 
+	end
+
+	
 	def run()
 		lk_AllPeptides = Set.new
 		lk_AllGpfPeptides = Set.new
@@ -58,7 +80,6 @@ class AugustusCollect < ProteomaticScript
 		lk_AllPeptideOccurences = Hash.new
 		@input[:psmFiles].each do |ls_Path|
 			#next unless ls_Path.index("Kurs")
-			puts ls_Path
 			# merge OMSSA results
 			lk_Result = loadPsm(ls_Path)
 			
@@ -86,16 +107,139 @@ class AugustusCollect < ProteomaticScript
 			lk_AllModelPeptides += lk_ModelPeptides
 			lk_AllPeptides += Set.new(lk_PeptideHash.keys)
 		end
-		lk_Info = Hash.new
-		lk_Info[:peptides] = Hash.new
-		lk_Info[:peptides][:models] = lk_AllModelPeptides.to_a.sort
-		lk_Info[:peptides][:gpf] = lk_AllGpfPeptides.to_a.sort
-		lk_Info[:peptideOccurences] = lk_AllPeptideOccurences
 		
-		#puts lk_Info.to_yaml
-		lk_AllPeptides = Set.new(lk_Info[:peptides][:models]) | Set.new(lk_Info[:peptides][:models])
+		print 'Loading GPF details...'
+		lk_GpfDetails = YAML::load_file('/home/michael/ak-hippler-alignments/gpf-results.yaml')
+		puts ''
+		
+		puts "GPF details: #{lk_GpfDetails.keys.size}"
+		lk_GpfDetails.reject! { |x, y| (!y) || y.empty?}
+		puts "GPF details (non empty): #{lk_GpfDetails.keys.size}"
+		
+		lk_PeptidesWithDetails = Set.new(lk_GpfDetails.keys.collect do |x|
+			x.sub('peptide=', '').sub('"', '')
+		end)
+		
+		lk_LostPeptides = lk_AllPeptides - lk_PeptidesWithDetails
+		
+		puts "lost & GPF only: #{(lk_LostPeptides & (lk_AllGpfPeptides - lk_AllModelPeptides)).size}"
+		puts "lost & both: #{(lk_LostPeptides & (lk_AllGpfPeptides & lk_AllModelPeptides)).size}"
+		puts "lost & models: #{(lk_LostPeptides & (lk_AllModelPeptides - lk_AllGpfPeptides)).size}"
+		
+		puts "Attention, from now on lost peptides are ignored!"
+		
+		lk_ModelPeptideDetails = YAML::load_file('/home/michael/ak-hippler-alignments/model-peptides-details.yaml')
+		lk_ModelPeptideDetails.reject! { |x, y| (!y) || y.empty? }
+		
+		lk_AllPeptides &= lk_PeptidesWithDetails
+		lk_AllGpfPeptides &= lk_PeptidesWithDetails
+		lk_AllModelPeptides &= lk_PeptidesWithDetails
+		
+# 		lk_AllPeptides &= Set.new(lk_ModelPeptideDetails.keys)
+# 		lk_AllGpfPeptides &= Set.new(lk_ModelPeptideDetails.keys)
+# 		lk_AllModelPeptides &= Set.new(lk_ModelPeptideDetails.keys)
+		
 		puts "got #{lk_AllPeptides.size} peptides."
+		puts "GPF only: #{(lk_AllGpfPeptides - lk_AllModelPeptides).size}."
+		puts "both: #{(lk_AllGpfPeptides & lk_AllModelPeptides).size}."
+		puts "models only: #{(lk_AllModelPeptides - lk_AllGpfPeptides).size}."
 		
+		lk_GpfSplitInfo = Hash.new
+		lk_AllPeptides.each do |ls_Peptide|
+			lb_Immediate = false
+			lb_IntronSplit = false
+			lb_TripletSplit = false
+			lb_EvenSplit = false
+			ls_Key = "peptide=#{ls_Peptide}"
+			lk_GpfDetails[ls_Key].each do |lk_Hit|
+				if (lk_Hit['partScores'].size == 1)
+					lb_Immediate = true
+				else
+					lb_IntronSplit = true
+					lb_TripletSplit = true if ((lk_Hit['details']['parts'][0]['length'] % 3) != 0)
+					lb_EvenSplit = true if ((lk_Hit['details']['parts'][0]['length'] % 3) == 0)
+				end 
+			end
+			lk_GpfSplitInfo[ls_Peptide] = Hash.new
+			lk_GpfSplitInfo[ls_Peptide][:immediate] = lb_Immediate
+			lk_GpfSplitInfo[ls_Peptide][:intronSplit] = lb_IntronSplit
+			lk_GpfSplitInfo[ls_Peptide][:tripletSplit] = lb_TripletSplit
+			lk_GpfSplitInfo[ls_Peptide][:evenSplit] = lb_EvenSplit
+		end
+		
+		puts
+		puts 'gpf only peptides:'
+		dumpSplitInfo(lk_AllGpfPeptides - lk_AllModelPeptides, lk_GpfSplitInfo);
+		
+		lk_ModelPeptideSplitDetails = Hash.new
+		
+		(lk_AllModelPeptides & lk_AllGpfPeptides).each do |ls_Peptide|
+			li_LeftSize = 5
+			li_RightSize = 5
+			li_CrossOut = -1
+			lb_Immediate = false
+			lb_IntronSplit = false
+			lb_TripletSplit = false
+			lb_EvenSplit = false
+			while !lb_Immediate && !lb_IntronSplit
+				lk_Surroundings = Set.new
+				lk_ModelPeptideDetails[ls_Peptide].each do |ls_Protein, lk_Hits|
+					lk_Hits.each do |lk_Hit|
+						x = [lk_Hit['left'], lk_Hit['right']]
+						x[0].gsub!('*', '$')
+						x[1].gsub!('*', '$')
+# 						x[0] = x[0].reverse[0, li_LeftSize].reverse
+# 						x[1] = x[1][0, li_RightSize]
+						x[0][li_CrossOut] = '!' if (0..4).include?(li_CrossOut) && x[0].size > li_CrossOut
+						x[1][li_CrossOut - 5] = '!' if (5..9).include?(li_CrossOut) && x[1].size > (li_CrossOut - 5)
+						lk_Surroundings.add(x)
+					end
+				end
+				lk_GpfDetails['peptide=' + ls_Peptide].each do |lk_Hit|
+					lk_GpfSurroundings = [lk_Hit['left'], lk_Hit['right']]
+					lk_GpfSurroundings[0].gsub!('*', '$')
+					lk_GpfSurroundings[1].gsub!('*', '$')
+					lk_Surroundings.each do |x|
+						z = lk_GpfSurroundings.dup
+						z[0][li_CrossOut] = '!' if (0..4).include?(li_CrossOut) && z[0].size > li_CrossOut
+						z[1][li_CrossOut - 5] = '!' if (5..9).include?(li_CrossOut) && z[1].size > (li_CrossOut - 5)
+						# cut down z
+						z[0] = z[0].reverse[0, x[0].size].reverse
+						z[1] = z[1][0, x[1].size]
+# 						z[0] = z[0].reverse[0, li_LeftSize].reverse
+# 						z[1] = z[1][0, li_RightSize]
+						if (z == x)
+							if (lk_Hit['partScores'].size == 1)
+								lb_Immediate = true
+							else
+								lb_IntronSplit = true
+								lb_EvenSplit = true if (lk_Hit['details']['parts'][0]['length'] % 3) == 0
+								lb_TripletSplit = true if (lk_Hit['details']['parts'][0]['length'] % 3) != 0
+							end
+						end
+					end
+				end
+# 				li_LeftSize -= 1
+# 				li_RightSize -= 1
+# 				break if (li_LeftSize == 0 || li_RightSize == 0)
+				li_CrossOut += 1
+				break if li_CrossOut > 9
+			end
+			lk_ModelPeptideSplitDetails[ls_Peptide] = Hash.new
+			lk_ModelPeptideSplitDetails[ls_Peptide][:immediate] = lb_Immediate
+			lk_ModelPeptideSplitDetails[ls_Peptide][:intronSplit] = lb_IntronSplit
+			lk_ModelPeptideSplitDetails[ls_Peptide][:evenSplit] = lb_EvenSplit
+			lk_ModelPeptideSplitDetails[ls_Peptide][:tripletSplit] = lb_TripletSplit
+#  			if !lb_Immediate && !lb_IntronSplit && !lb_EvenSplit && !lb_TripletSplit
+#  				puts lk_Surroundings.to_a.join(' / ')
+#  				puts lk_GpfDetails['peptide=' + ls_Peptide].to_yaml
+# 			end
+		end
+
+		puts 'model and GPF peptides with OMSSA:'
+		dumpSplitInfo(lk_AllModelPeptides & lk_AllGpfPeptides, lk_ModelPeptideSplitDetails);
+
+=begin		
 		gpfPeptides = Set.new
 
 		File.open('/home/michael/ak-hippler-alignments/gpf-results.yaml') do |file|
@@ -111,6 +255,7 @@ class AugustusCollect < ProteomaticScript
 		
 		puts "got #{(lk_AllPeptides - gpfPeptides).size} new peptides."
 		puts "#{(lk_AllPeptides - gpfPeptides).collect { |x| '>' + x + "\n" + x + "\n" }.join('')}"
+=end
 		
 # 		lk_GpfOnlyPeptides = lk_AllGpfPeptides - lk_AllModelPeptides
 # 		puts "got #{lk_GpfOnlyPeptides.size} GPF only peptides."

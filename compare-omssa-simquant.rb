@@ -63,8 +63,9 @@ class CompareOmssaSimQuant < ProteomaticScript
 		lk_QuantPeptideHash = Hash.new
 		lk_SimQuantResults.each do |ls_Key, lk_Results|
 			lk_Results.each do |ls_Spot, lk_SpotResults|
-				ls_SpotId = ls_Spot.sub('_new', '').split('_').last
+				ls_SpotId = ls_Spot.sub('_new', '').split('_')[-2]
 				lk_SpotResults.each do |ls_Peptide, lk_PeptideResults|
+					next unless lk_PeptideResults
 					lk_Proteins = lk_RunResults[ls_Key][:peptideHash][ls_Peptide][:proteins]
 					next if lk_Proteins.size > 1
 					ls_Protein = lk_Proteins.keys.first
@@ -192,7 +193,7 @@ class CompareOmssaSimQuant < ProteomaticScript
 						if lk_Spots && (!lk_Spots.empty?)
 							lk_Spots.reject! { |x| x == :total }
 							lk_Spots.collect! do |x|
-								x.sub('_new', '').split('_').last
+								x.sub('_new', '').split('_')[-2]
 							end
 							# we now have key and spots
 						end
@@ -263,7 +264,7 @@ class CompareOmssaSimQuant < ProteomaticScript
 						if lk_Spots && (!lk_Spots.empty?)
 							lk_Spots.reject! { |x| x == :total }
 							lk_Spots.collect! do |x|
-								x.sub('_new', '').split('_').last
+								x.sub('_new', '').split('_')[-2]
 							end
 							# we now have key and spots
 						end
@@ -316,7 +317,7 @@ class CompareOmssaSimQuant < ProteomaticScript
 						if lk_Spots && (!lk_Spots.empty?)
 							lk_Spots.reject! { |x| x == :total }
 							lk_Spots.collect! do |x|
-								x.sub('_new', '').split('_').last
+								x.sub('_new', '').split('_')[-2]
 							end
 							# we now have key and spots
 						end

@@ -413,6 +413,13 @@ def loadPsm(as_Path)
 		end
 	end
 	
+	# clean up scan hash, throw out all scans in which several peptides with
+	# the same score were found
+	# TODO: maybe we could prefer model peptides here, and keep equal gpf peptides?
+	lk_ScanHash.reject! do |x, y|
+		y[:peptides].size > 1
+	end
+	
 	lk_PeptideHash = Hash.new
 	#WLQYSEVIHAR:
 	#  :scans: [MT_HydACPAN_1_300407.100.100.2, ...]
