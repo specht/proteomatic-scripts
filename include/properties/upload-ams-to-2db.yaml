@@ -21,3 +21,8 @@ parameters:
     type: enum
     choices: [http://localhost/2db, 'sonstwo']
     default: http://localhost/2db
+  - key: Organism
+    label: Organism
+    type: enum
+    choices: [Chlamydomonas, 'something']
+    default: Chlamydomonas
