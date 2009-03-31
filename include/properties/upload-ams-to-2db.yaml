@@ -1,0 +1,24 @@
+group: Miscellaneous
+
+title: upload AMS to 2DB
+
+description: >
+  Upload AMS files to 2 Data base.
+
+type: processor
+
+parameters:
+  - key: User
+    type: string
+    label: User name
+    default: ''
+  - key: Password
+    type: string
+    label: Password
+    default: 'garnix'
+  - key: databasetarget
+    label: database
+    type: enum
+    choices: [http://localhost/2db, 'sonstwo']
+    default: http://localhost/2db
+	
