@@ -125,7 +125,7 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		#ls_TempPath = "/home/michael/mnt/x/AK Hippler/Ingrid/CAS9/1. Batch/WTWCAN_Mix_130109/Quant full scan/1 % FPR, 10 ppm, no MS2/temp-simquant.3720.0"
+		ls_TempPath = "/flipbook/spectra/quantitation/temp-simquant20090402-7517-1tuwu37-0"
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
@@ -179,7 +179,7 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
-		runCommand(ls_Command, true)
+		#runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
 		li_QuantiationEventCount = 0
@@ -267,13 +267,14 @@ class SimQuant < ProteomaticScript
 		
 		if @output[:proteinCsv]
 			File.open(@output[:proteinCsv], 'w') do |lk_Out|
-				lk_Out.puts "Band / Protein / Peptide;count;ratio mean;ratio sd;snr mean;snr sd"
+				lk_Out.puts "band;scan id;protein;peptide;unlabeled amount;labeled amount;ratio;snr;proline count"
 				
 				lk_QuantifiedPeptides = Array.new
 				lk_Results['results'].each { |ls_Spot, lk_SpotResults| lk_QuantifiedPeptides += lk_SpotResults.keys }
 				lk_MatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
 					lk_PeptideInProtein.include?(ls_Peptide) && lk_PeptideInProtein[ls_Peptide].size == 1
 				end
+				lk_AmbiguouslyMatchingPeptides = (Set.new(lk_QuantifiedPeptides) - Set.new(lk_MatchedPeptides)).to_a
 				
 				lk_PeptidesForProtein = Hash.new
 				lk_MatchedPeptides.each do |ls_Peptide|
@@ -287,76 +288,30 @@ class SimQuant < ProteomaticScript
 					end
 				end
 				
-				# determine merged results for each spot/peptide
-				lk_PeptideMergedResults = Hash.new
-				lk_Results['results'].keys.each do |ls_Spot|
-					lk_PeptideMergedResults[ls_Spot] = Hash.new
-					lk_Results['results'][ls_Spot].keys.each do |ls_Peptide|
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide] = Hash.new
-						# determine merged ratio/snr
-						lk_MergedRatio = Array.new
-						lk_MergedSnr = Array.new
-						lk_Results['results'][ls_Spot][ls_Peptide].each do |lk_Scan|
-							lk_MergedRatio.push(lk_Scan['ratio'])
-							lk_MergedSnr.push(lk_Scan['snr'])
-						end
-						ld_MergedRatioMean, ld_MergedRatioSd = meanAndStandardDeviation(lk_MergedRatio)
-						ld_MergedSnrMean, ld_MergedSnrSd = meanAndStandardDeviation(lk_MergedSnr)
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean] = ld_MergedRatioMean
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd] = ld_MergedRatioSd
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean] = ld_MergedSnrMean
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd] = ld_MergedSnrSd
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count] = lk_MergedRatio.size
-					end
-				end
+				lk_Results['results'].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
 				
-				# determine merged results for each spot/protein
-				lk_ProteinMergedResults = Hash.new
-				lk_Results['results'].keys.each do |ls_Spot|
-					lk_ProteinMergedResults[ls_Spot] = Hash.new
+					# handle unabbiguously matching peptides
 					lk_Proteins = lk_MatchedPeptides.select { |x| lk_Results['results'][ls_Spot].keys.include?(x) }.collect do |ls_Peptide|
 						lk_PeptideInProtein[ls_Peptide].keys.first
 					end
 					lk_Proteins.sort! { |a, b| String::natcmp(a, b) }
 					lk_Proteins.uniq!
-					
 					lk_Proteins.each do |ls_Protein|
-						lk_ProteinMergedResults[ls_Spot][ls_Protein] = Hash.new
-						# determine merged ratio/snr
-						lk_MergedRatio = Array.new
-						lk_MergedSnr = Array.new
 						lk_PeptidesForProtein[ls_Protein].each do |ls_Peptide|
 							next unless lk_Results['results'][ls_Spot].keys.include?(ls_Peptide)
-							lk_Results['results'][ls_Spot][ls_Peptide].each do |lk_Scan|
-								lk_MergedRatio.push(lk_Scan['ratio'])
-								lk_MergedSnr.push(lk_Scan['snr'])
+							lk_Results['results'][ls_Spot][ls_Peptide].each do |entry|
+								lk_Out.puts "#{ls_Spot};#{entry['id']};\"#{ls_Protein}\";#{ls_Peptide};#{entry['amountUnlabeled']};#{entry['amountLabeled']};#{entry['ratio']};#{entry['snr']};#{ls_Peptide.downcase.count('p')}"
 							end
 						end
-						ld_MergedRatioMean, ld_MergedRatioSd = meanAndStandardDeviation(lk_MergedRatio)
-						ld_MergedSnrMean, ld_MergedSnrSd = meanAndStandardDeviation(lk_MergedSnr)
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean] = ld_MergedRatioMean
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd] = ld_MergedRatioSd
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean] = ld_MergedSnrMean
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd] = ld_MergedSnrSd
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:count] = lk_MergedRatio.size
 					end
-				end
-				
-				unless lk_MatchedPeptides.empty?
-					lk_Results['results'].keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
-						lk_Out.puts "#{ls_Spot}"
-						lk_Proteins = lk_MatchedPeptides.select { |x| lk_Results['results'][ls_Spot].keys.include?(x) }.collect do |ls_Peptide|
-							lk_PeptideInProtein[ls_Peptide].keys.first
-						end
-						lk_Proteins.sort! { |a, b| String::natcmp(a, b) }
-						lk_Proteins.uniq!
-						
-						lk_Proteins.each do |ls_Protein|
-							lk_Out.puts "\"#{ls_Protein}\";#{lk_ProteinMergedResults[ls_Spot][ls_Protein][:count]};#{niceRatio(lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean])};#{lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd]};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrMean])};#{cutMax(lk_ProteinMergedResults[ls_Spot][ls_Protein][:snrSd])}"
-							lk_PeptidesForProtein[ls_Protein].each do |ls_Peptide|
-								next unless lk_Results['results'][ls_Spot].keys.include?(ls_Peptide)
-								lk_Out.puts "#{ls_Peptide};#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count]};#{niceRatio(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean])};#{lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd]};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrMean])};#{cutMax(lk_PeptideMergedResults[ls_Spot][ls_Peptide][:snrSd])}"
-							end
+					
+					# handle ambiguously matching peptides
+					lk_Peptides = lk_AmbiguouslyMatchingPeptides.select { |x| lk_Results['results'][ls_Spot].keys.include?(x) }
+					lk_Peptides.each do |ls_Peptide|
+						lk_Results['results'][ls_Spot][ls_Peptide].each do |entry|
+							ls_ProteinDescription = '(not matching to any protein)'
+							ls_ProteinDescription = "(matching to #{lk_PeptideInProtein[ls_Peptide].size} proteins)" if lk_PeptideInProtein[ls_Peptide].size > 1
+							lk_Out.puts "#{ls_Spot};#{entry['id']};#{ls_ProteinDescription};#{ls_Peptide};#{entry['amountUnlabeled']};#{entry['amountLabeled']};#{entry['ratio']};#{entry['snr']};#{ls_Peptide.downcase.count('p')}"
 						end
 					end
 				end
@@ -364,7 +319,7 @@ class SimQuant < ProteomaticScript
 		end
 		if @output[:yamlReport]
 			File.open(@output[:yamlReport], 'w') do |lk_Out|
-					lk_Out.puts lk_Results.to_yaml
+				lk_Out.puts lk_Results.to_yaml
 			end
 		end
 		if @output[:xhtmlReport]
