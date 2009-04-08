@@ -31,10 +31,38 @@ class SimQuant < ProteomaticScript
 	end
 	
 	def niceRatio(af_Value)
+		return af_Value if af_Value.class == String
+		return '-inf' if af_Value.class == Float && af_Value == 0.0
 		return sprintf('%s%1.2f', (af_Value < 1.0) ? '-' : '+', (af_Value < 1.0) ? (1.0 / af_Value) : af_Value)
 	end
 	
 	def meanAndStandardDeviation(ak_Values)
+		lb_AllNumbers = true
+		lb_AllEqual = true
+		lk_FirstValue = ak_Values.first
+		ak_Values.each { |x| lb_AllNumbers = false if x.class != Float }
+		ak_Values.each { |x| lb_AllEqual = false if x != lk_FirstValue }
+		unless lb_AllNumbers
+			if (lb_AllEqual)
+				return lk_FirstValue, ''
+			else
+				lk_Mixed = Set.new
+				ak_Values.each { |x| lk_Mixed.add("#{niceRatio(x)} (#{ak_Values.count(x)})") if x.class != Float }
+				ld_Mean = 0.0
+				li_Count = 0
+				ak_Values.each do |x|
+					if x.class == Float
+						ld_Mean += x
+						li_Count += 1
+					end
+				end
+				if (li_Count > 0)
+					ld_Mean /= li_Count
+					lk_Mixed.add(sprintf('%1.2f (%d)', ld_Mean, li_Count))
+				end
+				return "mixed: #{lk_Mixed.to_a.sort.join(', ')}", ''
+			end
+		end
 		ld_Mean = 0.0
 		ld_Sd = 0.0
 		ak_Values.each { |x| ld_Mean += x }
@@ -125,7 +153,6 @@ class SimQuant < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('simquant')
-		#ls_TempPath = "/flipbook/spectra/quantitation/temp-simquant20090402-7517-1tuwu37-0"
 		ls_YamlPath = File::join(ls_TempPath, 'out.yaml')
 		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
@@ -178,7 +205,7 @@ class SimQuant < ProteomaticScript
 			end
 		end
 		
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
+		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} --textOutput no --yamlOutput yes --yamlOutputTarget \"#{ls_YamlPath}\" --svgOutPath \"#{ls_SvgPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
 		runCommand(ls_Command, true)
 		
 		lk_Results = YAML::load_file(ls_YamlPath)
@@ -372,7 +399,7 @@ class SimQuant < ProteomaticScript
 						lk_PeptideInProtein[a][ls_Protein].first['start'] <=> lk_PeptideInProtein[b][ls_Protein].first['start']
 					end
 				end
-				
+
 				# determine merged results for each spot/peptide
 				lk_PeptideMergedResults = Hash.new
 				lk_Results['results'].keys.each do |ls_Spot|
@@ -399,9 +426,8 @@ class SimQuant < ProteomaticScript
 						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMean] = ld_MergedRatioMean
 						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSd] = ld_MergedRatioSd
 						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:count] = lk_MergedSnr.size
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:shinyNewRatioMean] = lf_MergedUnlabeledAmount / lf_MergedLabeledAmount
 						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioMeanPrint] = niceRatio(ld_MergedRatioMean)
-						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSdPrint] = lk_MergedSnr.size == 1 ? '&ndash;' : sprintf('%1.2f', ld_MergedRatioSd)
+						lk_PeptideMergedResults[ls_Spot][ls_Peptide][:ratioSdPrint] = lk_MergedSnr.size == 1 || ld_MergedRatioSd.class == String ? '&ndash;' : sprintf('%1.2f', ld_MergedRatioSd)
 					end
 				end
 				
@@ -438,9 +464,8 @@ class SimQuant < ProteomaticScript
 						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMean] = ld_MergedRatioMean
 						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSd] = ld_MergedRatioSd
 						lk_ProteinMergedResults[ls_Spot][ls_Protein][:count] = lk_MergedSnr.size
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:shinyNewRatioMean] = lf_MergedUnlabeledAmount / lf_MergedLabeledAmount
 						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioMeanPrint] = niceRatio(ld_MergedRatioMean)
-						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSdPrint] = lk_MergedSnr.size == 1 ? '&ndash;' : sprintf('%1.2f', ld_MergedRatioSd)
+						lk_ProteinMergedResults[ls_Spot][ls_Protein][:ratioSdPrint] = lk_MergedSnr.size == 1 || ld_MergedRatioSd.class == String ? '&ndash;' : sprintf('%1.2f', ld_MergedRatioSd)
 					end
 				end
 				
@@ -617,7 +642,7 @@ class SimQuant < ProteomaticScript
 						lk_Scans.sort! { |a, b| a['retentionTime'] <=> b['retentionTime'] }
 						lk_Scans.each do |lk_Scan|
 							lk_Out.puts "<tr><td style='border: none' colspan='5'></td></tr>" if @param[:includeSpectra]
-							lk_Out.puts "<tr><td>scan ##{lk_Scan['id']} (charge #{lk_Scan['charge']}+)</td>"
+							lk_Out.puts "<tr><td>#{ls_Peptide}, scan ##{lk_Scan['id']} (charge #{lk_Scan['charge']}+)</td>"
 							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"
 							lk_Out.puts "<td style='text-align: right;'>#{niceRatio(lk_Scan['ratio'])}</td>"
 							lk_Out.puts "<td style='text-align: right;'>&ndash;</td>"

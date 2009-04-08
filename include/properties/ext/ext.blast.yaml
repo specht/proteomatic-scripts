@@ -1,15 +1,15 @@
 title: BLAST
 
-version: 2.2.18
+version: 2.2.20
 
 link: http://www.ncbi.nlm.nih.gov/blast
 
 download:
-  linux: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-ia32-linux.tar.gz
-  win32: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-ia32-win32.exe
-  macx: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.18/blast-2.2.18-universal-macosx.tar.gz
+  linux: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.20/blast-2.2.20-ia32-linux.tar.gz
+  win32: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.20/blast-2.2.20-ia32-win32.exe
+  macx: ftp://ftp.ncbi.nih.gov/blast/executables/release/2.2.20/blast-2.2.20-universal-macosx.tar.gz
 
 path:
-  linux: blast-2.2.18/bin
+  linux: blast-2.2.20/bin
   win32: bin
-  macx: blast-2.2.18/bin
+  macx: blast-2.2.20/bin

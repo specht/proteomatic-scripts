@@ -29,6 +29,10 @@ require 'zlib'
 require 'uri'
 require 'net/http'
 require 'digest/md5'
+require 'socket'
+
+
+DEFAULT_DAEMON_PORT = 5555
 
 
 class ProteomaticScriptDaemon
@@ -366,9 +370,21 @@ class ProteomaticScript
 		
 		if @mb_Daemon
 			resolveDependencies()
-			DRb.start_service(@ms_DaemonUri, ProteomaticScriptDaemon.new(self))
-			puts "#{@ms_Title} daemon listening at #{DRb.uri}"
-			DRb.thread.join
+			lk_Server = TCPServer.new('', @mi_DaemonPort);
+			puts "#{@ms_Title} daemon listening on port #{@mi_DaemonPort}."
+			while (lk_Session = lk_Server.accept)
+				Thread.new(lk_Session) do |lk_Session|
+					begin
+						handleTcpRequest(lk_Session)
+					ensure
+						lk_Session.close
+					end
+				end
+			end
+		
+# 			DRb.start_service(@ms_DaemonUri, ProteomaticScriptDaemon.new(self))
+# 			puts "#{@ms_Title} daemon listening at #{DRb.uri}"
+# 			DRb.thread.join
 		else
 			begin
 				applyArguments(ARGV)
@@ -391,7 +407,7 @@ class ProteomaticScript
 		ls_Result += "Usage:\n    ruby #{$0} [options] [input files]\n\n"
 		ls_Result += indent(wordwrap("Options:\n--help           print this help\n" +
 			"--proposePrefix  propose a prefix depending on the input files specified\n" +
-			"--daemon [uri]   run this script as a daemon"), 4, false)
+			"--daemon [port]  run this script as a daemon, default port is #{DEFAULT_DAEMON_PORT}"), 4, false)
 		ls_Result += "\n"
 		ls_Result += @mk_Parameters.helpString()
 		if @mk_Input
@@ -504,11 +520,8 @@ class ProteomaticScript
 	def handleArguments()
 		if ARGV.first == '--daemon'
 			@mb_Daemon = true
-			if ARGV.size < 2
-				puts 'Error: No daemon URI specified!'
-				exit 1
-			end
-			@ms_DaemonUri = ARGV[1]
+			@mi_DaemonPort = DEFAULT_DAEMON_PORT
+			@mi_DaemonPort = ARGV[1].to_i if ARGV.size > 1
 		end
 		if ARGV == ['---getParameters']
 			puts getParameters()
