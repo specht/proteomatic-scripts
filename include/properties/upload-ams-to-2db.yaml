@@ -19,8 +19,8 @@ parameters:
   - key: databasetarget
     label: database
     type: enum
-    choices: [http://localhost/2db, 'sonstwo']
-    default: http://localhost/2db
+    choices: ['http://localhost/2db', 'sonstwo']
+    default: 'http://localhost/2db'
   - key: Organism
     label: Organism
     type: enum
