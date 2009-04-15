@@ -162,13 +162,30 @@ end # class String
 # returns a hash of downcased-stripped-header -> index
 def mapCsvHeader(as_Header, ak_Options = {})
 	lk_Header = as_Header.parse_csv(ak_Options)
+	lk_StrippedHeaderMap = Hash.new
 	lk_HeaderMap = Hash.new
 	(0...lk_Header.size).each do |i|
 		next unless lk_Header[i]
 		ls_Key = lk_Header[i].dup.strip.downcase.gsub(/[\s\-\/]/, '')
+		lk_StrippedHeaderMap[ls_Key] = lk_Header[i]
 		lk_HeaderMap[ls_Key] = i
 	end
 	return lk_HeaderMap
+end
+
+
+def loadCsvResults(as_Path)
+	lk_HeaderMap = Hash.new
+	lk_Result = Array.new
+	File.open(as_Path, 'r') do |lk_File|
+		ls_Header = lk_File.readline
+		lk_HeaderMap = mapCsvHeader(ls_Header)
+
+		while (!lk_File.eof?)
+			lk_Result.push(lk_File.readline.parse_csv())
+		end
+	end
+	return lk_HeaderMap, lk_Result
 end
 
 

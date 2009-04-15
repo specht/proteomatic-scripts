@@ -1,15 +1,15 @@
 group: Quantitation
 
-title: SimQuant
+title: qTrace
 
 description: >
-   Perform quantitation on SIM scans. 
+   Perform quantitation on MS1 scans. 
    If possible, peptides are extracted from the PSM result list specified.
    Additional peptides can be specified via input text files or the peptides
    parameter. Gene models for these non-PSM peptides can be added as input
    files to enable protein quantitation.
    <br />
-   <span style='background-color: #eaa;'><b>Warning:</b> SimQuant is still in development. Use at your own risk.</span>
+   <span style='background-color: #eaa;'><b>Warning:</b> qTrace is still in development. Use at your own risk.</span>
 
 type: processor
 
@@ -34,19 +34,14 @@ defaultOutputDirectory: spectraFiles
 
 output:
   - key: xhtmlReport
-    label: XHTML report
+    label: XHTML results
     format: xhtml
-    filename: quantitation-results.xhtml
-    default: yes
-  - key: yamlReport
-    label: YAML report
-    format: yaml
-    filename: quantitation-results.yaml
+    filename: qtrace-results.xhtml
     default: yes
   - key: proteinCsv
-    label: CSV protein quantitation results
+    label: CSV results
     format: csv
-    filename: quantified-proteins.csv
+    filename: qtrace-results.csv
     default: yes
 
 parameters:
@@ -94,42 +89,50 @@ parameters:
     default: 2.0
     min: 0.0
     step: 0.1
-  - key: massAccuracy
-    label: Mass accuracy
+  - key: includeMassAccuracy
+    label: Include mass accuracy
     type: float
     suffix: ppm
     default: 5.0
     min: 0.0
     step: 0.1
     description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
+  - key: excludeMassAccuracy
+    label: Exclude mass accuracy
+    type: float
+    suffix: ppm
+    default: 30.0
+    min: 0.0
+    step: 0.1
+    description: This mass accuracy is used when peaks are tested for absence.
   - key: useMaxIdentificationQuantitationTimeDifference
     label: Require a MS2 event close to every quantitation event
     type: flag
     default: yes
   - key: maxIdentificationQuantitationTimeDifference
-    label: MS2 / SimQuant RT accuracy
+    label: Identification / quantitation RT accuracy
     type: float
     suffix: minutes
     default: 1.0
     min: 0.0
-    description: The maximum retention time difference between a MS2 identification and a SimQuant quantitation event for any peptide.
+    description: The maximum retention time difference between a MS2 identification and a qTrace quantitation event for any peptide.
   - key: printStatistics
     label: Print quantitation failure statistics
     type: flag
     default: yes
   - key: showPeptideInProtein
     label: Show peptide location within protein
-    group: SimQuant Report
+    group: qTrace Results
     type: flag
     default: yes
   - key: showElutionProfile
     label: Show elution profile
-    group: SimQuant Report
+    group: qTrace Results
     type: flag
     default: yes
   - key: includeSpectra
     label: Include spectra
-    group: SimQuant Report
+    group: qTrace Results
     type: flag
     default: yes
     
