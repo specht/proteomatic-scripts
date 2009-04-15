@@ -75,7 +75,8 @@ class QTrace < ProteomaticScript
 	end
 	
 	def run()
-		lk_Peptides = Array.new
+		# peptides for each spot
+		lk_Peptides = Hash.new
 
 		lk_PeptideInProtein = Hash.new
 		
@@ -97,8 +98,12 @@ class QTrace < ProteomaticScript
 					exit 1
 				end
 			end
-			
-			lk_Peptides += lk_PeptideHash.keys
+			lk_PeptideHash.each_pair do |ls_Peptide, lk_Hash|
+				lk_Hash[:spots].each do |ls_Spot|
+					lk_Peptides[ls_Spot] ||= Set.new
+					lk_Peptides[ls_Spot] << ls_Peptide
+				end
+			end
 		else
 			if (@param[:useMaxIdentificationQuantitationTimeDifference])
 				puts 'You need to specify at least one PSM list file if you require a MS2 event close to every quantitation event.'
@@ -107,18 +112,19 @@ class QTrace < ProteomaticScript
 		end
 		
 		# get peptides from parameters
-		lk_Peptides += @param[:peptides].split(%r{[,;\s/]+})
+		lk_PeptidesForAll = Array.new
+		lk_PeptidesForAll += @param[:peptides].split(%r{[,;\s/]+})
 		
 		# get peptides from peptides files
 		@input[:peptideFiles].each do |ls_Path|
-			lk_Peptides += File::read(ls_Path).split("\n")
+			lk_PeptidesForAll += File::read(ls_Path).split("\n")
 		end
 		
-		lk_Peptides.uniq!
-		lk_Peptides.collect! { |x| x.upcase }
+		lk_PeptidesForAll.uniq!
+		lk_PeptidesForAll.collect! { |x| x.upcase }
 		
 		# convert SEQUEST-type peptides X.PEPTIDEK.X to PEPTIDEK
-		lk_Peptides.collect! do |ls_Peptide|
+		lk_PeptidesForAll.collect! do |ls_Peptide|
 			if ls_Peptide.include?('.')
 				lk_Peptide = ls_Peptide.split('.')
 				if (lk_Peptide.size == 3)
@@ -131,9 +137,14 @@ class QTrace < ProteomaticScript
 			ls_Peptide
 		end
 
-		lk_Peptides.reject! do |ls_Peptide|
+		lk_PeptidesForAll.reject! do |ls_Peptide|
 			# reject peptide if it's empty or if it does not contain arginine (R)
 			ls_Peptide.strip.empty? || (!ls_Peptide.include?('R'))
+		end
+		lk_Peptides.each_key do |ls_Spot|
+			lk_Peptides[ls_Spot].reject! do |ls_Peptide|
+				ls_Peptide.strip.empty? || (!ls_Peptide.include?('R'))
+			end
 		end
 
 		# handle amino acid exclusion list
@@ -144,27 +155,16 @@ class QTrace < ProteomaticScript
 		end
 		# ls_ExcludeList now contains all amino acids that should be chucked out
 		(0...ls_ExcludeList.size).each do |i|
-			lk_Peptides.reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }
+			lk_PeptidesForAll.reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }
+			lk_Peptides.each_key do |ls_Spot|
+				lk_Peptides[ls_Spot].reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }			
+			end
 		end
 		
-		if lk_Peptides.empty? && @input[:peptideFiles].empty?
-			puts 'Error: no peptides have been specified.'
-			puts 'Maybe there were peptides, but all were excluded due to the fact that each of them contained amino acids that you want to exclude.'
-			exit 1
-		end
-		
-		ls_TempPath = tempFilename('simquant')
+		ls_TempPath = tempFilename('qtrace')
 # 		ls_TempPath = '/flipbook/spectra/quantitation/temp-simquant20090415-32662-uwranb-0'
-		ls_CsvPath = File::join(ls_TempPath, 'out.csv')
-		ls_XhtmlPath = File::join(ls_TempPath, 'out.xhtml')
-		ls_PeptidesPath = File::join(ls_TempPath, 'peptides.txt')
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		FileUtils::mkpath(ls_TempPath)
-
-		# write all target peptides into one file
-		File::open(ls_PeptidesPath, 'w') do |lk_Out|
-			lk_Out.puts lk_Peptides.join("\n")
-		end
 
 		# update lk_PeptideInProtein
 		unless @input[:modelFiles].empty?
@@ -206,135 +206,158 @@ class QTrace < ProteomaticScript
 			end
 		end
 		
-		ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
-		runCommand(ls_Command, true)
-		
-		lk_HeaderMap, lk_Results = loadCsvResults(ls_CsvPath)
-		
-		li_ChuckedOutBecauseOfTimeDifference = 0
-		li_ChuckedOutBecauseOfNoMs2Identification = 0
-		lk_UnidentifiedPeptides = Set.new
-		lk_TooHighTimeDifferencePeptides = Set.new
-
-		# chuck out quantitation events that have no corresponding MS2 identification event
-		if @param[:useMaxIdentificationQuantitationTimeDifference]
-			lk_Results.reject! do |lk_Hit|
-				lb_RejectThis = true
-				lb_RejectedDueToTimeDifference = false
-				ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
-				ls_Spot = lk_Hit[lk_HeaderMap['filename']]
-				if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
-					lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
-						ls_Ms2Spot = ls_Scan.split('.').first
-						lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
-						lb_RejectedDueToTimeDifference = true if lb_RejectThis
-						lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
-					end
-				else
-					li_ChuckedOutBecauseOfNoMs2Identification += 1
-					lk_UnidentifiedPeptides.add(ls_Peptide)
-				end
-				li_ChuckedOutBecauseOfTimeDifference += 1 if lb_RejectedDueToTimeDifference
-				lb_RejectThis
-			end
-		end
-		
-		if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
-			puts 'Attention: Some quantitation events have been removed.'
-			puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification}" if li_ChuckedOutBecauseOfNoMs2Identification > 0
-			puts "...because the SimQuant/MS2 RT difference was too high: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
-		else
-			puts "No quantitation events have been removed." if @param[:useMaxIdentificationQuantitationTimeDifference]
-		end
-		
-		lk_QuantifiedPeptides = Set.new
-		lk_Results.each { |lk_Hit| lk_QuantifiedPeptides << lk_Hit[lk_HeaderMap['peptide']] }
-		lk_MatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
-			lk_PeptideInProtein.include?(ls_Peptide) && lk_PeptideInProtein[ls_Peptide].size == 1
-		end
-		lk_AmbiguouslyMatchingPeptides = (Set.new(lk_QuantifiedPeptides) - Set.new(lk_MatchedPeptides)).to_a
-		
-		lk_PeptidesForProtein = Hash.new
-		lk_MatchedPeptides.each do |ls_Peptide|
-			ls_Protein = lk_PeptideInProtein[ls_Peptide].keys.first
-			lk_PeptidesForProtein[ls_Protein] ||= Array.new
-			lk_PeptidesForProtein[ls_Protein].push(ls_Peptide) unless lk_PeptidesForProtein[ls_Protein].include?(ls_Peptide)
-		end
-		lk_PeptidesForProtein.keys.each do |ls_Protein|
-			lk_PeptidesForProtein[ls_Protein].sort! do |a, b|
-				lk_PeptideInProtein[a][ls_Protein].first['start'] <=> lk_PeptideInProtein[b][ls_Protein].first['start']
-			end
-		end
-		
-		# determine protein for each peptide
-		lk_PeptideProteinDescription = Hash.new
-		lk_QuantifiedPeptides.each do |ls_Peptide|
-			ls_Protein = '(not matching to any protein)'
-			if (lk_PeptideInProtein[ls_Peptide])
-				if (lk_PeptideInProtein[ls_Peptide].size == 1)
-					ls_Protein = lk_PeptideInProtein[ls_Peptide].keys.first
-				else
-					ls_Protein = "(matching to #{lk_PeptideInProtein[ls_Peptide].size} proteins)"
-				end
-			end
-			lk_PeptideProteinDescription[ls_Peptide] = ls_Protein
-		end
-		
-		
-		# inject ratio, proline count, protein
-		lk_HeaderMapArray = Array.new
-		lk_HeaderMapReversed = lk_HeaderMap.invert
-		lk_HeaderMapReversed.keys.sort.each { |li_Index| lk_HeaderMapArray << lk_HeaderMapReversed[li_Index] }
-		
-		li_ProteinIndex = lk_HeaderMapArray.index('peptide')
-		lk_HeaderMapArray.insert(li_ProteinIndex, 'protein')
-		
-		li_RatioIndex = lk_HeaderMapArray.index('amountheavy') + 1
-		lk_HeaderMapArray.insert(li_RatioIndex, 'ratio')
-		
-		li_ProlineCountIndex = lk_HeaderMapArray.size
-		lk_HeaderMapArray.insert(li_ProlineCountIndex, 'prolinecount')
-		
-		lk_Results.collect! do |lk_Hit|
-			lk_NewHit = lk_Hit.dup
-			lk_NewHit.insert(li_ProteinIndex, lk_PeptideProteinDescription[lk_Hit[lk_HeaderMap['peptide']]])
-			lk_NewHit.insert(li_RatioIndex, (lk_Hit[lk_HeaderMap['amountlight']].to_f / lk_Hit[lk_HeaderMap['amountheavy']].to_f).to_s)
-			lk_NewHit.insert(li_ProlineCountIndex, lk_Hit[lk_HeaderMap['peptide']].downcase.count('p'))
-			lk_NewHit
-		end
-		
-		# update header map
-		lk_HeaderMap = Hash.new
-		lk_HeaderMapArray.each_with_index do |ls_Key, li_Index|
-			lk_HeaderMap[ls_Key] = li_Index
-		end
-		
-		# promote results to spot => peptide => event ids
-		lk_ResultsBySpotAndPeptide = Hash.new
-		lk_Results.each_with_index do |lk_Hit, li_Index|
-			ls_Filename = lk_Hit[lk_HeaderMap['filename']]
-			ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
-			lk_ResultsBySpotAndPeptide[ls_Filename] ||= Hash.new
-			lk_ResultsBySpotAndPeptide[ls_Filename][ls_Peptide] ||= Array.new
-			lk_ResultsBySpotAndPeptide[ls_Filename][ls_Peptide].push(li_Index)
-		end
-		
-		if (lk_Results.size == 0)
-			puts 'No peptides could be quantified.'
-		end
-		
+		# create csv out file
 		if @output[:proteinCsv]
 			File.open(@output[:proteinCsv], 'w') do |lk_Out|
-				lk_Out.puts lk_HeaderMapArray.to_csv
-				lk_Results.each do |lk_Hit|
-					lk_Out.puts lk_Hit.to_csv
-				end
 			end
 		end
-		
-		if @output[:xhtmlReport]
-			FileUtils::cp(ls_XhtmlPath, @output[:xhtmlReport])
+
+		lb_FirstRun = true
+		@input[:spectraFiles].each do |ls_SpectraFile|
+			ls_Spot = File::basename(ls_SpectraFile).split('.').first
+			ls_CsvPath = File::join(ls_TempPath, ls_Spot + '-out.csv')
+			ls_XhtmlPath = File::join(ls_TempPath, ls_Spot + '-out.xhtml')
+			ls_PeptidesPath = File::join(ls_TempPath, ls_Spot + '-peptides.txt')
+
+			# write all target peptides into one file
+			File::open(ls_PeptidesPath, 'w') do |lk_Out|
+				lk_Out.puts((lk_Peptides[ls_Spot] + Set.new(lk_PeptidesForAll)).to_a.sort.join("\n"))
+			end
+
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
+			runCommand(ls_Command, true)
+			
+			lk_HeaderMap, lk_Results = loadCsvResults(ls_CsvPath)
+			
+			li_ChuckedOutBecauseOfTimeDifference = 0
+			li_ChuckedOutBecauseOfNoMs2Identification = 0
+			lk_UnidentifiedPeptides = Set.new
+			lk_TooHighTimeDifferencePeptides = Set.new
+
+			# chuck out quantitation events that have no corresponding MS2 identification event
+			if @param[:useMaxIdentificationQuantitationTimeDifference]
+				lk_Results.reject! do |lk_Hit|
+					lb_RejectThis = true
+					lb_RejectedDueToTimeDifference = false
+					ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
+					ls_Spot = lk_Hit[lk_HeaderMap['filename']]
+					if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
+						lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
+							ls_Ms2Spot = ls_Scan.split('.').first
+							lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
+							lb_RejectedDueToTimeDifference = true if lb_RejectThis
+							lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
+						end
+					else
+						li_ChuckedOutBecauseOfNoMs2Identification += 1
+						lk_UnidentifiedPeptides.add(ls_Peptide)
+					end
+					li_ChuckedOutBecauseOfTimeDifference += 1 if lb_RejectedDueToTimeDifference
+					lb_RejectThis
+				end
+			end
+			
+			if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
+				puts 'Attention: Some quantitation events have been removed.'
+				puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification}" if li_ChuckedOutBecauseOfNoMs2Identification > 0
+				puts "...because the SimQuant/MS2 RT difference was too high: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
+			else
+				puts "No quantitation events have been removed." if @param[:useMaxIdentificationQuantitationTimeDifference]
+			end
+			
+			lk_QuantifiedPeptides = Set.new
+			lk_Results.each { |lk_Hit| lk_QuantifiedPeptides << lk_Hit[lk_HeaderMap['peptide']] }
+			lk_MatchedPeptides = lk_QuantifiedPeptides.select do |ls_Peptide|
+				lk_PeptideInProtein.include?(ls_Peptide) && lk_PeptideInProtein[ls_Peptide].size == 1
+			end
+			lk_AmbiguouslyMatchingPeptides = (Set.new(lk_QuantifiedPeptides) - Set.new(lk_MatchedPeptides)).to_a
+			
+			lk_PeptidesForProtein = Hash.new
+			lk_MatchedPeptides.each do |ls_Peptide|
+				ls_Protein = lk_PeptideInProtein[ls_Peptide].keys.first
+				lk_PeptidesForProtein[ls_Protein] ||= Array.new
+				lk_PeptidesForProtein[ls_Protein].push(ls_Peptide) unless lk_PeptidesForProtein[ls_Protein].include?(ls_Peptide)
+			end
+			lk_PeptidesForProtein.keys.each do |ls_Protein|
+				lk_PeptidesForProtein[ls_Protein].sort! do |a, b|
+					lk_PeptideInProtein[a][ls_Protein].first['start'] <=> lk_PeptideInProtein[b][ls_Protein].first['start']
+				end
+			end
+			
+			# determine protein for each peptide
+			lk_PeptideProteinDescription = Hash.new
+			lk_QuantifiedPeptides.each do |ls_Peptide|
+				ls_Protein = '(not matching to any protein)'
+				if (lk_PeptideInProtein[ls_Peptide])
+					if (lk_PeptideInProtein[ls_Peptide].size == 1)
+						ls_Protein = lk_PeptideInProtein[ls_Peptide].keys.first
+					else
+						ls_Protein = "(matching to #{lk_PeptideInProtein[ls_Peptide].size} proteins)"
+					end
+				end
+				lk_PeptideProteinDescription[ls_Peptide] = ls_Protein
+			end
+			
+			
+			# inject ratio, proline count, protein
+			lk_HeaderMapArray = Array.new
+			lk_HeaderMapReversed = lk_HeaderMap.invert
+			lk_HeaderMapReversed.keys.sort.each { |li_Index| lk_HeaderMapArray << lk_HeaderMapReversed[li_Index] }
+			
+			li_ProteinIndex = lk_HeaderMapArray.index('peptide')
+			lk_HeaderMapArray.insert(li_ProteinIndex, 'protein')
+			
+			li_RatioIndex = lk_HeaderMapArray.index('amountheavy') + 1
+			lk_HeaderMapArray.insert(li_RatioIndex, 'ratio')
+			
+			li_ProlineCountIndex = lk_HeaderMapArray.size
+			lk_HeaderMapArray.insert(li_ProlineCountIndex, 'prolinecount')
+			
+			lk_Results.collect! do |lk_Hit|
+				lk_NewHit = lk_Hit.dup
+				lk_NewHit.insert(li_ProteinIndex, lk_PeptideProteinDescription[lk_Hit[lk_HeaderMap['peptide']]])
+				lk_NewHit.insert(li_RatioIndex, (lk_Hit[lk_HeaderMap['amountlight']].to_f / lk_Hit[lk_HeaderMap['amountheavy']].to_f).to_s)
+				lk_NewHit.insert(li_ProlineCountIndex, lk_Hit[lk_HeaderMap['peptide']].downcase.count('p'))
+				lk_NewHit
+			end
+			
+			# update header map
+			lk_HeaderMap = Hash.new
+			lk_HeaderMapArray.each_with_index do |ls_Key, li_Index|
+				lk_HeaderMap[ls_Key] = li_Index
+			end
+			
+			# promote results to spot => peptide => event ids
+			lk_ResultsBySpotAndPeptide = Hash.new
+			lk_Results.each_with_index do |lk_Hit, li_Index|
+				ls_Filename = lk_Hit[lk_HeaderMap['filename']]
+				ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
+				lk_ResultsBySpotAndPeptide[ls_Filename] ||= Hash.new
+				lk_ResultsBySpotAndPeptide[ls_Filename][ls_Peptide] ||= Array.new
+				lk_ResultsBySpotAndPeptide[ls_Filename][ls_Peptide].push(li_Index)
+			end
+			
+			if (lk_Results.size == 0)
+				puts 'No peptides could be quantified.'
+			end
+			
+			if @output[:proteinCsv]
+				File.open(@output[:proteinCsv], 'a') do |lk_Out|
+					lk_Out.puts lk_HeaderMapArray.to_csv if lb_FirstRun
+					lk_Results.each do |lk_Hit|
+						lk_Out.puts lk_Hit.to_csv
+					end
+				end
+			end
+			
+			lb_FirstRun = false
+			
 		end
+		
+		
+# 		if @output[:xhtmlReport]
+# 			FileUtils::cp(ls_XhtmlPath, @output[:xhtmlReport])
+# 		end
 		
 # 		lk_AllProteins = Hash.new
 # 		lk_Results.each do |lk_Hit|
