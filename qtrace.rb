@@ -224,7 +224,7 @@ class QTrace < ProteomaticScript
 				lk_Out.puts((lk_Peptides[ls_Spot] + Set.new(lk_PeptidesForAll)).to_a.sort.join("\n"))
 			end
 
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles #{@input[:spectraFiles].collect {|x| '"' + x + '"'}.join(' ')} --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
+			ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
 			runCommand(ls_Command, true)
 			
 			lk_HeaderMap, lk_Results = loadCsvResults(ls_CsvPath)
