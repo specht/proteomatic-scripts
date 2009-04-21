@@ -37,7 +37,7 @@ output:
     label: XHTML results
     format: xhtml
     filename: qtrace-results.xhtml
-    default: yes
+    default: no
   - key: proteinCsv
     label: CSV results
     format: csv
@@ -105,17 +105,6 @@ parameters:
     min: 0.0
     step: 0.1
     description: This mass accuracy is used when peaks are tested for absence.
-  - key: useMaxIdentificationQuantitationTimeDifference
-    label: Require a MS2 event close to every quantitation event
-    type: flag
-    default: yes
-  - key: maxIdentificationQuantitationTimeDifference
-    label: Identification / quantitation RT accuracy
-    type: float
-    suffix: minutes
-    default: 1.0
-    min: 0.0
-    description: The maximum retention time difference between a MS2 identification and a qTrace quantitation event for any peptide.
   - key: printStatistics
     label: Print quantitation failure statistics
     type: flag

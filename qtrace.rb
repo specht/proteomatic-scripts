@@ -162,7 +162,7 @@ class QTrace < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('qtrace')
-# 		ls_TempPath = '/flipbook/spectra/quantitation/temp-simquant20090415-32662-uwranb-0'
+# 		ls_TempPath = '/flipbook/spectra/quantitation/temp-qtrace20090421-24698-y734e3-0'
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		FileUtils::mkpath(ls_TempPath)
 
@@ -228,41 +228,25 @@ class QTrace < ProteomaticScript
 			runCommand(ls_Command, true)
 			
 			lk_HeaderMap, lk_Results = loadCsvResults(ls_CsvPath)
+			lk_TimeDifference = Hash.new
 			
-			li_ChuckedOutBecauseOfTimeDifference = 0
-			li_ChuckedOutBecauseOfNoMs2Identification = 0
-			lk_UnidentifiedPeptides = Set.new
-			lk_TooHighTimeDifferencePeptides = Set.new
-
 			# chuck out quantitation events that have no corresponding MS2 identification event
-			if @param[:useMaxIdentificationQuantitationTimeDifference]
-				lk_Results.reject! do |lk_Hit|
-					lb_RejectThis = true
-					lb_RejectedDueToTimeDifference = false
-					ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
-					ls_Spot = lk_Hit[lk_HeaderMap['filename']]
-					if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
-						lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
-							ls_Ms2Spot = ls_Scan.split('.').first
-							lb_RejectThis = false if ((lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs <= @param[:maxIdentificationQuantitationTimeDifference]) && (ls_Spot == ls_Ms2Spot)
-							lb_RejectedDueToTimeDifference = true if lb_RejectThis
-							lk_TooHighTimeDifferencePeptides.add(ls_Peptide)
+			lk_Results.each do |lk_Hit|
+				lb_RejectThis = true
+				lb_RejectedDueToTimeDifference = false
+				ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
+				ls_Spot = lk_Hit[lk_HeaderMap['filename']]
+				if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
+					lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
+						ls_Ms2Spot = ls_Scan.split('.').first
+						if (ls_Spot == ls_Ms2Spot)
+							lf_TimeDifference = (lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs
+							li_Index = lk_Hit[lk_HeaderMap['id']]
+							lk_TimeDifference[li_Index] ||= lf_TimeDifference 
+							lk_TimeDifference[li_Index] = lf_TimeDifference if lf_TimeDifference < lk_TimeDifference[li_Index]
 						end
-					else
-						li_ChuckedOutBecauseOfNoMs2Identification += 1
-						lk_UnidentifiedPeptides.add(ls_Peptide)
 					end
-					li_ChuckedOutBecauseOfTimeDifference += 1 if lb_RejectedDueToTimeDifference
-					lb_RejectThis
 				end
-			end
-			
-			if (li_ChuckedOutBecauseOfNoMs2Identification > 0) || (li_ChuckedOutBecauseOfTimeDifference > 0)
-				puts 'Attention: Some quantitation events have been removed.'
-				puts "...because there was no MS2 identification: #{li_ChuckedOutBecauseOfNoMs2Identification}" if li_ChuckedOutBecauseOfNoMs2Identification > 0
-				puts "...because the SimQuant/MS2 RT difference was too high: #{li_ChuckedOutBecauseOfTimeDifference}" if li_ChuckedOutBecauseOfTimeDifference > 0
-			else
-				puts "No quantitation events have been removed." if @param[:useMaxIdentificationQuantitationTimeDifference]
 			end
 			
 			lk_QuantifiedPeptides = Set.new
@@ -299,7 +283,7 @@ class QTrace < ProteomaticScript
 			end
 			
 			
-			# inject ratio, proline count, protein
+			# inject ratio, proline count, protein, time difference
 			lk_HeaderMapArray = Array.new
 			lk_HeaderMapReversed = lk_HeaderMap.invert
 			lk_HeaderMapReversed.keys.sort.each { |li_Index| lk_HeaderMapArray << lk_HeaderMapReversed[li_Index] }
@@ -313,12 +297,15 @@ class QTrace < ProteomaticScript
 			li_ProlineCountIndex = lk_HeaderMapArray.size
 			lk_HeaderMapArray.insert(li_ProlineCountIndex, 'prolinecount')
 			
+			li_TimeDifferenceIndex = lk_HeaderMapArray.size
+			lk_HeaderMapArray.insert(li_TimeDifferenceIndex, 'timedifference')
+			
 			lk_Results.collect! do |lk_Hit|
 				lk_NewHit = lk_Hit.dup
 				lk_NewHit.insert(li_ProteinIndex, lk_PeptideProteinDescription[lk_Hit[lk_HeaderMap['peptide']]])
 				lk_NewHit.insert(li_RatioIndex, (lk_Hit[lk_HeaderMap['amountlight']].to_f / lk_Hit[lk_HeaderMap['amountheavy']].to_f).to_s)
 				lk_NewHit.insert(li_ProlineCountIndex, lk_Hit[lk_HeaderMap['peptide']].downcase.count('p'))
-				lk_NewHit
+				lk_NewHit.insert(li_TimeDifferenceIndex, lk_TimeDifference[lk_Hit[lk_HeaderMap['id']]])
 			end
 			
 			# update header map
@@ -659,6 +646,7 @@ class QTrace < ProteomaticScript
 			end
 		end
 =end
+exit
 	end
 end
 
