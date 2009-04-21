@@ -221,7 +221,10 @@ class QTrace < ProteomaticScript
 
 			# write all target peptides into one file
 			File::open(ls_PeptidesPath, 'w') do |lk_Out|
-				lk_Out.puts((lk_Peptides[ls_Spot] + Set.new(lk_PeptidesForAll)).to_a.sort.join("\n"))
+				lk_ThisPeptides = Set.new
+				lk_ThisPeptides += lk_Peptides[ls_Spot] if lk_Peptides[ls_Spot]
+				lk_ThisPeptides += Set.new(lk_PeptidesForAll) if lk_PeptidesForAll
+				lk_Out.puts(lk_ThisPeptides.to_a.sort.join("\n"))
 			end
 
 			ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
@@ -646,7 +649,6 @@ class QTrace < ProteomaticScript
 			end
 		end
 =end
-exit
 	end
 end
 
