@@ -108,6 +108,8 @@ class AugustusCollect < ProteomaticScript
 			lk_AllPeptides += Set.new(lk_PeptideHash.keys)
 		end
 		
+		puts "Total peptides: #{lk_AllPeptides.size}"
+		
 		print 'Loading GPF details...'
 		lk_GpfDetails = YAML::load_file('/home/michael/ak-hippler-alignments/gpf-results.yaml')
 		puts ''
@@ -115,6 +117,13 @@ class AugustusCollect < ProteomaticScript
 		puts "GPF details: #{lk_GpfDetails.keys.size}"
 		lk_GpfDetails.reject! { |x, y| (!y) || y.empty?}
 		puts "GPF details (non empty): #{lk_GpfDetails.keys.size}"
+		
+		File::open('/home/michael/ak-hippler-alignments/peptides-without-gpf-details.fasta', 'w') do |f|
+			(lk_AllPeptides - Set.new(lk_GpfDetails.keys.collect { |x| x.sub('peptide=', '')})).to_a.sort.each do |ls_Peptide|
+				f.puts ">#{ls_Peptide}"
+				f.puts "#{ls_Peptide}"
+			end
+		end
 		
 		lk_PeptidesWithDetails = Set.new(lk_GpfDetails.keys.collect do |x|
 			x.sub('peptide=', '').sub('"', '')

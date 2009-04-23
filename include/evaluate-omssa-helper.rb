@@ -187,7 +187,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 end
 
 
-def loadPsm(as_Path)
+def loadPsm(as_Path, ak_Options = {})
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507.1058.1058.2.dta:
 	#  :e: 3.88761e-07
@@ -241,7 +241,7 @@ def loadPsm(as_Path)
 		
 		lk_File.each do |ls_Line|
 			li_EntryCount += 1
-			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
+			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0) unless ak_Options[:silent]
 			lk_Line = ls_Line.parse_csv()
 			
 			if (lb_FirstLineComing)
@@ -263,13 +263,15 @@ def loadPsm(as_Path)
 				lb_HasFpr = ls_ScoreThresholdType == 'fpr'
 				lb_HasFixedScoreThreshold = ls_ScoreThresholdType == 'min' || ls_ScoreThresholdType == 'max'
 
-				print 'Statistical significance: '
-				if (lb_HasFpr)
-					puts 'FPR (adaptive score threshold).'
-				elsif (lb_HasFixedScoreThreshold)
-					puts 'fixed score threshold.'
-				else
-					puts 'none at all!'
+				unless ak_Options[:silent]
+					print 'Statistical significance: '
+					if (lb_HasFpr)
+						puts 'FPR (adaptive score threshold).'
+					elsif (lb_HasFixedScoreThreshold)
+						puts 'fixed score threshold.'
+					else
+						puts 'none at all!'
+					end
 				end
 			end
 			ls_Scan = lk_Line[lk_HeaderMap['filenameid']]
@@ -390,7 +392,7 @@ def loadPsm(as_Path)
 			end
 		end
 	end
-	puts "\rReading PSM entries... #{li_EntryCount}."
+	puts "\rReading PSM entries... #{li_EntryCount}." unless ak_Options[:silent]
 	if (li_ErrorCount > 0)
 		puts "ATTENTION: The scan name was not as expected in #{li_ErrorCount} of #{li_EntryCount} lines, these lines have been ignored."
 		puts "The scan name is expected to end with (start scan).(end scan).(charge)."
