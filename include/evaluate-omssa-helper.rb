@@ -195,6 +195,7 @@ def loadPsm(as_Path, ak_Options = {})
 	#    NLLAALNHEETR: 
 	#      :measuredMass: 1374.32
 	#      :calculatedMass: 1374.31
+	#      :charge: 2
 	#  :deflines:
 	#  - target_proteins.finalModelsV2.fasta;171789
 	#  - target_proteins.frozen_GeneCatalog_2007_09_13.fasta;jgi|Chlre3|194475
@@ -378,7 +379,7 @@ def loadPsm(as_Path, ak_Options = {})
 			lk_ScanHash[ls_Scan] ||= Hash.new
 			if (!lk_ScanHash[ls_Scan].has_key?(:e) || lf_E < lk_ScanHash[ls_Scan][:e])
 				# clear scan hash
-				lk_ScanHash[ls_Scan][:peptides] = {ls_Peptide => {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass} }
+				lk_ScanHash[ls_Scan][:peptides] = {ls_Peptide => {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass, :charge => li_Charge } }
 				lk_ScanHash[ls_Scan][:deflines] = [ls_DefLine]
 				lk_ScanHash[ls_Scan][:e] = lf_E;
 				lk_ScanHash[ls_Scan][:retentionTime] = lf_RetentionTime
@@ -386,7 +387,7 @@ def loadPsm(as_Path, ak_Options = {})
 				lk_ScanHash[ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
 			elsif (lf_E == lk_ScanHash[ls_Scan][:e])
 				# update scan hash
-				lk_ScanHash[ls_Scan][:peptides][ls_Peptide] = {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass}
+				lk_ScanHash[ls_Scan][:peptides][ls_Peptide] = {:measuredMass => lf_Mass, :calculatedMass => lf_TheoMass, :charge => li_Charge }
 				lk_ScanHash[ls_Scan][:deflines].push(ls_DefLine)
 				lk_ScanHash[ls_Scan][:mods].push({:peptide => ls_OriginalPeptide, :description => lk_Mods}) unless lk_Mods.empty?
 			end

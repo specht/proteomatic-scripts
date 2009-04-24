@@ -162,7 +162,7 @@ class QTrace < ProteomaticScript
 		end
 		
 		ls_TempPath = tempFilename('qtrace')
-# 		ls_TempPath = '/flipbook/spectra/quantitation/temp-qtrace20090421-24698-y734e3-0'
+#  		ls_TempPath = '/home/michael/Desktop/qtrace-fix/qtrace-temp-results'
 		ls_PeptideMatchYamlPath = File::join(ls_TempPath, 'matchpeptides.yaml')
 		FileUtils::mkpath(ls_TempPath)
 
@@ -234,22 +234,29 @@ class QTrace < ProteomaticScript
 			lk_TimeDifference = Hash.new
 			
 			# chuck out quantitation events that have no corresponding MS2 identification event
-			lk_Results.each do |lk_Hit|
+			lk_Results.reject! do |lk_Hit|
 				lb_RejectThis = true
-				lb_RejectedDueToTimeDifference = false
 				ls_Peptide = lk_Hit[lk_HeaderMap['peptide']]
 				ls_Spot = lk_Hit[lk_HeaderMap['filename']]
 				if lk_PeptideHash && lk_PeptideHash.include?(ls_Peptide)
 					lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
 						ls_Ms2Spot = ls_Scan.split('.').first
+						# check whether same spot
 						if (ls_Spot == ls_Ms2Spot)
-							lf_TimeDifference = (lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs
-							li_Index = lk_Hit[lk_HeaderMap['id']]
-							lk_TimeDifference[li_Index] ||= lf_TimeDifference 
-							lk_TimeDifference[li_Index] = lf_TimeDifference if lf_TimeDifference < lk_TimeDifference[li_Index]
+							li_QuantitationCharge = lk_Hit[lk_HeaderMap['charge']].to_i
+							li_IdentificationCharge = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:charge]
+							# check whether we are talking about the same charge here
+							if (li_QuantitationCharge == li_IdentificationCharge)
+								lf_TimeDifference = (lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs
+								li_Index = lk_Hit[lk_HeaderMap['id']]
+								lk_TimeDifference[li_Index] ||= lf_TimeDifference 
+								lk_TimeDifference[li_Index] = lf_TimeDifference if lf_TimeDifference < lk_TimeDifference[li_Index]
+								lb_RejectThis = false
+							end
 						end
 					end
 				end
+				lb_RejectThis
 			end
 			
 			lk_QuantifiedPeptides = Set.new
