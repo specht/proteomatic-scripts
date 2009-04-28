@@ -16,18 +16,23 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'include/proteomatic'
+require 'net/http'
 
 
 class UploadAMSto2DB < ProteomaticScript
 	def run()
-	  File.open('c:\dev\proteomatic\test_neu.txt', 'w+') do |file|
-      file.puts 'Hallöchen'
-	  file.puts 'Du bist ' + @param[:User]
-	  file.puts 'Dein Passwort lautet: ' + @param[:Password]
-	  file.puts 'Du willst in die Datenbank ' + @param[:databasetarget] 
-	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewählt.'
-	  file.puts 'Viel Spaß noch!'
-	  end
+#	  File.open('c:\dev\proteomatic\test_neu.txt', 'w+') do |file|
+#      file.puts 'Hallöchen'
+#	  file.puts 'Du bist ' + @param[:User]
+#	  file.puts 'Dein Passwort lautet: ' + @param[:Password]
+#	  file.puts 'Du willst in die Datenbank ' + @param[:databasetarget] 
+#	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewählt.'
+#	  file.puts 'Viel Spaß noch!'
+	  h = Net::HTTP.new('localhost', 80)
+      resp, body = h.post('/2db/tags/v1/admin/AMSUpload.php', 'password=@param[:Password] username=@param[:User]' )
+puts "#{resp.code}"
+puts body
+#	  end
 	end
 end
 
