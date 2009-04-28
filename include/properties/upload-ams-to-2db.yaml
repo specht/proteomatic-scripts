@@ -7,6 +7,13 @@ description: >
 
 type: processor
 
+input:
+  - key: amsFile
+    max: 1
+    min: 1
+    label: AMS
+    formats: [ams]
+
 parameters:
   - key: User
     type: string
@@ -19,8 +26,8 @@ parameters:
   - key: databasetarget
     label: database
     type: enum
-    choices: ['http://localhost/2db', 'sonstwo']
-    default: 'http://localhost/2db'
+    choices: ['/2db/tags/v1/admin/AMSUpload.php', 'sonstwo']
+    default: '/2db/tags/v1/admin/AMSUpload.php'
   - key: Organism
     label: Organism
     type: enum
