@@ -118,8 +118,8 @@ class AugustusCollect < ProteomaticScript
 		lk_GpfDetails.reject! { |x, y| (!y) || y.empty?}
 		puts "GPF details (non empty): #{lk_GpfDetails.keys.size}"
 		
-		File::open('/home/michael/ak-hippler-alignments/peptides-without-gpf-details.fasta', 'w') do |f|
-			(lk_AllPeptides - Set.new(lk_GpfDetails.keys.collect { |x| x.sub('peptide=', '')})).to_a.sort.each do |ls_Peptide|
+		File::open('/home/michael/ak-hippler-alignments/redo-gpf-peptides.fasta', 'w') do |f|
+			lk_AllPeptides.to_a.sort.each do |ls_Peptide|
 				f.puts ">#{ls_Peptide}"
 				f.puts "#{ls_Peptide}"
 			end
