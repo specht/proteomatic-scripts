@@ -18,6 +18,7 @@
 require 'include/proteomatic'
 require 'net/http'
 require 'yaml'
+require 'uri'
 
 
 class UploadAMSto2DB < ProteomaticScript
@@ -29,11 +30,16 @@ class UploadAMSto2DB < ProteomaticScript
 #	  file.puts 'Du willst in die Datenbank ' + @param[:databasetarget] 
 #	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewählt.'
 #	  file.puts 'Viel Spaß noch!'
-		puts @input[:amsFile]
+#---------------------------------------
+#		puts @input[:amsFile]
+f = File.open('c:\temp\blabla.txt', 'r')
+file_data = f.read
+f.close
+
 	  h = Net::HTTP.new('localhost', 80)
-      resp, body = h.post("#{@param[:databasetarget]}?password=#{@param[:Password]}&username=#{@param[:User]}&filepath=#{@input[:amsFile]}&organism=#{@param[:Organism]}", '' )
+      resp, body = h.post_form(URI.parse('#{@param[:databasetarget]}'),{'password'=>'#{@param[:Password]}','username'=>'#{@param[:User]}','filepath'=>'#{@input[:amsFile]}','organism'=>'#{@param[:Organism]}'}, 'file_data' )
 puts "#{resp.code}"
-puts body
+# puts body
 #	  end
 	end
 end
