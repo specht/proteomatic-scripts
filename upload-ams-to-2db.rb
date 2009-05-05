@@ -24,12 +24,12 @@ require 'uri'
 class UploadAMSto2DB < ProteomaticScript
 	def run()
 #	  File.open('c:\dev\proteomatic\test_neu.txt', 'w+') do |file|
-#      file.puts 'Hallöchen'
+#      file.puts 'Halloechen'
 #	  file.puts 'Du bist ' + @param[:User]
 #	  file.puts 'Dein Passwort lautet: ' + @param[:Password]
 #	  file.puts 'Du willst in die Datenbank ' + @param[:databasetarget] 
-#	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewählt.'
-#	  file.puts 'Viel Spaß noch!'
+#	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewaehlt.'
+#	  file.puts 'Viel Spass noch!'
 #---------------------------------------
 #		puts @input[:amsFile]
 f = File.open('c:\temp\blabla.txt', 'r')
@@ -37,7 +37,7 @@ file_data = f.read
 f.close
 
 	  h = Net::HTTP.new('localhost', 80)
-      resp, body = h.post_form(URI.parse('#{@param[:databasetarget]}'),{'password'=>'#{@param[:Password]}','username'=>'#{@param[:User]}','filepath'=>'#{@input[:amsFile]}','organism'=>'#{@param[:Organism]}'}, 'file_data' )
+      resp, body = h.post_form(URI.parse(@param[:databasetarget]),{'password'=>'#{@param[:Password]}','username'=>'#{@param[:User]}','filepath'=>'#{@input[:amsFile]}','organism'=>'#{@param[:Organism]}'}, 'file_data' )
 puts "#{resp.code}"
 # puts body
 #	  end
