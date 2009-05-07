@@ -35,10 +35,10 @@ class UploadAMSto2DB < ProteomaticScript
 
 
 		h = Net::HTTP.new('localhost', 80)
-		content = File::read(@input[:amsFile])
+		content = File::read(@input[:amsFile].first)
 #      resp, body = h.post((@param[:databasetarget]),{'password'=>@param[:Password],'username'=>@param[:User],'filepath'=>@input[:amsFile],'organism'=>@param[:Organism]}, 'content')
 
-		resp, body = h.post(@param[:databasetarget])
+		resp, body = h.post(@param[:databasetarget], 'dddddd')
 		puts "#{resp.code}"
 		puts body
 #	  end
