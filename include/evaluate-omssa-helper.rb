@@ -16,8 +16,9 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'bigdecimal'
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 require 'include/misc'
+require 'set'
 
 
 def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm = nil)

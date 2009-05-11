@@ -1,0 +1,12 @@
+# This is the patch which has been applied to fastercsv 1.4.0, 
+# because of the following error with Ruby 1.9.1:
+# faster_csv.rb:1570: syntax error, unexpected keyword_nil, expecting keyword_end (SyntaxError)
+
+1570c1570,1574
+<       line  += @io.gets(@row_sep) rescue return nil
+---
+>       begin
+>         line  += @io.gets(@row_sep) 
+>       rescue 
+>         return nil
+>       end

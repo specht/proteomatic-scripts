@@ -17,7 +17,7 @@
 
 require 'include/proteomatic'
 require 'include/evaluate-omssa-helper'
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 require 'include/misc'
 require 'set'
 require 'yaml'
@@ -79,7 +79,8 @@ class AugustusCollect < ProteomaticScript
 		lk_AllModelPeptides = Set.new
 		lk_AllPeptideOccurences = Hash.new
 		@input[:psmFiles].each do |ls_Path|
-			#next unless ls_Path.index("Kurs")
+		
+			#next unless ls_Path.index("MT_CPAN1")
 			# merge OMSSA results
 			lk_Result = loadPsm(ls_Path)
 			
@@ -110,20 +111,20 @@ class AugustusCollect < ProteomaticScript
 		
 		puts "Total peptides: #{lk_AllPeptides.size}"
 		
-		print 'Loading GPF details...'
-		lk_GpfDetails = YAML::load_file('/home/michael/ak-hippler-alignments/gpf-results.yaml')
-		puts ''
-		
-		puts "GPF details: #{lk_GpfDetails.keys.size}"
-		lk_GpfDetails.reject! { |x, y| (!y) || y.empty?}
-		puts "GPF details (non empty): #{lk_GpfDetails.keys.size}"
-		
-		File::open('/home/michael/ak-hippler-alignments/redo-gpf-peptides.fasta', 'w') do |f|
+		File::open('/home/michael/Promotion/ak-hippler-alignments/redo-gpf-peptides.fasta', 'w') do |f|
 			lk_AllPeptides.to_a.sort.each do |ls_Peptide|
 				f.puts ">#{ls_Peptide}"
 				f.puts "#{ls_Peptide}"
 			end
 		end
+		
+		print 'Loading GPF details...'
+		lk_GpfDetails = YAML::load_file('/home/michael/Promotion/ak-hippler-alignments/gpf-results.yaml')
+		puts ''
+		
+		puts "GPF details: #{lk_GpfDetails.keys.size}"
+		lk_GpfDetails.reject! { |x, y| (!y) || y.empty?}
+		puts "GPF details (non empty): #{lk_GpfDetails.keys.size}"
 		
 		lk_PeptidesWithDetails = Set.new(lk_GpfDetails.keys.collect do |x|
 			x.sub('peptide=', '').sub('"', '')
@@ -137,7 +138,7 @@ class AugustusCollect < ProteomaticScript
 		
 		puts "Attention, from now on lost peptides are ignored!"
 		
-		lk_ModelPeptideDetails = YAML::load_file('/home/michael/ak-hippler-alignments/model-peptides-details.yaml')
+		lk_ModelPeptideDetails = YAML::load_file('/home/michael/Promotion/ak-hippler-alignments/model-peptides-details.yaml')
 		lk_ModelPeptideDetails.reject! { |x, y| (!y) || y.empty? }
 		
 		lk_AllPeptides &= lk_PeptidesWithDetails

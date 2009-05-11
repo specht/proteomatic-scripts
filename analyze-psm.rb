@@ -16,7 +16,7 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'include/proteomatic'
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 require 'include/misc'
 require 'bigdecimal'
 require 'set'

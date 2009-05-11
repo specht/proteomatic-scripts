@@ -17,7 +17,7 @@
 
 require 'include/proteomatic'
 require 'include/evaluate-omssa-helper'
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 require 'include/misc'
 require 'set'
 require 'yaml'

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 
 def stddev(ak_Values)
 	lf_Mean = 0.0

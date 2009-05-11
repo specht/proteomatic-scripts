@@ -325,8 +325,6 @@ class ProteomaticScript
 		end
 		@ms_HostName = 'unknown' unless @ms_HostName
 		
-		@ms_UserName.strip!
-		@ms_HostName.strip!
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		

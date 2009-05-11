@@ -18,7 +18,7 @@
 require 'include/proteomatic'
 require 'include/externaltools'
 require 'include/fasta'
-require 'include/fastercsv'
+require 'include/ext/fastercsv'
 require 'include/formats'
 require 'include/misc'
 require 'yaml'
