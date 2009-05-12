@@ -1025,6 +1025,7 @@ class ProteomaticScript
 					lk_ExistingFiles = Array.new
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
+						ls_Directory = ls_OutputDirectory if ls_OutputDirectory
 						ls_Basename = File::basename(ls_Path).dup
 						ls_Format = findFormatForFile(ls_Path)
 						ls_Extension = ''
