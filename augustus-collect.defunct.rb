@@ -111,6 +111,12 @@ class AugustusCollect < ProteomaticScript
 		
 		puts "Total peptides: #{lk_AllPeptides.size}"
 		
+		File::open('/home/michael/Promotion/ak-hippler-alignments/all-gpf-peptides.fasta', 'w') do |f|
+			lk_AllGpfPeptides.to_a.sort.each do |ls_Peptide|
+				f.puts "#{ls_Peptide}"
+			end
+		end
+		
 		File::open('/home/michael/Promotion/ak-hippler-alignments/redo-gpf-peptides.fasta', 'w') do |f|
 			lk_AllPeptides.to_a.sort.each do |ls_Peptide|
 				f.puts ">#{ls_Peptide}"

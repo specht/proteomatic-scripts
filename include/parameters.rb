@@ -51,7 +51,7 @@ class Parameters
 			IO.popen("#{ExternalTools::binaryPath(as_ExtTool)} #{ls_Switch}") { |f| ls_Result = f.read }
 			#puts ls_Result
 			ak_Parameter['choices'] = Array.new
-			ls_Result.each do |ls_Line|
+			ls_Result.each_line do |ls_Line|
 				lk_Line = ls_Line.split(':')
 				next if lk_Line.size != 2
 				# check whether key is a number
@@ -182,9 +182,9 @@ class Parameters
 			lk_Values = Set.new(ak_Value.split(','))
 			@mk_Parameters[as_Key]['choices'].each do |lk_Choice|
 				if (lk_Choice.class == Hash)
-					lk_Values -= lk_Choice.keys.first
+					lk_Values -= [lk_Choice.keys.first]
 				else
-					lk_Values -= lk_Choice
+					lk_Values -= [lk_Choice]
 				end
 			end
 			unless lk_Values.empty?

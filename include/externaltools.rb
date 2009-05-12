@@ -58,7 +58,7 @@ class ExternalTools
 		ls_Package = as_Package.sub('ext.', '')
 		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/properties/ext/ext.#{ls_Package}.yaml")) unless ak_PackageDescription
 		unless ak_PackageDescription['download'][@@ms_Platform]
-			puts "Error: This package is not available for this platform (#{@@ms_Platform})."
+			puts "Error: This package (#{ak_PackageDescription['title']}) is not available for this platform (#{@@ms_Platform})."
 			return
 		end
 		as_ResultFilePath = File::join('ext', ls_Package, @@ms_Platform, ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath

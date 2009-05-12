@@ -537,10 +537,12 @@ class ProteomaticScript
 	private :handleArguments
 
 	def resolveDependencies()
-		@mk_ScriptProperties['needs'].each do |ls_ExtTool|
-			# skip if 'config' and not a proper 'package.program' tool
-			next unless ls_ExtTool[0, 4] == 'ext.'
-			ExternalTools::install(ls_ExtTool) unless ExternalTools::installed?(ls_ExtTool)
+		if @mk_ScriptProperties.include?('needs')
+			@mk_ScriptProperties['needs'].each do |ls_ExtTool|
+				# skip if 'config' and not a proper 'package.program' tool
+				next unless ls_ExtTool[0, 4] == 'ext.'
+				ExternalTools::install(ls_ExtTool) unless ExternalTools::installed?(ls_ExtTool)
+			end
 		end
 	end
 	private :resolveDependencies
@@ -550,9 +552,11 @@ class ProteomaticScript
 		puts "include/properties/#{@ms_ScriptName}.yaml"
 		ls_ConfigPath = File::join('config', "#{@ms_ScriptName}.config.yaml")
 		puts ls_ConfigPath if @mb_NeedsConfig && File::exists?(ls_ConfigPath)
-		@mk_ScriptProperties['needs'].each do |ls_Need|
-			next if ls_Need == 'config'
-			puts Dir[File::join('include', 'properties', "#{ls_Need}*")].join("\n")
+		if @mk_ScriptProperties.include?('needs')
+			@mk_ScriptProperties['needs'].each do |ls_Need|
+				next if ls_Need == 'config'
+				puts Dir[File::join('include', 'properties', "#{ls_Need}*")].join("\n")
+			end
 		end
 		if (@mk_ScriptProperties.has_key?('externalParameters'))
 			@mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
@@ -712,7 +716,7 @@ class ProteomaticScript
 				unless ls_Response.empty?
 					puts '---getParametersUnresolvedDependencies'
 					puts ls_Response
-					exit 1
+					exit 0
 				end
 			end
 		end
@@ -734,7 +738,7 @@ class ProteomaticScript
 		end
 		
 		# add script parameters
-		if @mk_ScriptProperties['parameters']
+		if @mk_ScriptProperties.include?('parameters')
 			@mk_ScriptProperties['parameters'].each do |lk_Parameter| 
 				if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
 					puts "Internal error: Parameter key must not start with 'input' or 'output'."
@@ -748,7 +752,7 @@ class ProteomaticScript
 		# handle filetracker options
 		@mk_DontMd5InputFiles = Array.new
 		@mk_DontMd5OutputFiles = Array.new
-		if @mk_ScriptProperties['filetracker']
+		if @mk_ScriptProperties.include?('filetracker')
 			@mk_ScriptProperties['filetracker'].each do |lk_Parameter|
 				@mk_DontMd5InputFiles = lk_Parameter.values.first if lk_Parameter.keys.first == 'dontMd5InputFiles'
 				@mk_DontMd5OutputFiles = lk_Parameter.values.first if lk_Parameter.keys.first == 'dontMd5OutputFiles'
@@ -759,24 +763,26 @@ class ProteomaticScript
 		lk_InputFormats = Hash.new
 		lk_InputGroups = Hash.new
 		lk_InputGroupOrder = Array.new
-		@mk_ScriptProperties['input'].each do |lk_InputGroup|
-			unless lk_InputGroup.has_key?('key')
-				puts "Internal error: Input group has no key."
-				exit 1
-			end
-			unless lk_InputGroup['formats'].class == Array
-				puts "Internal error: 'formats' must be an array."
-				exit 1
-			end
-			lk_InputGroups[lk_InputGroup['key']] = lk_InputGroup
-			lk_InputGroupOrder.push(lk_InputGroup['key'])
-			lk_InputGroup['formats'].each do |ls_Format|
-				assertFormat(ls_Format)
-				if lk_InputFormats.has_key?(ls_Format)
-					puts "Internal error: #{ls_Format} appears in more than one input file group."
+		if @mk_ScriptProperties.include?('input')
+			@mk_ScriptProperties['input'].each do |lk_InputGroup|
+				unless lk_InputGroup.has_key?('key')
+					puts "Internal error: Input group has no key."
 					exit 1
 				end
-				lk_InputFormats[ls_Format] = lk_InputGroup['key']
+				unless lk_InputGroup['formats'].class == Array
+					puts "Internal error: 'formats' must be an array."
+					exit 1
+				end
+				lk_InputGroups[lk_InputGroup['key']] = lk_InputGroup
+				lk_InputGroupOrder.push(lk_InputGroup['key'])
+				lk_InputGroup['formats'].each do |ls_Format|
+					assertFormat(ls_Format)
+					if lk_InputFormats.has_key?(ls_Format)
+						puts "Internal error: #{ls_Format} appears in more than one input file group."
+						exit 1
+					end
+					lk_InputFormats[ls_Format] = lk_InputGroup['key']
+				end
 			end
 		end
 		@mk_Input = Hash.new
@@ -795,33 +801,35 @@ class ProteomaticScript
 		#end
 
 		lk_OutputFiles = Hash.new
-		@mk_ScriptProperties['output'].each do |lk_OutputFile|
-			if (@m_ScriptType == 'converter' && (!lk_OutFiles.empty?))
-				puts 'Internal error: Only one output file group allowed for converter scripts.'
-				exit 1
-			end
-			unless lk_OutputFile.has_key?('key')
-				puts "Internal error: Output file has no key."
-				exit 1
-			end
-			ls_Key = lk_OutputFile['key']
-			ls_Label = lk_OutputFile['label']
-			lk_OutputFiles[ls_Key] = lk_OutputFile
-			assertFormat(lk_OutputFile['format'])
-			if (@ms_ScriptType == 'processor')
-				ls_Key = lk_OutputFile['key']
-				ls_Key[0, 1] = ls_Key[0, 1].upcase
-				lk_WriteFlag = {'group' => 'Output files', 'key' => "outputWrite#{ls_Key}",
-					'label' => ls_Label, 'type' => 'flag',
-					'filename' => lk_OutputFile['filename']}
-				if (lk_OutputFile.has_key?('force'))
-					lk_WriteFlag['force'] = lk_OutputFile['force'] == true ? 'yes' : 'no'
-					lk_WriteFlag['default'] = lk_OutputFile['force'] == true ? 'yes' : 'no'
-				else
-					lk_WriteFlag['default'] = lk_OutputFile['default'] == true ? 'yes' : 'no'
+		if @mk_ScriptProperties.include?('output')
+			@mk_ScriptProperties['output'].each do |lk_OutputFile|
+				if (@m_ScriptType == 'converter' && (!lk_OutFiles.empty?))
+					puts 'Internal error: Only one output file group allowed for converter scripts.'
+					exit 1
 				end
-				lk_WriteFlag['description'] = "Write #{ls_Label} (#{lk_WriteFlag['filename']})"
-				@mk_Parameters.addParameter(lk_WriteFlag)
+				unless lk_OutputFile.has_key?('key')
+					puts "Internal error: Output file has no key."
+					exit 1
+				end
+				ls_Key = lk_OutputFile['key']
+				ls_Label = lk_OutputFile['label']
+				lk_OutputFiles[ls_Key] = lk_OutputFile
+				assertFormat(lk_OutputFile['format'])
+				if (@ms_ScriptType == 'processor')
+					ls_Key = lk_OutputFile['key']
+					ls_Key[0, 1] = ls_Key[0, 1].upcase
+					lk_WriteFlag = {'group' => 'Output files', 'key' => "outputWrite#{ls_Key}",
+						'label' => ls_Label, 'type' => 'flag',
+						'filename' => lk_OutputFile['filename']}
+					if (lk_OutputFile.has_key?('force'))
+						lk_WriteFlag['force'] = lk_OutputFile['force'] == true ? 'yes' : 'no'
+						lk_WriteFlag['default'] = lk_OutputFile['force'] == true ? 'yes' : 'no'
+					else
+						lk_WriteFlag['default'] = lk_OutputFile['default'] == true ? 'yes' : 'no'
+					end
+					lk_WriteFlag['description'] = "Write #{ls_Label} (#{lk_WriteFlag['filename']})"
+					@mk_Parameters.addParameter(lk_WriteFlag)
+				end
 			end
 		end
 		
@@ -863,13 +871,55 @@ class ProteomaticScript
 		lk_Arguments = ak_Arguments.dup
 		
 		lb_ProposePrefix = false
-		if (lk_Arguments.include?('--proposePrefix'))
+		if lk_Arguments.include?('--proposePrefix')
 			lk_Arguments.delete('--proposePrefix')
 			lb_ProposePrefix = true
 		end
-
-		# digest parameters
+		
+		# reset parameters
 		@mk_Parameters.keys().each { |ls_Key| @mk_Parameters.reset(ls_Key) }
+		
+		# apply profiles
+		lk_ProfileMix = Hash.new
+		lk_AppliedProfiles = Array.new
+		while lk_Arguments.include?('--applyProfile')
+			li_Index = lk_Arguments.index('--applyProfile')
+			ls_ProfilePath = lk_Arguments[li_Index + 1]
+			lk_ApplyProfile = YAML::load_file(ls_ProfilePath)
+			lb_Ok = false
+			if lk_ApplyProfile['content'].class == Hash
+				if lk_ApplyProfile['content']['settings'].class == Hash
+					lb_Ok = true
+					lk_AppliedProfiles << lk_ApplyProfile['content']['title']
+					lk_ApplyProfile['content']['settings'].each_pair do |ls_Key, ls_Value|
+						lk_ProfileMix[ls_Key] ||= Set.new
+ 						lk_ProfileMix[ls_Key] << ls_Value
+					end
+				end
+			end
+			unless lb_Ok
+				puts "Error: Invalid profile in #{ls_ProfilePath}."
+				exit 1
+			end
+			lk_Arguments.delete_at(li_Index)
+			lk_Arguments.delete_at(li_Index)
+		end
+		unless lk_ProfileMix.empty?
+			puts "Applying #{lk_AppliedProfiles.join(', ')} profile#{lk_AppliedProfiles.size > 1 ? 's' : ''}."
+			lk_OldKeys = Set.new(lk_ProfileMix.keys)
+			lk_ProfileMix.reject! { |ls_Key, lk_Values| lk_Values.size > 1 }
+			lk_DeletedKeys = lk_OldKeys - Set.new(lk_ProfileMix.keys)
+			unless lk_DeletedKeys.empty?
+				puts "...the following keys were ignored due to ambiguity: #{lk_DeletedKeys.to_a.sort.to_yaml.sub('---', '')}"
+			end
+			# apply profile mix
+			lk_ProfileMix.each_key { |ls_Key| lk_ProfileMix[ls_Key] = lk_ProfileMix[ls_Key].to_a.first }
+			lk_ProfileMix.each_pair do |ls_Key, ls_Value|
+				@mk_Parameters.set(ls_Key, ls_Value)
+			end
+		end
+
+		# digest command line parameters
 		@mk_Parameters.applyParameters(lk_Arguments)
 		@param = Hash.new
 		@mk_Parameters.keys().each { |ls_Key| @param[ls_Key.intern] = @mk_Parameters.value(ls_Key) }
