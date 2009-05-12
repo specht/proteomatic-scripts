@@ -1,0 +1,33 @@
+group: Quantitation
+
+title: Filter qTrace results by time difference
+
+description: Filter qTrace results by time difference
+
+type: processor
+
+input:
+  - key: qTraceResults
+    label: qTrace Results
+    formats: [csv]
+    min: 1
+    max: 1
+	
+proposePrefix:
+  - qTraceResults
+
+defaultOutputDirectory: qTraceResults
+
+output:
+  - key: filteredResults
+    label: filtered qTrace results
+    format: csv
+    filename: filtered-by-time-difference.csv
+    default: yes
+
+parameters:
+  - key: maxTimeDifference
+    label: Maximum time difference
+    type: float
+    default: 1.0
+    suffix: minutes
