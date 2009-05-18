@@ -76,17 +76,20 @@ class AugustusCollect < ProteomaticScript
 	def run()
 		lk_AllPeptides = Set.new
 		lk_AllGpfPeptides = Set.new
+		lk_AllSixFramesPeptides = Set.new
 		lk_AllModelPeptides = Set.new
 		lk_AllPeptideOccurences = Hash.new
 		@input[:psmFiles].each do |ls_Path|
 		
+			puts File::basename(ls_Path)
 			#next unless ls_Path.index("MT_CPAN1")
 			# merge OMSSA results
-			lk_Result = loadPsm(ls_Path)
+			lk_Result = loadPsm(ls_Path, :silent => true)
 			
 			lk_ScanHash = lk_Result[:scanHash]
 			lk_PeptideHash = lk_Result[:peptideHash]
 			lk_GpfPeptides = lk_Result[:gpfPeptides]
+			lk_SixFramesPeptides = lk_Result[:sixFramesPeptides]
 			lk_ModelPeptides = lk_Result[:modelPeptides]
 			lk_ProteinIdentifyingModelPeptides = lk_Result[:proteinIdentifyingModelPeptides]
 			lk_Proteins = lk_Result[:proteins]
@@ -105,11 +108,22 @@ class AugustusCollect < ProteomaticScript
 			end
 			
 			lk_AllGpfPeptides += lk_GpfPeptides
+			lk_AllSixFramesPeptides += lk_SixFramesPeptides
 			lk_AllModelPeptides += lk_ModelPeptides
 			lk_AllPeptides += Set.new(lk_PeptideHash.keys)
 		end
 		
 		puts "Total peptides: #{lk_AllPeptides.size}"
+		puts "models only: #{(lk_AllModelPeptides - lk_AllSixFramesPeptides - lk_AllGpfPeptides).size}"
+		puts "GPF only: #{(lk_AllGpfPeptides - lk_AllSixFramesPeptides - lk_AllModelPeptides).size}"
+		puts "six frames only: #{(lk_AllSixFramesPeptides - lk_AllModelPeptides - lk_AllGpfPeptides).size}"
+		puts "GPF and model and six frames: #{(lk_AllModelPeptides & lk_AllGpfPeptides & lk_AllSixFramesPeptides).size}"
+		
+		File::open('/home/michael/Desktop/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
+		File::open('/home/michael/Desktop/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
+		File::open('/home/michael/Desktop/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
+		
+		exit
 		
 		File::open('/home/michael/Promotion/ak-hippler-alignments/all-gpf-peptides.fasta', 'w') do |f|
 			lk_AllGpfPeptides.to_a.sort.each do |ls_Peptide|

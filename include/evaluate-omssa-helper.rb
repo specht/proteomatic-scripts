@@ -428,7 +428,7 @@ def loadPsm(as_Path, ak_Options = {})
 	#WLQYSEVIHAR:
 	#  :scans: [MT_HydACPAN_1_300407.100.100.2, ...]
 	#  :spots: (MT_HydACPAN_1_300407) (set)
-	#  :found: {gpf, models}
+	#  :found: {gpf, models, sixframes}
 	#  :proteins: {x => true, y => true}
 	#  :foundUnmodified: true
 	#  :mods:
@@ -461,6 +461,8 @@ def loadPsm(as_Path, ak_Options = {})
 		lk_ScanHash[ls_Scan][:deflines].each do |ls_DefLine|
 			if (ls_DefLine.index('gpf_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:gpf] = true 
+			elsif (ls_DefLine.index('ORF_') == 0)
+				lk_PeptideHash[ls_Peptide][:found][:sixframes] = true 
 			else
 				lk_PeptideHash[ls_Peptide][:found][:models] = true 
 				lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
@@ -474,11 +476,13 @@ def loadPsm(as_Path, ak_Options = {})
 	end
 	
 	lk_GpfPeptides = Set.new
+	lk_SixFramesPeptides = Set.new
 	lk_ModelPeptides = Set.new
 	lk_ProteinIdentifyingModelPeptides = Set.new
 	
 	lk_PeptideHash.keys.each do |ls_Peptide|
 		lk_GpfPeptides.add(ls_Peptide) if lk_PeptideHash[ls_Peptide][:found].has_key?(:gpf)
+		lk_SixFramesPeptides.add(ls_Peptide) if lk_PeptideHash[ls_Peptide][:found].has_key?(:sixframes)
 		lk_ModelPeptides.add(ls_Peptide) if lk_PeptideHash[ls_Peptide][:found].has_key?(:models)
 		lk_ProteinIdentifyingModelPeptides.add(ls_Peptide) if lk_PeptideHash[ls_Peptide][:proteins].size == 1
 	end
@@ -528,6 +532,7 @@ def loadPsm(as_Path, ak_Options = {})
 	lk_Result[:scanHash] = lk_ScanHash
 	lk_Result[:peptideHash] = lk_PeptideHash
 	lk_Result[:gpfPeptides] = lk_GpfPeptides
+	lk_Result[:sixFramesPeptides] = lk_SixFramesPeptides
 	lk_Result[:modelPeptides] = lk_ModelPeptides
 	lk_Result[:proteinIdentifyingModelPeptides] = lk_ProteinIdentifyingModelPeptides
 	lk_Result[:proteins] = lk_Proteins
