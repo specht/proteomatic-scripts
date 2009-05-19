@@ -15,20 +15,20 @@ input:
     formats: [ams]
 
 parameters:
-  - key: User
+  - key: user
     type: string
     label: User name
     default: ''
-  - key: Password
+  - key: password
     type: string
     label: Password
     default: 'garnix'
-  - key: databasetarget
+  - key: databaseTarget
     label: database
     type: enum
     choices: ['/2db/tags/v1/admin/AMSUpload.php', 'sonstwo']
     default: '/2db/tags/v1/admin/AMSUpload.php'
-  - key: Organism
+  - key: organism
     label: Organism
     type: enum
     choices: [Chlamydomonas, 'something']
