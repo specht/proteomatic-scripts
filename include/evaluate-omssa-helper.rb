@@ -45,6 +45,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 	li_EntryCount = 0
 	li_ErrorCount = 0
 	ls_ErrorLine = nil
+	lk_Warnings = Set.new
 	ak_Files.each do |ls_Filename|
 		lk_File = File.open(ls_Filename, 'r')
 		
@@ -73,8 +74,10 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 
 			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
 			unless (ls_DefLine.index('target_') == 0) || (ls_DefLine.index('decoy_') == 0)
-				puts "Error: There is a PSM which does not come from a target/decoy search in #{ls_Filename}."
-				exit 1
+				unless ls_DefLine.index('__putative__') == 0
+					lk_Warnings.add("Warning: There is a PSM which does not come from a target/decoy search in #{ls_Filename}.")
+				end
+				next
 			end
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[lk_HeaderMap['mods']]
@@ -130,6 +133,9 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 		end
 	end
 	puts "\rReading PSM entries... #{li_EntryCount}."
+	unless lk_Warnings.empty?
+		puts lk_Warnings.to_a.join("\n")
+	end
 	if (li_ErrorCount > 0)
 		puts "ATTENTION: The scan name was not as expected in #{li_ErrorCount} of #{li_EntryCount} lines, these lines have been ignored."
 		puts "The scan name is expected to end with (start scan).(end scan).(charge)."

@@ -36,7 +36,7 @@ class MassCalc < ProteomaticScript
 		lk_PeptideSet = Set.new
 		@input[:peptides].each do |ls_Path|
 			ls_File = File::read(ls_Path)
-			ls_File.each do |ls_Line|
+			ls_File.each_line do |ls_Line|
 				ls_Peptide = ls_Line.strip
 				next if ls_Peptide.empty?
 				if (ls_Peptide.include?('.'))
