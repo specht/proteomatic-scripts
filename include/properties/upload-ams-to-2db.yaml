@@ -25,9 +25,8 @@ parameters:
     default: 'garnix'
   - key: databaseTarget
     label: database
-    type: enum
-    choices: ['/2db/tags/v1/admin/AMSUpload.php', 'sonstwo']
-    default: '/2db/tags/v1/admin/AMSUpload.php'
+    type: string
+    default: "http://localhost/2db/tags/v1/"
   - key: organism
     label: Organism
     type: enum

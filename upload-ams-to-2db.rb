@@ -27,7 +27,7 @@ class UploadAMSto2DB < ProteomaticScript
 #      file.puts 'Halloechen'
 #	  file.puts 'Du bist ' + @param[:User]
 #	  file.puts 'Dein Passwort lautet: ' + @param[:Password]
-#	  file.puts 'Du willst in die Datenbank ' + @param[:databasetarget] 
+#	  file.puts 'Du willst in die Datenbank ' + @param[:databaseTarget] 
 #	  file.puts 'Du hast den Organismus ' + @param[:Organism] + ' gewaehlt.'
 #	  file.puts 'Viel Spass noch!'
 #---------------------------------------
@@ -36,9 +36,12 @@ class UploadAMSto2DB < ProteomaticScript
 
 		h = Net::HTTP.new('localhost', 80)
 		content = File::read(@input[:amsFile].first)
-#      resp, body = h.post((@param[:databasetarget]),{'password'=>@param[:Password],'username'=>@param[:User],'filepath'=>@input[:amsFile],'organism'=>@param[:Organism]}, 'content')
+		#      resp, body = h.post((@param[:databaseTarget]),{'password'=>@param[:Password],'username'=>@param[:User],'filepath'=>@input[:amsFile],'organism'=>@param[:Organism]}, 'content')
 
-		resp, body = h.post(@param[:databasetarget] + "?password=#{@param[:password]}&username=#{@param[:user]}&organism=#{@param[:organism]}", content )
+		puts @param.to_yaml
+		uri = @param[:databaseTarget] + "/admin/AMSUpload.php?password=#{@param[:password]}&username=#{@param[:user]}&organism=#{@param[:organism]}&filepath=#{@input[:amsFile]}, content"
+		puts uri
+		resp, body = h.post(uri, content )
 		puts "#{resp.code}"
 		puts body
 #	  end
