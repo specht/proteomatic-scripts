@@ -39,9 +39,9 @@ class UploadAMSto2DB < ProteomaticScript
 		#      resp, body = h.post((@param[:databaseTarget]),{'password'=>@param[:Password],'username'=>@param[:User],'filepath'=>@input[:amsFile],'organism'=>@param[:Organism]}, 'content')
 
 		puts @param.to_yaml
-		uri = @param[:databaseTarget] + "/admin/AMSUpload.php?password=#{@param[:password]}&username=#{@param[:user]}&organism=#{@param[:organism]}&filepath=#{@input[:amsFile]}, content"
+		uri = @param[:databaseTarget] + "/admin/AMSUpload.php?password=#{@param[:password]}&username=#{@param[:user]}&organism=#{@param[:organism]}&filepath=#{@input[:amsFile]}"
 		puts uri
-		resp, body = h.post(uri, content )
+		resp, body = h.post(uri, content)
 		puts "#{resp.code}"
 		puts body
 #	  end
