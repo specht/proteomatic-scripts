@@ -10,6 +10,6 @@ download:
   macx: 'ftp://gpf.uni-muenster.de/download/ptb/ptb-0.2.2-macx.tar.bz2'
 
 path:
-  linux: ptb/ptb-0.2.2-linux
-  win32: ptb/ptb-0.2.2-win32
-  macx: ptb/ptb-0.2.2-macx
+  linux: ptb-0.2.2-linux
+  win32: ptb-0.2.2-win32
+  macx: ptb-0.2.2-macx

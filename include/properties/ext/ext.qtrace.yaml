@@ -10,6 +10,6 @@ download:
   macx: 'ftp://gpf.uni-muenster.de/download/qtrace/qtrace-0.2.0-macx.tar.bz2'
 
 path:
-  linux: qtrace/qtrace-0.2.0-linux
-  win32: qtrace/qtrace-0.2.0-win32
-  macx: qtrace/qtrace-0.2.0-macx
+  linux: qtrace-0.2.0-linux
+  win32: qtrace-0.2.0-win32
+  macx: qtrace-0.2.0-macx
