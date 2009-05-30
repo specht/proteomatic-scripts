@@ -1,6 +1,6 @@
 group: Quantitation
 
-title: qTrace
+title: QTrace
 
 description: >
    Perform quantitation on MS1 scans. 
@@ -126,7 +126,8 @@ parameters:
     default: yes
     
 needs:
-  - ext.simquant
+  - ext.qtrace
+  - ext.ptb
 
 filetracker:
   - dontMd5InputFiles: [spectraFiles]

@@ -100,7 +100,7 @@ parameters:
 	
 needs:
   - config
-  - ext.simquant
+  - ext.ptb
 
 filetracker:
   - dontMd5InputFiles: [spectra]

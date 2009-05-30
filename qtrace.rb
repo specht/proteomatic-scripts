@@ -94,7 +94,7 @@ class QTrace < ProteomaticScript
 			lk_ScanHash.each do |ls_Scan, lk_Scan|
 				unless (lk_Scan[:retentionTime])
 					puts 'Error: The PSM list you specified does not contain any retention time information.'
-					puts 'SimQuant cannot continue without that information. Please re-run the OMSSA search to get a PSM list which includes retention times.'
+					puts 'QTrace cannot continue without that information. Please re-run the OMSSA search to get a PSM list which includes retention times.'
 					exit 1
 				end
 			end
@@ -169,7 +169,7 @@ class QTrace < ProteomaticScript
 		# update lk_PeptideInProtein
 		unless @input[:modelFiles].empty?
 			print 'Matching peptides to proteins...'
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.matchpeptides')}\" --output \"#{ls_PeptideMatchYamlPath}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
+			ls_Command = "\"#{ExternalTools::binaryPath('ptb.matchpeptides')}\" --output \"#{ls_PeptideMatchYamlPath}\" --peptides #{lk_Peptides.join(' ')} --peptideFiles #{@input[:peptideFiles].collect {|x| '"' + x + '"'}.join(' ')} --modelFiles #{@input[:modelFiles].collect {|x| '"' + x + '"'}.join(' ')}"
 			runCommand(ls_Command, true)
 			lk_PeptideMatches = YAML::load_file(ls_PeptideMatchYamlPath)
 			puts 'done.'
@@ -227,7 +227,7 @@ class QTrace < ProteomaticScript
 				lk_Out.puts(lk_ThisPeptides.to_a.sort.join("\n"))
 			end
 
-			ls_Command = "\"#{ExternalTools::binaryPath('simquant.simquant')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
+			ls_Command = "\"#{ExternalTools::binaryPath('qtrace.qtrace')}\" --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --xhtmlOutput yes --xhtmlOutputTarget \"#{ls_XhtmlPath}\" --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\" --printStatistics #{@param[:printStatistics]}"
 			runCommand(ls_Command, true)
 			
 			lk_HeaderMap, lk_Results = loadCsvResults(ls_CsvPath)
@@ -390,11 +390,11 @@ class QTrace < ProteomaticScript
 				lk_Out.puts "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>"
 				lk_Out.puts "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='de'>"
 				lk_Out.puts '<head>'
-				lk_Out.puts '<title>SimQuant Report</title>'
+				lk_Out.puts '<title>QTrace Report</title>'
 				printStyleSheet(lk_Out)
 				lk_Out.puts '</head>'
 				lk_Out.puts '<body>'
-				lk_Out.puts "<h1>SimQuant Report</h1>"
+				lk_Out.puts "<h1>QTrace Report</h1>"
 				lk_Out.puts '<p>'
 				lk_Out.puts "Trying charge states #{@param[:minCharge]} to #{@param[:maxCharge]}.<br />"
 				lk_Out.puts "Quantitation has been attempted in #{@param[:scanType] == 'sim' ? 'SIM scans only' : (@param[:scanType] == 'ms1' ? 'full scans only' : 'all MS1 scans')}, considering #{@param[:isotopeCount]} isotope peaks for both the unlabeled and the labeled ions.<br />"
@@ -587,7 +587,7 @@ class QTrace < ProteomaticScript
 				# TODO: continue here with unmatched/overmatched peptides
 				unless lk_UnmatchedPeptides.empty?
 					lk_Out.puts "<h2 id='header-unmatched-peptides'>Unmatched peptides</h2>"
-					lk_Out.puts "<p>The following peptides have been quantified, but could not be matched to a protein (maybe because they have been found via <i>de novo</i> prediction and GPF). In order to see which proteins the peptides belong to, you can either supply gene models to SimQuant, or you can use PSM lists (MS2 search results) in the first place instead of peptide lists.</p>"
+					lk_Out.puts "<p>The following peptides have been quantified, but could not be matched to a protein (maybe because they have been found via <i>de novo</i> prediction and GPF). In order to see which proteins the peptides belong to, you can either supply gene models to QTrace, or you can use PSM lists (MS2 search results) in the first place instead of peptide lists.</p>"
 					ls_Peptides = lk_UnmatchedPeptides.sort.join(', ')
 					lk_Out.puts "<p>#{ls_Peptides}</p>"
 				end

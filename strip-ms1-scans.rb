@@ -11,7 +11,7 @@ class StripMs1Scans < ProteomaticScript
 			ls_OldDir = Dir.pwd
 			Dir.chdir(ls_TempOutPath)
 			# call stripscans
-			ls_Command = "#{ExternalTools::binaryPath('simquant.stripscans')} \"#{ls_InPath}\""
+			ls_Command = "#{ExternalTools::binaryPath('ptb.stripscans')} \"#{ls_InPath}\""
 			print 'stripping'
 			$stdout.flush
 			runCommand(ls_Command)

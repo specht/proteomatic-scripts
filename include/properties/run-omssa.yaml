@@ -73,7 +73,7 @@ externalParameters:
 needs:
   - ext.omssa
   - ext.blast
-  - ext.simquant
+  - ext.ptb
 
 filetracker:
   - dontMd5InputFiles: [spectra]

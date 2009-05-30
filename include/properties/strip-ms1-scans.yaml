@@ -31,7 +31,7 @@ parameters:
 
 needs:
   - ext.7zip
-  - ext.simquant
+  - ext.ptb
 
 filetracker:
   - dontMd5InputFiles: [mzMlFiles]

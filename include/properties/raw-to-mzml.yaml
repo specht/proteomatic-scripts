@@ -38,7 +38,7 @@ parameters:
 needs:
   - ext.pwiz
   - ext.7zip
-  - ext.simquant
+  - ext.ptb
 
 externalParameters: 
   - pwiz.msconvert

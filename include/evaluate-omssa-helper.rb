@@ -21,7 +21,7 @@ require 'include/misc'
 require 'set'
 
 
-def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm = nil)
+def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_')
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -73,7 +73,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 
 			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
-			unless (ls_DefLine.index('target_') == 0) || (ls_DefLine.index('decoy_') == 0)
+			unless (ls_DefLine.index(as_TargetPrefix) == 0) || (ls_DefLine.index(as_DecoyPrefix) == 0)
 				unless ls_DefLine.index('__putative__') == 0
 					lk_Warnings.add("Warning: There is a PSM which does not come from a target/decoy search in #{ls_Filename}.")
 				end
@@ -85,12 +85,6 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 			lf_Mass = lk_Line[lk_HeaderMap['mass']]
 			lf_TheoMass = lk_Line[lk_HeaderMap['theomass']]
 			li_Charge = lk_Line[lk_HeaderMap['charge']].to_i
-			if af_MaxPpm
-				# calculate mass error in ppm
-				lf_ThisPpm = ((lf_Mass.to_f - lf_TheoMass.to_f).abs / lf_Mass.to_f) * 1000000.0
-				# skip this PSM if ppm is not good
-				next if lf_ThisPpm > af_MaxPpm
-			end
 			
 			# correct charge in scan name (because when there are multiple charges,
 			# only one version of the spectrum may have been sent to OMSSA, because
@@ -126,9 +120,9 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, af_MaxPpm 
 			if (!lk_ScanHash[ls_Spot][ls_Scan].has_key?(:e) || lf_E < lk_ScanHash[ls_Spot][ls_Scan][:e])
 				# clear scan hash
 				lk_ScanHash[ls_Spot][ls_Scan][:e] = lf_E;
-				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = {(ls_DefLine.index('decoy_') == 0) => true}
+				lk_ScanHash[ls_Spot][ls_Scan][:decoy] = {(ls_DefLine.index(as_DecoyPrefix) == 0) => true}
 			elsif (lf_E == lk_ScanHash[ls_Spot][ls_Scan][:e])
-				lk_ScanHash[ls_Spot][ls_Scan][:decoy][(ls_DefLine.index('decoy_') == 0)] = true
+				lk_ScanHash[ls_Spot][ls_Scan][:decoy][(ls_DefLine.index(as_DecoyPrefix) == 0)] = true
 			end
 		end
 	end
@@ -195,6 +189,7 @@ end
 
 
 def loadPsm(as_Path, ak_Options = {})
+	ak_Options[:putativePrefix] ||= '__putative__'
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507.1058.1058.2.dta:
 	#  :e: 3.88761e-07
@@ -298,7 +293,7 @@ def loadPsm(as_Path, ak_Options = {})
 			lf_RetentionTime = nil
 			lf_RetentionTime = lk_Line[lk_HeaderMap['retentiontime']].to_f if lk_HeaderMap.include?('retentiontime')
 
-			if (ls_DefLine.index('target_') == 0 || ls_DefLine.index('decoy_') == 0)
+			if (ls_DefLine.include?('decoy_'))
 				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script. If you are unsatisfied with the results of the FPR filter, you can alternatively filter by a fixed score threshold."
 				exit 1
 			end
@@ -465,9 +460,9 @@ def loadPsm(as_Path, ak_Options = {})
 			lk_PeptideHash[ls_Peptide][:mods][lk_Mod[:peptide]][ls_Description][ls_Spot].push(ls_Scan)
 		end
 		lk_ScanHash[ls_Scan][:deflines].each do |ls_DefLine|
-			if (ls_DefLine.index('gpf_') == 0)
+			if (ls_DefLine.index(ak_Options[:putativePrefix] + 'gpf_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:gpf] = true 
-			elsif (ls_DefLine.index('ORF_') == 0)
+			elsif (ls_DefLine.index(ak_Options[:putativePrefix] + 'ORF_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:sixframes] = true 
 			else
 				lk_PeptideHash[ls_Peptide][:found][:models] = true 

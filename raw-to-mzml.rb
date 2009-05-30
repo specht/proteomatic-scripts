@@ -22,12 +22,12 @@ class Raw2MzML < ProteomaticScript
 			
 			# strip MS1 scans if desired
 			# Note: msconvert has the --stripIT option to strip MS1 ion trap scans, but 
-			# it didn't strip our MS1 scans when I tried it, so we use simquant.stripscans here
+			# it didn't strip our MS1 scans when I tried it, so we use ptb.stripscans here
 			
 			unless (@param[:stripMs1Scans].empty?)
 				ls_OldDir = Dir::pwd()
 				
-				ls_StripScansPath = ExternalTools::binaryPath('simquant.stripscans')
+				ls_StripScansPath = ExternalTools::binaryPath('ptb.stripscans')
 				Dir.chdir(ls_TempOutPath)
 				
 				print ', stripping'

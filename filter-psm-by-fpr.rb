@@ -45,7 +45,7 @@ class FilterPsmByFpr < ProteomaticScript
 		end
 
 		lk_Result = Hash.new
-		lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global')
+		lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global', @param[:targetPrefix], @param[:decoyPrefix])
 		
 		puts 'Warning: No PSM remaining.' if (lk_Result[:scoreThresholds].empty?)
 		
@@ -71,12 +71,12 @@ class FilterPsmByFpr < ProteomaticScript
 							lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 							ls_DefLine = lk_Line[lk_HeaderMap['defline']]
 							# is it a decoy match? skip it!
-							next if ls_DefLine.index('decoy_') == 0
+							next if ls_DefLine.index(@param[:decoyPrefix]) == 0
 							# is the score too bad? skip it!
 							next if lf_E > lk_Result[:scoreThresholds][ls_Spot]
 
 							unless @param[:beStrict] && (lk_Result[:actualFpr][ls_Spot] > @param[:targetFpr] / 100.0)
-								lk_Out.print ls_Line.sub('target_', '').strip
+								lk_Out.print ls_Line.sub(@param[:targetPrefix], '').strip
 								lk_Out.print ", fpr, #{@param[:targetFpr] / 100.0}, #{lk_Result[:actualFpr][ls_Spot]}, #{lk_Result[:scoreThresholds][ls_Spot]}"
 								lk_Out.puts
 							end

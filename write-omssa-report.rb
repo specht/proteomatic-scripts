@@ -25,7 +25,7 @@ require 'yaml'
 class WriteOmssaReport < ProteomaticScript
 	def run()
 		# merge OMSSA results
-		lk_Result = loadPsm(@input[:psmFile].first)
+		lk_Result = loadPsm(@input[:psmFile].first, {:putativePrefix => @param[:putativePrefix]})
 		
 		lk_ScanHash = lk_Result[:scanHash]
 		lk_PeptideHash = lk_Result[:peptideHash]

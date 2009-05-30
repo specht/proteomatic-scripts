@@ -47,3 +47,13 @@ parameters:
     type: flag
     default: yes
     description: Be strict about the target FPR.
+  - key: targetPrefix
+    label: Target entry prefix
+    type: string
+    default: '__td__target_'
+    group: Tweaks
+  - key: decoyPrefix
+    label: Decoy entry prefix
+    type: string
+    default: '__td__decoy_'
+    group: Tweaks

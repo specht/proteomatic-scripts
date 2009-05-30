@@ -48,3 +48,8 @@ parameters:
     label: Write modified peptides
     type: flag
     default: true
+  - key: putativePrefix
+    group: Tweaks
+    label: Putative entry prefix
+    type: string
+    default: '__putative__'
