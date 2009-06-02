@@ -68,13 +68,13 @@ class AnalyzePsm < ProteomaticScript
 							lf_Mass = lk_Line[lk_Header['mass']].to_f
 							lf_TheoMass = lk_Line[lk_Header['theomass']].to_f
 							lf_Ppm = ((lf_Mass - lf_TheoMass).abs / lf_TheoMass) * 1000000.0
-							next unless lk_Line[lk_Header['defline']].index('decoy_') == 0 || lk_Line[lk_Header['defline']].index('target_') == 0
+							next unless lk_Line[lk_Header['defline']].index(@param[:targetEntryPrefix]) == 0 || lk_Line[lk_Header['defline']].index(@param[:decoyEntryPrefix]) == 0
 							li_PsmCount += 1
 							lk_Psm = {
 								:peptide => lk_Line[lk_Header['peptide']].upcase, 
 								:score => BigDecimal.new(lk_Line[lk_Header['evalue']]),
 								:ppm => lf_Ppm,
-								:decoy => (lk_Line[lk_Header['defline']].index('decoy_') == 0)
+								:decoy => (lk_Line[lk_Header['defline']].index(@param[:decoyEntryPrefix]) == 0)
 							}
 							if (lk_ScanHash.include?(ls_ScanId))
 								lk_ScanHash[ls_ScanId] = lk_Psm if (lk_Psm[:score] < lk_ScanHash[ls_ScanId][:score])

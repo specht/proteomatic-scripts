@@ -118,7 +118,9 @@ class AugustusCollect < ProteomaticScript
 		puts "GPF only: #{(lk_AllGpfPeptides - lk_AllSixFramesPeptides - lk_AllModelPeptides).size}"
 		puts "six frames only: #{(lk_AllSixFramesPeptides - lk_AllModelPeptides - lk_AllGpfPeptides).size}"
 		puts "GPF and model and six frames: #{(lk_AllModelPeptides & lk_AllGpfPeptides & lk_AllSixFramesPeptides).size}"
+		puts "all but sixframes: #{(lk_AllModelPeptides + lk_AllGpfPeptides).size}"
 		
+		File::open('/home/michael/Desktop/ingrid-peptides-new.txt', 'w') { |f| f.puts lk_AllPeptides.to_a.sort.join("\n") }
 		File::open('/home/michael/Desktop/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
 		File::open('/home/michael/Desktop/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
 		File::open('/home/michael/Desktop/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }

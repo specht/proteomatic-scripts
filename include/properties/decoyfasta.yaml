@@ -1,43 +1,32 @@
-group: OMSSA/1. Run
+group: FASTA
 
-title: Run OMSSA
+title: Create target/decoy database
 
 type: processor
 
 description: >
-  This script runs OMSSA on a given set of spectral files and databases. 
-  If desired, a target-decoy approach can be used.
+  This script creates a target/decoy database from a set of input FASTA databases.
 
 input:
-  - key: spectra
-    label: spectra
-    formats: [dta, mgf, xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
-    min: 1
   - key: databases
     label: database
     formats: [fasta]
     min: 1
     
 proposePrefix:
-  - spectra
+  - databases
 
-defaultOutputDirectory: spectra
+defaultOutputDirectory: databases
     
 output:
-  - key: resultFile
-    label: OMSSA results
-    format: csv
-    filename: omssa-results.csv
+  - key: outputDatabase
+    label: Target/decoy database
+    format: fasta
+    filename: target-decoy.fasta
     default: yes
 
 parameters:
-  - key: doTargetDecoy
-    group: '{1}Target/decoy search'
-    label: Perform target-decoy search
-    type: flag
-    default: true
   - key: targetDecoyMethod
-    group: '{1}Target/decoy search'
     label: Target-decoy method
     type: enum
     choices: [{'shuffle': 'shuffle protein'}, {'reverse': 'reverse protein'}, {'shuffle-peptide': 'shuffle peptide'}]
@@ -45,7 +34,6 @@ parameters:
     description: Specify how decoys should be created.
     enabled: doTargetDecoy
   - key: targetDecoyKeepStart
-    group: '{1}Target/decoy search'
     label: Decoy keep start
     type: int
     default: 0
@@ -53,7 +41,6 @@ parameters:
     description: Specify how many amino acids from the start of a sequence should be left untouched when creating a decoy entry.
     enabled: doTargetDecoy
   - key: targetDecoyKeepEnd
-    group: '{1}Target/decoy search'
     label: Decoy keep end
     type: int
     default: 1
@@ -61,33 +48,17 @@ parameters:
     description: Specify how many amino acids from the end of a sequence should be left untouched when creating a decoy entry.
     enabled: doTargetDecoy
   - key: targetEntryPrefix
-    group: '{1}Target/decoy search'
     label: Target entry prefix
     type: string
     default: '__td__target_'
     description: This will be prepended to every target entry during target/decoy generation.
     enabled: doTargetDecoy
   - key: decoyEntryPrefix
-    group: '{1}Target/decoy search'
     label: Decoy entry prefix
     type: string
     default: '__td__decoy_'
     description: This will be prepended to every decoy entry during target/decoy generation.
     enabled: doTargetDecoy
-  - key: batchSize
-    group: Tweaks
-    label: Spectrum batch size
-    type: int
-    default: 2000
-    min: 1
-    
-externalParameters: 
-  - omssa.omssacl
 
 needs:
-  - ext.omssa
-  - ext.blast
   - ext.ptb
-
-filetracker:
-  - dontMd5InputFiles: [spectra]

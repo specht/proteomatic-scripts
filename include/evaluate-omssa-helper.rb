@@ -462,7 +462,7 @@ def loadPsm(as_Path, ak_Options = {})
 		lk_ScanHash[ls_Scan][:deflines].each do |ls_DefLine|
 			if (ls_DefLine.index(ak_Options[:putativePrefix] + 'gpf_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:gpf] = true 
-			elsif (ls_DefLine.index(ak_Options[:putativePrefix] + 'ORF_') == 0)
+			elsif (ls_DefLine.index(ak_Options[:putativePrefix] + 'orf_') == 0)
 				lk_PeptideHash[ls_Peptide][:found][:sixframes] = true 
 			else
 				lk_PeptideHash[ls_Peptide][:found][:models] = true 

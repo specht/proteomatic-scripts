@@ -21,3 +21,19 @@ input:
     label: OMSSA results
     formats: [csv]
     min: 1
+
+parameters:
+  - key: targetEntryPrefix
+    group: Tweaks
+    label: Target entry prefix
+    type: string
+    default: '__td__target_'
+    description: This will be prepended to every target entry during target/decoy generation.
+    enabled: doTargetDecoy
+  - key: decoyEntryPrefix
+    group: Tweaks
+    label: Decoy entry prefix
+    type: string
+    default: '__td__decoy_'
+    description: This will be prepended to every decoy entry during target/decoy generation.
+    enabled: doTargetDecoy

@@ -112,7 +112,8 @@ class RunOmssa < ProteomaticScript
 			# yay, make it the real target mc decoy!
 			puts "Creating target-decoy database..."
 			ls_DatabasePath= tempFilename('target-decoy-database', ls_DatabaseTempPath);
-			ls_Command = "#{ExternalTools::binaryPath('ptb.decoyfasta')} --output \"#{ls_DatabasePath}\" --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
+			ls_Command = "#{ExternalTools::binaryPath('ptb.decoyfasta')} --output \"#{ls_DatabasePath}\" --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} --targetFormat \"#{@param[:targetEntryPrefix]}\" --decoyFormat \"#{@param[:decoyEntryPrefix]}\" #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
+			#puts ls_Command
 			runCommand(ls_Command, true)
 		end
 		

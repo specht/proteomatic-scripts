@@ -85,19 +85,6 @@ class FilterPsmByFpr < ProteomaticScript
 				end
 			end
 		end
-		if @output[:scoreThresholds]
-			File.open(@output[:scoreThresholds], 'w') do |lk_Out|
-				lk_Hash = Hash.new
-				lb_DestroyResults = false
-				lk_Hash['actualFpr'] = lk_Result[:actualFpr]
-				lk_Hash['targetFpr'] = @param[:targetFpr] / 100.0
-				lk_Hash['scoreThresholds'] = Hash.new
-				lk_Result[:scoreThresholds].each do |ls_Spot, lk_Threshold|
-					lk_Hash['scoreThresholds'][ls_Spot] = lk_Threshold.to_f
-				end
-				lk_Out.puts lk_Hash.to_yaml
-			end
-		end
 	end
 end
 
