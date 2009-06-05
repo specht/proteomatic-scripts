@@ -247,11 +247,14 @@ class QTrace < ProteomaticScript
 							li_IdentificationCharge = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:charge]
 							# check whether we are talking about the same charge here
 							if (li_QuantitationCharge == li_IdentificationCharge)
-								lf_TimeDifference = (lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs
-								li_Index = lk_Hit[lk_HeaderMap['id']]
-								lk_TimeDifference[li_Index] ||= lf_TimeDifference 
-								lk_TimeDifference[li_Index] = lf_TimeDifference if lf_TimeDifference < lk_TimeDifference[li_Index]
-								lb_RejectThis = false
+								# additionally check whether the peptide has been MS2-identified without modifications
+								if lk_ScanHash[ls_Scan][:mods].empty?
+									lf_TimeDifference = (lk_ScanHash[ls_Scan][:retentionTime] - lk_Hit[lk_HeaderMap['retentiontime']].to_f).abs
+									li_Index = lk_Hit[lk_HeaderMap['id']]
+									lk_TimeDifference[li_Index] ||= lf_TimeDifference 
+									lk_TimeDifference[li_Index] = lf_TimeDifference if lf_TimeDifference < lk_TimeDifference[li_Index]
+									lb_RejectThis = false
+								end
 							end
 						end
 					end
