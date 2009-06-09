@@ -1,6 +1,6 @@
 group: Quantitation
 
-title: QTrace
+title: qTrace
 
 description: >
    Perform quantitation on MS1 scans. 
@@ -33,11 +33,11 @@ input:
 defaultOutputDirectory: spectraFiles
 
 output:
-  - key: xhtmlReport
-    label: XHTML results
-    format: xhtml
-    filename: qtrace-results.xhtml
-    default: no
+#   - key: xhtmlReport
+#     label: XHTML results
+#     format: xhtml
+#     filename: qtrace-results.xhtml
+#     default: no
   - key: proteinCsv
     label: CSV results
     format: csv
@@ -55,11 +55,11 @@ parameters:
     default: ''
     label: Exclude amino acids
     description: "If you have reason to believe that proline containing peptides will mess up your quantitation, enter 'P' here."
-  - key: modification
-    label: Modification
+  - key: label
+    label: Label
     type: enum
-    default: argc13
-    choices: [{argc13: 'heavy arginine'}]
+    default: RP
+    choices: [{R: 'heavy R'}, {RP: 'heavy R and P'}]
   - key: scanType
     label: Scans to analyze
     type: enum
@@ -105,25 +105,25 @@ parameters:
     min: 0.0
     step: 0.1
     description: This mass accuracy is used when peaks are tested for absence.
-  - key: printStatistics
-    label: Print quantitation failure statistics
-    type: flag
-    default: yes
-  - key: showPeptideInProtein
-    label: Show peptide location within protein
-    group: qTrace Results
-    type: flag
-    default: yes
-  - key: showElutionProfile
-    label: Show elution profile
-    group: qTrace Results
-    type: flag
-    default: yes
-  - key: includeSpectra
-    label: Include spectra
-    group: qTrace Results
-    type: flag
-    default: yes
+#   - key: printStatistics
+#     label: Print quantitation failure statistics
+#     type: flag
+#     default: yes
+#   - key: showPeptideInProtein
+#     label: Show peptide location within protein
+#     group: qTrace Results
+#     type: flag
+#     default: yes
+#   - key: showElutionProfile
+#     label: Show elution profile
+#     group: qTrace Results
+#     type: flag
+#     default: yes
+#   - key: includeSpectra
+#     label: Include spectra
+#     group: qTrace Results
+#     type: flag
+#     default: yes
     
 needs:
   - ext.qtrace
