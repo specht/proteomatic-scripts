@@ -20,7 +20,7 @@ defaultOutputDirectory: databases
     
 output:
   - key: outputDatabase
-    label: Target/decoy database
+    label: target/decoy database
     format: fasta
     filename: target-decoy.fasta
     default: yes
