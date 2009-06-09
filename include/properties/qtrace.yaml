@@ -28,7 +28,6 @@ input:
   - key: modelFiles
     label: gene model
     formats: [fasta]
-	
 
 defaultOutputDirectory: spectraFiles
 
