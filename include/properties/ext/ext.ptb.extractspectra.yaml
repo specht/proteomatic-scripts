@@ -1,4 +1,4 @@
 binary:
   win32: extractspectra.exe
-  linux: extractspectra
+  linux: extractspectra.sh
   macx: extractspectra
