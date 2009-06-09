@@ -155,7 +155,6 @@ parameters:
     ignoreIfEmpty: true
     valuesFromProgram: '-il'
     display: row
-    colspan: 2
 
   # Charge handling 
    
