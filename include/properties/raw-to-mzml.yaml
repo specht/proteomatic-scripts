@@ -22,7 +22,7 @@ output:
     label: mzML files
     format: xml-mzml
     filename: '#{basename}#{stripMs1Scans}.mzML#{compression}'
-	
+
 parameters:
   - key: compression
     label: Compress result file

@@ -21,7 +21,7 @@ output:
     label: stripped mzML files
     format: xml-mzml
     filename: '#{basename}-no-ms1.mzML#{compression}'
-	
+
 parameters:
   - key: compression
     label: Compress result file
