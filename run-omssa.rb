@@ -96,25 +96,12 @@ class RunOmssa < ProteomaticScript
 			FileUtils::mkpath(ls_DatabaseTempPath)
 		end
 		
-		# if target-decoy if switched off and we have multiple databases,
-		# merge all of them into one database
-		ls_DatabasePath = nil
-		if !@param[:doTargetDecoy]
-			# no target decoy!
-			puts 'Merging databases...' unless @input[:databases].size == 1
-			ls_DatabasePath= tempFilename('merged-database', ls_DatabaseTempPath);
-			File::open(ls_DatabasePath, 'w') do |lk_OutFile|
-				@input[:databases].each do |ls_Path|
-					File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
-				end
+		puts 'Merging databases...' unless @input[:databases].size == 1
+		ls_DatabasePath= tempFilename('merged-database', ls_DatabaseTempPath);
+		File::open(ls_DatabasePath, 'w') do |lk_OutFile|
+			@input[:databases].each do |ls_Path|
+				File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
 			end
-		else
-			# yay, make it the real target mc decoy!
-			puts "Creating target-decoy database..."
-			ls_DatabasePath= tempFilename('target-decoy-database', ls_DatabaseTempPath);
-			ls_Command = "#{ExternalTools::binaryPath('ptb.decoyfasta')} --output \"#{ls_DatabasePath}\" --method #{@param[:targetDecoyMethod]} --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} --targetFormat \"#{@param[:targetEntryPrefix]}\" --decoyFormat \"#{@param[:decoyEntryPrefix]}\" #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
-			#puts ls_Command
-			runCommand(ls_Command, true)
 		end
 		
 		puts 'Converting database to BLAST format...'
