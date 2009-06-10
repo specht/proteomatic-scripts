@@ -601,7 +601,7 @@ class ProteomaticScript
 			end
 	
 			# convert number strings to numbers
-			(0...lk_Parts.size).each { |i| lk_Parts[i] = lk_Parts[i].to_i if ls_Pattern[i, 1] == '0' }
+			#(0...lk_Parts.size).each { |i| lk_Parts[i] = lk_Parts[i].to_i if ls_Pattern[i, 1] == '0' }
 
 			# create part sets when they don't exist on first iteration
 			unless lk_AllParts
@@ -622,42 +622,43 @@ class ProteomaticScript
 			else
 				if (ls_AllPattern[i, 1] == '0')
 					# we have multiple entries and it's a number part, try to find ranges!
-					li_Start = nil
-					li_Stop = nil
-					li_Last = nil
+					ls_Start = nil
+					ls_Stop = nil
+					ls_Last = nil
 					lk_OldPart = lk_Part.dup
 					lk_Part = Array.new
-					lk_OldPart.each do |i|
-						unless li_Start 
-							li_Start = i
-							li_Stop = i 
-							li_Last = i
+					lk_OldPart.each do |si|
+						i = si.to_i
+						unless ls_Start 
+							ls_Start = si
+							ls_Stop = si 
+							ls_Last = si
 							next
 						end
-						if i == li_Last + 1
+						if i == ls_Last.to_i + 1
 							# extend range
-							li_Stop = i
-							li_Last = i
+							ls_Stop = si
+							ls_Last = si
 							next
 						else
-							if (li_Start == li_Stop)
-								lk_Part << "#{li_Start}"
-							elsif(li_Start + 1 == li_Stop)
-								lk_Part << "#{li_Start},#{li_Stop}"
+							if (ls_Start.to_i == ls_Stop.to_i)
+								lk_Part << "#{ls_Start}"
+							elsif(ls_Start.to_i + 1 == ls_Stop.to_i)
+								lk_Part << "#{ls_Start},#{ls_Stop}"
 							else
-								lk_Part << "#{li_Start}-#{li_Stop}"
+								lk_Part << "#{ls_Start}-#{ls_Stop}"
 							end
-							li_Start = i
-							li_Last = i
-							li_Stop = i
+							ls_Start = si
+							ls_Last = si
+							ls_Stop = si
 						end
 					end
-					if (li_Start == li_Stop)
-						lk_Part << "#{li_Start}"
-					elsif(li_Start + 1 == li_Stop)
-						lk_Part << "#{li_Start},#{li_Stop}"
+					if (ls_Start.to_i == ls_Stop.to_i)
+						lk_Part << "#{ls_Start}"
+					elsif(ls_Start.to_i + 1 == ls_Stop.to_i)
+						lk_Part << "#{ls_Start},#{ls_Stop}"
 					else
-						lk_Part << "#{li_Start}-#{li_Stop}"
+						lk_Part << "#{ls_Start}-#{ls_Stop}"
 					end
 				end
 				ls_MergedName << lk_Part.join(',')
@@ -993,7 +994,7 @@ class ProteomaticScript
 				lk_PrefixFiles.collect! { |x| File::basename(x).split('.').first }
 				ls_Merged = mergeFilenames(lk_PrefixFiles)
 				unless ls_Merged
-					puts 'Sorry, unable to merge file names.'
+					puts 'Sorry, but Proteomatic is unable to propose a catchy prefix.'
 					exit 1
 				end
 				lk_Prefix << ls_Merged
