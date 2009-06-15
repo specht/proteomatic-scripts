@@ -499,7 +499,7 @@ class ProteomaticScript
 			end
 			if @ms_DefaultOutputDirectoryGroup
 				ls_Result << "!!!begin defaultOutputDirectory\n"
-				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['label']}\n"
+				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']}\n"
 				ls_Result << "!!!end defaultOutputDirectory\n"
 			end
 		end
