@@ -23,6 +23,8 @@ require 'yaml'
 
 class IndirectQuantitation < ProteomaticScript
 	def run()
+		puts 'Ahoy!'
+		exit 1
 	end
 end
 
