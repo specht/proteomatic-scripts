@@ -616,7 +616,12 @@ class ProteomaticScript
 		ls_MergedName = ''
 
 		(0...ls_AllPattern.size).each do |i|
-			lk_Part = lk_AllParts[i].to_a.sort
+			lk_Part = lk_AllParts[i].to_a
+			if ls_AllPattern[i, 1] == 'a'
+				lk_Part.sort!
+			else
+				lk_Part.sort! { |a, b| a.to_i <=> b.to_i }
+			end
 			if (lk_Part.size == 1)
 				ls_MergedName << lk_Part.first.to_s
 			else
