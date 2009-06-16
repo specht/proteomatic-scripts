@@ -440,6 +440,27 @@ class ProteomaticScript
 				ls_Result += "\n"
 			end
 		end
+		unless @mk_Input['ambiguousFormats'].empty?
+# 				ls_Line = "-#{ls_Group}: force assignment of following files to this group"
+# 				ls_Result += indent(wordwrap(ls_Line), 2, true) + "\n"
+			ls_Result += "#{underline('Input file ambiguities', '-')}\n"
+			ls_Result += wordwrap("Because some input file formats appear in multiple input file groups, files in some input formats must be manually assigned to a certain input file group by preceding the filenames with the appropriate switches.")
+			ls_Result += "\n"
+			ls_Result += wordwrap("Affected input file formats:")
+			ls_Result += "\n"
+			@mk_Input['ambiguousFormats'].to_a.sort.each do |ls_Format|
+				lk_FormatInfo = formatInfo(ls_Format)
+				ls_Result += wordwrap("- #{lk_FormatInfo['description']} (#{lk_FormatInfo['extensions'].join('|')})")
+				ls_Result += "\n"
+			end
+			ls_Result += wordwrap("Input file group assignment switches:")
+			ls_Result += "\n"
+			@mk_Input['groupOrder'].each do |ls_Group|
+				next if (Set.new(@mk_Input['groups'][ls_Group]['formats']) & @mk_Input['ambiguousFormats']).empty?
+				ls_Result += wordwrap("-#{ls_Group}: subsequent files are interpreted as #{@mk_Input['groups'][ls_Group]['label']}")
+				ls_Result += "\n"
+			end
+		end
 		if @mk_Input && @ms_DefaultOutputDirectoryGroup
 			ls_Result += "#{underline('Output directory', '-')}\n"
 			ls_Result += wordwrap("Unless an output directory is specified, the output files will be written to the directory of the first #{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['label']} file.")
@@ -774,6 +795,7 @@ class ProteomaticScript
 		lk_InputFormats = Hash.new
 		lk_InputGroups = Hash.new
 		lk_InputGroupOrder = Array.new
+		lk_AmbiguousFormats = Set.new
 		if @mk_ScriptProperties.include?('input')
 			@mk_ScriptProperties['input'].each do |lk_InputGroup|
 				unless lk_InputGroup.has_key?('key')
@@ -789,16 +811,17 @@ class ProteomaticScript
 				lk_InputGroup['formats'].each do |ls_Format|
 					assertFormat(ls_Format)
 					if lk_InputFormats.has_key?(ls_Format)
-						puts "Internal error: #{ls_Format} appears in more than one input file group."
-						exit 1
+						lk_AmbiguousFormats.add(ls_Format)
+						lk_InputFormats.delete(ls_Format)
 					end
-					lk_InputFormats[ls_Format] = lk_InputGroup['key']
+					lk_InputFormats[ls_Format] = lk_InputGroup['key'] unless lk_AmbiguousFormats.include?(ls_Format)
 				end
 			end
 		end
 		@mk_Input = Hash.new
 		@mk_Input['groups'] = lk_InputGroups
 		@mk_Input['groupOrder'] = lk_InputGroupOrder
+		@mk_Input['ambiguousFormats'] = lk_AmbiguousFormats
 		@mk_Input.freeze
 
 		# handle output files
@@ -934,11 +957,12 @@ class ProteomaticScript
 		@mk_Parameters.applyParameters(lk_Arguments)
 		@param = Hash.new
 		@mk_Parameters.keys().each { |ls_Key| @param[ls_Key.intern] = @mk_Parameters.value(ls_Key) }
-
+		
 		lk_Files = lk_Arguments.dup
 		# check whether all files are there if not in propose prefix mode
 		unless lb_ProposePrefix
 			lk_Files.each do |ls_Path|
+				next if ls_Path[0, 1] == '-' && @mk_Input['groups'].include?(ls_Path[1, ls_Path.size - 1])
 				unless File::file?(ls_Path)
 					puts "Error: Unable to open file #{ls_Path}."
 					exit 1
@@ -951,6 +975,7 @@ class ProteomaticScript
 		lk_Directories = Array.new if !@param['outputDirectory'.intern] || @param['outputDirectory'.intern].empty?
 
 		lk_Errors = Array.new
+		lk_UnusedFiles = Array.new
 		
 		# determine input files
 		@input = Hash.new
@@ -958,14 +983,30 @@ class ProteomaticScript
 		@mk_Input['groups'].each { |ls_Group, lk_Group|	@input[ls_Group.intern] = Array.new }
 		
 		# @inputFormat stores the format of each input file
+		ls_DefaultInputGroup = nil
 		@inputFormat = Hash.new
 		lk_Files.each do |ls_Path|
+			if (ls_Path[0, 1] == '-')
+				ls_Group = ls_Path[1, ls_Path.size - 1]
+				ls_DefaultInputGroup = ls_Group
+				next
+			end
 			ls_Group, ls_Format = findGroupForFile(ls_Path)
+			if (!ls_Group) && ls_DefaultInputGroup
+				ls_Group = ls_DefaultInputGroup
+				ls_Format = findFormatForFile(ls_Path)
+			end
 			if (ls_Group)
 				@input[ls_Group.intern] ||= Array.new
 				@input[ls_Group.intern].push(ls_Path)
 				@inputFormat[ls_Path] = ls_Format
+			else
+				lk_UnusedFiles.push(ls_Path)
 			end
+		end
+		
+		unless lk_UnusedFiles.empty?
+			puts "Warning: The following files have been specified by were ignored:\n#{lk_UnusedFiles.join("\n")}"
 		end
 
 		# check input files min/max conditions
@@ -1182,6 +1223,9 @@ class ProteomaticScript
 
 
 	def findGroupForFile(as_Path)
+		@mk_Input['ambiguousFormats'].each do |ls_Format|
+			return nil if fileMatchesFormat(as_Path, ls_Format)
+		end
 		@mk_Input['groups'].each do |ls_Group, lk_Group|
 			lk_Group['formats'].each do |ls_Format|
 				return ls_Group, ls_Format if (fileMatchesFormat(as_Path, ls_Format))
