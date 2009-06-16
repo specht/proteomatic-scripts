@@ -502,6 +502,11 @@ class ProteomaticScript
 				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']}\n"
 				ls_Result << "!!!end defaultOutputDirectory\n"
 			end
+			ls_Result << "!!!begin proposePrefixList\n"
+			@mk_ScriptProperties['proposePrefix'].each do |x|
+				ls_Result << "#{x}\n"
+			end
+			ls_Result << "!!!end proposePrefixList\n"
 		end
 		return ls_Result
 	end
@@ -633,14 +638,14 @@ class ProteomaticScript
 					lk_OldPart = lk_Part.dup
 					lk_Part = Array.new
 					lk_OldPart.each do |si|
-						i = si.to_i
+						li_Number = si.to_i
 						unless ls_Start 
 							ls_Start = si
 							ls_Stop = si 
 							ls_Last = si
 							next
 						end
-						if i == ls_Last.to_i + 1
+						if li_Number == ls_Last.to_i + 1
 							# extend range
 							ls_Stop = si
 							ls_Last = si
