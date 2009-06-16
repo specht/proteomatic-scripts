@@ -528,6 +528,14 @@ class ProteomaticScript
 				ls_Result << "#{x}\n"
 			end
 			ls_Result << "!!!end proposePrefixList\n"
+			unless @mk_Input['ambiguousFormats'].empty?
+				ls_Result << "!!!begin ambiguousInputGroups\n"
+				@mk_Input['groupOrder'].each do |ls_Group|
+					next if (Set.new(@mk_Input['groups'][ls_Group]['formats']) & @mk_Input['ambiguousFormats']).empty?
+					ls_Result += "#{ls_Group}\n"
+				end
+				ls_Result << "!!!end ambiguousInputGroups\n"
+			end
 		end
 		return ls_Result
 	end
