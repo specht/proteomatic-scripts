@@ -523,7 +523,7 @@ class ProteomaticScript
 				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']}\n"
 				ls_Result << "!!!end defaultOutputDirectory\n"
 			end
-			if @mk_Input['proposePrefix']
+			if @mk_ScriptProperties['proposePrefix']
 				ls_Result << "!!!begin proposePrefixList\n"
 				@mk_ScriptProperties['proposePrefix'].each do |x|
 					ls_Result << "#{x}\n"
@@ -763,6 +763,11 @@ class ProteomaticScript
 			end
 		end
 		
+		# check whether we have prefix proposal settings, if not, generate one
+		if (!@mk_ScriptProperties.has_key?('proposePrefix')) || (@mk_ScriptProperties['proposePrefix'].empty?)
+			@mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
+		end
+			
 		raise ProteomaticArgumentException, "Error#{lk_Errors.size > 1 ? "s:\n": ": "}" + lk_Errors.join("\n") unless lk_Errors.empty?
 		lk_Errors = Array.new
 		
@@ -892,11 +897,6 @@ class ProteomaticScript
 			if !@mk_Input['groups'].has_key?(@ms_DefaultOutputDirectoryGroup)
 				puts "Internal error: Invalid default output directory specified for this script."
 				exit 1
-			end
-			
-			# check whether we have prefix proposal settings, if not, generate one
-			unless @mk_ScriptProperties.has_key?('proposePrefix')
-				@mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
 			end
 			
 			# check whether prefix proposal entries are sane
