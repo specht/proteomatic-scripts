@@ -523,11 +523,13 @@ class ProteomaticScript
 				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']}\n"
 				ls_Result << "!!!end defaultOutputDirectory\n"
 			end
-			ls_Result << "!!!begin proposePrefixList\n"
-			@mk_ScriptProperties['proposePrefix'].each do |x|
-				ls_Result << "#{x}\n"
+			if @mk_Input['proposePrefix']
+				ls_Result << "!!!begin proposePrefixList\n"
+				@mk_ScriptProperties['proposePrefix'].each do |x|
+					ls_Result << "#{x}\n"
+				end
+				ls_Result << "!!!end proposePrefixList\n"
 			end
-			ls_Result << "!!!end proposePrefixList\n"
 			unless @mk_Input['ambiguousFormats'].empty?
 				ls_Result << "!!!begin ambiguousInputGroups\n"
 				@mk_Input['groupOrder'].each do |ls_Group|
