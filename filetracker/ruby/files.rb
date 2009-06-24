@@ -1,37 +1,48 @@
 require 'yaml'
 require 'mysql'
+require 'FilewithnameDao'
+require 'RunFilecontents'
+require 'Filecontents'
 
 object = YAML::load_file('c:\users\zimbo\desktop\praktikum\filetracker\test.yaml')
 
-conn = Mysql.new("localhost" , "root" , "testen","yaml")
+my = Mysql.new("localhost" , "root" , "testen")
+my.autocomit(false);
 
-
-conn.query( 
-  "INSERT INTO filewithname ( filewithname_id, filecontent_id, basename, directory, ctime, mtime ) 
-  VALUES ( ?, ?, ?, ?, ?, ? )")
+#Insert rows
+item = Filewithname.new();
+item.filewithname_id = value;
+item.filecontent_id = value;
+item.basename = value;
+item.directory = value;
+item.ctime = value;
+item.mtime = value;
+itemDao = FilewithnameDao.new(my);
+item.Dao.insert(item);
 end
 
-conn.query(
-  "INSERT INTO filecontents ( filecontent_id, identifier ) 
-  VALUES ( ?, ? )")
+#Insert rows
+head = Runfilecontents.new();
+head.run_id = value;
+head.filecontent_id = value;
+head.input_file =value;
+headDao = RunFilecontentsDao.new(my);
+head.Dao.insert(head);
 end
 
-conn.query(
-  "INSERT INTO run_filecontents ( run_id, filecontent_id, input_file ) 
-  VALUES ( ?, ?, ? )")
+#Insert rows
+piece = Filecontents.new();
+piece.filecontent_id = value;
+piece.identifier = value;
+piece.size = value;
+pieceDao = Filecontents.new(my);
+piece.Dao.insert(piece);
 end
 
-conn.query(
-  "INSERT INTO  md5table ( md5_id, size, md5 ) 
-  VALUES ( ?, ?, ? )")
-end
 
-conn.query(
-  "INSERT INTO basenametable ( basename_id, size, basename ) 
-  VALUES ( ?, ?, ? )")
-end
 
-conn.close
+
+
 
 
   
