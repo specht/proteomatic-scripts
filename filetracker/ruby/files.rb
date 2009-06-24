@@ -23,12 +23,12 @@ end
 
 conn.query(
   "INSERT INTO  md5table ( md5_id, size, md5 ) 
-  VALUES ( ?, ?, ? )"
+  VALUES ( ?, ?, ? )")
 end
 
 conn.query(
   "INSERT INTO basenametable ( basename_id, size, basename ) 
-  VALUES ( ?, ?, ? )"
+  VALUES ( ?, ?, ? )")
 end
 
 conn.close
