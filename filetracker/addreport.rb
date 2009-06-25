@@ -20,8 +20,7 @@ def addReport(report)
 end
 
   puts "-----------------------"
-  print report['run']["user"].strip, "-", report['run']["script_title"].strip, "-", report['run']["host"].strip, "-", report['run']["uri"].strip, "-", 
-  report['run']["version"].strip, "-", report['run']["start_time"].strip, "-", report['run']["end_time"].strip "\n"
+  print report['run']["user"].strip, "-", report['run']["script_title"].strip, "-", report['run']["host"].strip, "-", report['run']["uri"].strip, "-", report['run']["version"].strip, "-", report['run']["start_time"].strip, "-", report['run']["end_time"].strip "\n"
 
   puts "-----------------------"
   puts
@@ -34,20 +33,14 @@ end
   start_time = report['run']["start_time"].strip
   end_time = report['run']["end_time"].strip
   
-  conn.query( 
-    "INSERT INTO `runs` (user, title, host, uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{uri}', '#{version}', '#{start_time}', '#{end_time}' )")
+  conn.query( "INSERT INTO `runs` (user, title, host, uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{uri}', '#{version}', '#{start_time}', '#{end_time}' )")
   run_id = conn.insert_id()
 
-
-  conn.query( 
-    "INSERT INTO `parameters`(key, value, run_id ) VALUES (#{key}, #{value}, #{run_id})")
+  conn.query( "INSERT INTO `parameters`(key, value, run_id ) VALUES (#{key}, #{value}, #{run_id})")
   
-  
-  conn.query(
-    "UPDATE `runs` SET run_id = ?, user = ?, title = ?, host = ?, uri = ?, version = ?, start_time = ?, end_time = ? WHERE run_id = ? "
+  conn.query("UPDATE `runs` SET run_id = ?, user = ?, title = ?, host = ?, uri = ?, version = ?, start_time = ?, end_time = ? WHERE run_id = ? ")
 
-  conn.query(
-    "UPDATE `parameters` SET parameter_id = ?, key = ?, value = ?, run_id = ? WHERE parameter_id = ? "
+  conn.query("UPDATE `parameters` SET parameter_id = ?, key = ?, value = ?, run_id = ? WHERE parameter_id = ? ")
   
   #filecontents
   result = conn.query( "SELECT filecontent_id FROM filecontents WHERE identifier='#{identifier}' and size = '#{size}'")
@@ -63,6 +56,8 @@ end
   
   conn.query("INSERT INTO filewithname (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
   
+  conn.query("UPDATE filecontents SET filecontent_id = ?, identifier = ?, size = ? WHERE filecontent_id = ?")
+  
   #filewithname
   result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}'")
   
@@ -77,7 +72,13 @@ end
   
   conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
   
+  conn.query("UPDATE filewithname SET filewithname_id = ?, filecontent_id = ?, basename = ?, directory = ?, ctime = ?, mtime = ? WHERE filewithname_id = ?")
   
+#run_filewithname
+conn.query("INSERT INTO run_filewithname ( run_id, filewithname_id, input_file) VALUES ( #{run_id}, #{filewithname_id}, #{input_file})")
+
+conn.query("UPDATE run_filewithname SET run_id = ?, filecontent_id = ?, input_file = ? WHERE ")
+
 #Datenbankverbindung  
 conn = Mysql.new("localhost" , "root" , "testen")
 conn.select_db("yaml")
