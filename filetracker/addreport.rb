@@ -49,7 +49,7 @@ end
   conn.query(
     "UPDATE `parameters` SET parameter_id = ?, key = ?, value = ?, run_id = ? WHERE parameter_id = ? "
   
-  #.....................FILES................................
+  #filecontents
   result = conn.query( "SELECT filecontent_id FROM filecontents WHERE identifier='#{identifier}' and size = '#{size}'")
   
   filecontent_id = nil
@@ -61,12 +61,24 @@ end
     filecontent_id = result.fetch_row['filecontent_id']
   end
   
-  conn.query("INSERT INTO 'filewithname' (filecontent_id, basename, directory, ctime, mtime")
+  conn.query("INSERT INTO filewithname (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
+  
+  #filewithname
+  result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}'")
   
   filewithname_id = nil
   
-  if result = conn.query
-
+  if result.num_rows == 0
+    conn.query("INSERT INTO `filewithname` (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
+    filewithname_id = conn.insert_id()
+  else
+    filewithname_id = result.fetch_row['filewithname_id']
+  end
+  
+  conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
+  
+  
+#Datenbankverbindung  
 conn = Mysql.new("localhost" , "root" , "testen")
 conn.select_db("yaml")
 
