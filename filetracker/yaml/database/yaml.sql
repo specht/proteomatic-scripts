@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `filecontents`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `filecontents` (
   `filecontent_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `identifier` tinyint(1) NOT NULL,
+  `identifier` varchar(45) DEFAULT NULL,
   `size` int(45) unsigned NOT NULL,
   PRIMARY KEY (`filecontent_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -104,11 +104,11 @@ DROP TABLE IF EXISTS `run_filecontents`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `run_filecontents` (
   `run_id` int(10) unsigned NOT NULL,
-  `filecontent_id` int(10) unsigned NOT NULL,
+  `filewithname_id` int(10) unsigned NOT NULL,
   `input_file` tinyint(1) NOT NULL,
-  KEY `filecontent_id` (`filecontent_id`) USING BTREE,
   KEY `run_id` (`run_id`),
-  CONSTRAINT `filecontent_id2` FOREIGN KEY (`filecontent_id`) REFERENCES `filecontents` (`filecontent_id`),
+  KEY `filewithname` (`filewithname_id`) USING BTREE,
+  CONSTRAINT `filewithname_id` FOREIGN KEY (`filewithname_id`) REFERENCES `filewithname` (`filewithname_id`),
   CONSTRAINT `run_id2` FOREIGN KEY (`run_id`) REFERENCES `runs` (`run_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -134,6 +134,10 @@ CREATE TABLE `runs` (
   `user` varchar(20) NOT NULL,
   `title` varchar(45) NOT NULL,
   `host` varchar(15) NOT NULL,
+  `uri` varchar(45) NOT NULL,
+  `version` varchar(45) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
   PRIMARY KEY (`run_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -156,4 +160,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-06-24 11:54:14
+-- Dump completed on 2009-06-25  9:17:53
