@@ -18,6 +18,11 @@ def addReport(report)
   end_time = report['run']["end_time"].strip
   
   conn.query( "INSERT INTO `runs` (user, title, host, uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{uri}', '#{version}', '#{start_time}', '#{end_time}' )")
+  if conn.affected_rows = 1
+    puts "Successfully added!"
+  else
+    puts "Could not be added!"
+  end
   run_id = conn.insert_id()
   
   conn.query("UPDATE `runs` SET run_id = #{run_id}, user = #{user}, title = #{title}, host = #{host}, uri = #{uri}, version = #{version}, start_time = #{start_time}, end_time = #{end_time} WHERE run_id = #{run_id} ")
@@ -65,7 +70,6 @@ def addReport(report)
     identifier = "basename#{file['basename']}"
     identifier = "md5#{file['md5']}" if file['md5']
     puts identifier
-  
   
     filewithname_id = nil
   
