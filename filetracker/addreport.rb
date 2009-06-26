@@ -38,9 +38,9 @@ end
 
   conn.query( "INSERT INTO `parameters`(key, value, run_id ) VALUES (#{key}, #{value}, #{run_id})")
   
-  conn.query("UPDATE `runs` SET run_id = ?, user = ?, title = ?, host = ?, uri = ?, version = ?, start_time = ?, end_time = ? WHERE run_id = ? ")
+  conn.query("UPDATE `runs` SET run_id = #{run_id}, user = #{user}, title = #{title}, host = #{host}, uri = #{uri}, version = #{version}, start_time = #{start_time}, end_time = #{end_time} WHERE run_id = #{run_id} ")
 
-  conn.query("UPDATE `parameters` SET parameter_id = ?, key = ?, value = ?, run_id = ? WHERE parameter_id = ? ")
+  conn.query("UPDATE `parameters` SET parameter_id = #{parameter_id}, key = #{key}, value = #{value}, run_id = #{run_id} WHERE parameter_id = #{parameter_id} ")
   
   #filecontents
   result = conn.query( "SELECT filecontent_id FROM filecontents WHERE identifier='#{identifier}' and size = '#{size}'")
@@ -56,7 +56,7 @@ end
   
   conn.query("INSERT INTO filewithname (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
   
-  conn.query("UPDATE filecontents SET filecontent_id = ?, identifier = ?, size = ? WHERE filecontent_id = ?")
+  conn.query("UPDATE filecontents SET filecontent_id = #{filecontent_id}, identifier = #{identifier}, size = #{size} WHERE filecontent_id = #{filecontent_id}")
   
   #filewithname
   result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}'")
@@ -72,12 +72,12 @@ end
   
   conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
   
-  conn.query("UPDATE filewithname SET filewithname_id = ?, filecontent_id = ?, basename = ?, directory = ?, ctime = ?, mtime = ? WHERE filewithname_id = ?")
+  conn.query("UPDATE filewithname SET filewithname_id = #{filewithname}, filecontent_id = #{filecontent_id}, basename = #{basename}, directory = #{directory}, ctime = #{ctime}, mtime = #{mtime} WHERE filewithname_id = #{filewithname}")
   
 #run_filewithname
 conn.query("INSERT INTO run_filewithname ( run_id, filewithname_id, input_file) VALUES ( #{run_id}, #{filewithname_id}, #{input_file})")
 
-conn.query("UPDATE run_filewithname SET run_id = ?, filecontent_id = ?, input_file = ? WHERE ")
+conn.query("UPDATE run_filewithname SET run_id = #{run_id}, filecontent_id = #{filecontent_id}, input_file = #{input_file} WHERE ")
 
 #Datenbankverbindung  
 conn = Mysql.new("localhost" , "root" , "testen")
