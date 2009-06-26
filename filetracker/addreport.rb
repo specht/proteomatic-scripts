@@ -29,6 +29,11 @@ def addReport(report)
   end
   
   conn.query( "INSERT INTO `parameters`(key, value, run_id ) VALUES (#{key}, #{value}, #{run_id})")
+  if conn.affected_rows = 1
+    puts "Successfully added!"
+  else
+    puts "Could not be added!"
+  end
   
   conn.query("UPDATE filecontents SET filecontent_id = #{filecontent_id}, identifier = #{identifier}, size = #{size} WHERE filecontent_id = #{filecontent_id}")
 
@@ -40,10 +45,15 @@ def addReport(report)
     filecontent_id = nil
   
     if result.num_rows == 0
-    conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
-    filecontent_id = conn.insert_id()
+      conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
+      if conn.affected_rows = 1
+      puts "Successfully added!"
+      else
+      puts "Could not be added!"
+      end
+      filecontent_id = conn.insert_id()
     else
-    filecontent_id = result.fetch_row['filecontent_id']
+      filecontent_id = result.fetch_row['filecontent_id']
     end
     result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}'")
   
@@ -60,22 +70,43 @@ def addReport(report)
     filewithname_id = nil
   
     if result.num_rows == 0
-    conn.query("INSERT INTO `filewithname` (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
-    filewithname_id = conn.insert_id()
+      conn.query("INSERT INTO `filewithname` (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
+      if conn.affected_rows = 1
+        puts "Successfully added!"
+      else
+        puts "Could not be added!"
+      end
+      filewithname_id = conn.insert_id()
     else
-    filewithname_id = result.fetch_row['filewithname_id']
+      filewithname_id = result.fetch_row['filewithname_id']
     end
   
   end
   conn.query("INSERT INTO filewithname (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
+  if conn.affected_rows = 1
+    puts "Successfully added!"
+  else
+    puts "Could not be added!"
+  end
   
   conn.query("UPDATE filecontents SET filecontent_id = #{filecontent_id}, identifier = #{identifier}, size = #{size} WHERE filecontent_id = #{filecontent_id}")
   
   conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
+  if conn.affected_rows = 1
+    puts "Successfully added!"
+  else
+    puts "Could not be added!"
+  end
   
   conn.query("UPDATE filewithname SET filewithname_id = #{filewithname}, filecontent_id = #{filecontent_id}, basename = #{basename}, directory = #{directory}, ctime = #{ctime}, mtime = #{mtime} WHERE filewithname_id = #{filewithname}")
 
   conn.query("INSERT INTO run_filewithname ( run_id, filewithname_id, input_file) VALUES ( #{run_id}, #{filewithname_id}, #{input_file})")
+  if conn.affected_rows = 1
+    puts "Successfully added!"
+  else
+    puts "Could not be added!"
+  end
+
 
   conn.query("UPDATE run_filewithname SET run_id = #{run_id}, filecontent_id = #{filecontent_id}, input_file = #{input_file} WHERE ")
 end
