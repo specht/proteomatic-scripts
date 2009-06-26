@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `filecontents`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `filecontents` (
   `filecontent_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `identifier` varchar(45) DEFAULT NULL,
+  `identifier` varchar(60) DEFAULT NULL,
   `size` int(45) unsigned NOT NULL,
   PRIMARY KEY (`filecontent_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -78,7 +78,7 @@ DROP TABLE IF EXISTS `parameters`;
 CREATE TABLE `parameters` (
   `parameter_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `key` varchar(45) NOT NULL,
-  `value` tinyint(1) NOT NULL,
+  `value` varchar(45) NOT NULL,
   `run_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`parameter_id`) USING BTREE,
   KEY `run_id` (`run_id`),
@@ -96,13 +96,13 @@ LOCK TABLES `parameters` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `run_filecontents`
+-- Table structure for table `run_filewithname`
 --
 
-DROP TABLE IF EXISTS `run_filecontents`;
+DROP TABLE IF EXISTS `run_filewithname`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `run_filecontents` (
+CREATE TABLE `run_filewithname` (
   `run_id` int(10) unsigned NOT NULL,
   `filewithname_id` int(10) unsigned NOT NULL,
   `input_file` tinyint(1) NOT NULL,
@@ -114,12 +114,12 @@ CREATE TABLE `run_filecontents` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `run_filecontents`
+-- Dumping data for table `run_filewithname`
 --
 
-LOCK TABLES `run_filecontents` WRITE;
-/*!40000 ALTER TABLE `run_filecontents` DISABLE KEYS */;
-/*!40000 ALTER TABLE `run_filecontents` ENABLE KEYS */;
+LOCK TABLES `run_filewithname` WRITE;
+/*!40000 ALTER TABLE `run_filewithname` DISABLE KEYS */;
+/*!40000 ALTER TABLE `run_filewithname` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `runs` (
   `run_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user` varchar(20) NOT NULL,
   `title` varchar(45) NOT NULL,
-  `host` varchar(15) NOT NULL,
+  `host` varchar(45) NOT NULL,
   `uri` varchar(45) NOT NULL,
   `version` varchar(45) NOT NULL,
   `start_time` datetime NOT NULL,
@@ -160,4 +160,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-06-25  9:17:53
+-- Dump completed on 2009-06-26  6:24:28
