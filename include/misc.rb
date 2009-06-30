@@ -213,3 +213,24 @@ def printStyleSheet(ak_Target = $STDOUT)
 	ak_Target.puts '.clickableCell:hover { cursor: pointer; }'
 	ak_Target.puts '</style>'
 end
+
+
+# returns pattern, items
+def splitNumbersAndLetters(as_String)
+	lk_Parts = Array.new
+	ls_Pattern = ''
+	(0...as_String.size).each do |i|
+		ls_ThisPattern = '0123456789'.include?(as_String[i, 1]) ? '0' : 'a'
+		unless ls_Pattern
+			ls_Pattern += ls_ThisPattern
+			lk_Parts << as_String[i, 1]
+		end
+		if ls_ThisPattern != ls_Pattern[-1, 1]
+			ls_Pattern += ls_ThisPattern
+			lk_Parts << as_String[i, 1]
+		else
+			lk_Parts[-1] += as_String[i, 1]
+		end
+	end
+	return ls_Pattern, lk_Parts
+end

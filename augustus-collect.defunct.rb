@@ -120,7 +120,7 @@ class AugustusCollect < ProteomaticScript
 			puts File::basename(ls_Path)
 			#next unless ls_Path.index("MT_CPAN1")
 			# merge OMSSA results
-			lk_Result = loadPsm(ls_Path, :silent => true)
+			lk_Result = loadPsm(ls_Path, :silent => true)#, :putativePrefix => '') # this is for the old runs
 			
 			lk_ScanHash = lk_Result[:scanHash]
 			lk_PeptideHash = lk_Result[:peptideHash]
@@ -176,6 +176,9 @@ class AugustusCollect < ProteomaticScript
 		gpfOnly = lk_AllGpfPeptides - lk_AllModelPeptides - lk_AllSixFramesPeptides
 		sixFramesOnly = lk_AllSixFramesPeptides - lk_AllModelPeptides - lk_AllGpfPeptides
 		allThree = lk_AllSixFramesPeptides & lk_AllModelPeptides & lk_AllGpfPeptides
+		printDetails(lk_AllModelPeptides, 'gene models')
+		printDetails(lk_AllGpfPeptides, 'GPF')
+		printDetails(lk_AllSixFramesPeptides, 'six frames')
 		printDetails(modelsOnly, 'models only')
 		printDetails(gpfOnly, 'gpf only')
 		printDetails(sixFramesOnly, 'six frames only')

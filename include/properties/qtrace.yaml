@@ -1,15 +1,13 @@
-group: Quantitation
+group: Quantitation/1. Run
 
 title: qTrace
 
 description: >
-   Perform quantitation on MS1 scans. 
-   If possible, peptides are extracted from the PSM result list specified.
-   Additional peptides can be specified via input text files or the peptides
-   parameter. Gene models for these non-PSM peptides can be added as input
-   files to enable protein quantitation.
-   <br />
-   <span style='background-color: #eaa;'><b>Warning:</b> qTrace is still in development. Use at your own risk.</span>
+   Perform petide quantitation on MS1 full or SIM scans. All peptides that
+   are to be quantified must be specified either via the peptides parameter
+   or via text or PSM list files. By default, peptides that are specified 
+   via PSM list files are only searched for in those spectra files which the 
+   peptides have been identified in.
 
 type: processor
 
@@ -21,13 +19,9 @@ input:
   - key: psmFile
     label: PSM list
     formats: [csv]
-    max: 1
   - key: peptideFiles
     label: peptide
     formats: [txt]
-  - key: modelFiles
-    label: gene model
-    formats: [fasta]
 
 defaultOutputDirectory: spectraFiles
 
@@ -37,8 +31,8 @@ output:
 #     format: xhtml
 #     filename: qtrace-results.xhtml
 #     default: no
-  - key: proteinCsv
-    label: CSV results
+  - key: qtraceCsv
+    label: quantitation results
     format: csv
     filename: qtrace-results.csv
     default: yes
@@ -104,29 +98,14 @@ parameters:
     min: 0.0
     step: 0.1
     description: This mass accuracy is used when peaks are tested for absence.
-#   - key: printStatistics
-#     label: Print quantitation failure statistics
-#     type: flag
-#     default: yes
-#   - key: showPeptideInProtein
-#     label: Show peptide location within protein
-#     group: qTrace Results
-#     type: flag
-#     default: yes
-#   - key: showElutionProfile
-#     label: Show elution profile
-#     group: qTrace Results
-#     type: flag
-#     default: yes
-#   - key: includeSpectra
-#     label: Include spectra
-#     group: qTrace Results
-#     type: flag
-#     default: yes
+  - key: searchAllInAll
+    label: Search for all peptides in all spectra files
+    type: flag
+    default: false
+    description: Try to quantify all peptides in all spectra files, even if peptides have not been identified in some spectra files.
     
 needs:
   - ext.qtrace
-  - ext.ptb
 
 filetracker:
   - dontMd5InputFiles: [spectraFiles]

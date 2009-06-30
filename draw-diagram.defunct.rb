@@ -51,40 +51,30 @@ class DrawDiagram < ProteomaticScript
 		end
 		
 		lk_Items.collect! do |x|
-			x['pbmean'] = '10000.0' if x['mean'] == '10000.0'
+			x['mean'] = '10000.0' if x['mean'] == 'Infinity'
 			x
 		end
 		
-		lk_Items.sort! do |a, b|
-			(a['pbmean'].empty? == b['pbmean'].empty?)?
-				((a['pbmean'].empty?)? a['mean'].to_f <=> b['mean'].to_f: a['pbmean'].to_f <=> b['pbmean'].to_f):
-				(b['pbmean'].length) <=> (a['pbmean'].length)
-		end
+ 		lk_Items.sort! do |a, b|
+			a['peptidebandcount'].to_i != b['peptidebandcount'].to_i ?
+				(a['peptidebandcount'].to_i == 1 || b['peptidebandcount'].to_i == 1) ?
+					b['peptidebandcount'].to_i <=> a['peptidebandcount'].to_i :
+					a['mean'].to_f <=> b['mean'].to_f:
+				a['mean'].to_f <=> b['mean'].to_f
+					
+ 		end
 		
-# 		lk_Items.each do |x|
-# 			puts "#{x['pbmean']}\t#{x['mean']}"
-# 		end
-# 		exit
-
+		# max rel std dev is 0.6
 		relstddevcutoff = 0.6
-		lk_Items.reject! do |x|
-			lb_Reject = false
-			if (x['pbmean'].empty?)
-				lb_Reject = x['stddev'].to_f / x['mean'].to_f > relstddevcutoff
-			else
-				lb_Reject = x['pbstddev'].to_f / x['pbmean'].to_f > relstddevcutoff
-			end
-			lb_Reject
-		end
-		
-		lk_Items.reject! do |x|
-			x['count'].to_i < 2
-		end
+		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+
+		# min scan count is 2
+		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
 
 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
-			lk_Out.puts "Protein,count,mean,stddev"
+			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
 			lk_Items.each do |x|
-				lk_Out.puts "\"#{x['protein']}\",#{x['count']},#{x['pbmean'].empty? ? x['mean'] : x['pbmean']},#{x['pbstddev'].empty? ? x['stddev'] : x['pbstddev']}"
+				lk_Out.puts "\"#{x['protein']}\",#{x['scancount']},#{x['peptidebandcount']},#{x['mean']},#{x['stddev']}"
 			end
 		end
 		
@@ -149,33 +139,29 @@ class DrawDiagram < ProteomaticScript
 				#ls_Color = lk_GroupColorsFG[lk_GroupKeys[lk_Item['localization']] % lk_GroupColorsFG.size]
 				ls_Color = '#888a85'
 				ls_Color = '#000' if lk_Item['localization'].upcase == 'CP'
-				li_Count = lk_Item['count'].to_i
-				if li_Count > 100
-					ls_Color = '#000'
-				elsif li_Count > 20
-					ls_Color = '#333'
-				elsif li_Count > 0
-					ls_Color = '#888'
-				end
+# 				li_Count = lk_Item['count'].to_i
+# 				if li_Count > 100
+# 					ls_Color = '#000'
+# 				elsif li_Count > 20
+# 					ls_Color = '#333'
+# 				elsif li_Count > 0
+# 					ls_Color = '#888'
+# 				end
 				ls_Color = '#000'
-				ls_Color = '#888a85' if lk_Item['pbmean'].empty?
+				ls_Color = '#888a85' if lk_Item['peptidebandcount'].to_i == 1
 				ls_Style = ''
 				#ls_Style = 'stroke-dasharray: 2, 2;' if lk_Item['marker'].include?('unknown')
-				ls_Color = '#4e9a06;' if lk_Item['localization'].upcase == 'CP-PS' 
+				#ls_Color = '#4e9a06;' if lk_Item['localization'].upcase == 'CP-PS' 
 				x = scalex(i)
 				t = Hash.new
 				
-				if (lk_Item['pbmean'].empty?)
-					t[0] = lk_Item['mean'].to_f - lk_Item['stddev'].to_f
-					t[1] = lk_Item['mean'].to_f
-					t[2] = lk_Item['mean'].to_f + lk_Item['stddev'].to_f
-				else
-					t[0] = lk_Item['pbmean'].to_f - lk_Item['pbstddev'].to_f
-					t[1] = lk_Item['pbmean'].to_f
-					t[2] = lk_Item['pbmean'].to_f + lk_Item['pbstddev'].to_f
-				end
-				if (t[1] == 10000.0)
+				t[0] = lk_Item['mean'].to_f - lk_Item['stddev'].to_f
+				t[1] = lk_Item['mean'].to_f
+				t[2] = lk_Item['mean'].to_f + lk_Item['stddev'].to_f
+				if (t[1] > 6.0)
+					t[0] = 6.0
 					t[1] = 6.0
+					t[2] = 6.0
 				end
 				#puts lk_Item.to_yaml if (t[2] > 7.0)
 					

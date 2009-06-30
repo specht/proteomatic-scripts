@@ -1184,7 +1184,6 @@ class ProteomaticScript
 		lk_Info['host'] = @ms_HostName
 		lk_Info['script_uri'] = @ms_ScriptName + '.rb'
 		lk_Info['script_title'] = @ms_Title
-		lk_Info['script_version'] = @ms_Version
 		lk_Info['start_time'] = @mk_StartTime
 		lk_Info['end_time'] = @mk_EndTime
 		lk_Info['parameters'] = @mk_Parameters.humanReadableConfigurationHash()

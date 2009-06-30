@@ -1,0 +1,46 @@
+group: Quantitation/2. Filter
+
+title: Pick most abundant bands
+
+description: >
+  This script determines the most abundant bands for every peptide or protein and rejects
+  quantitation events that come from other bands.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+  - key: psmList
+    label: PSM list
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: quantitationEvents
+	
+output:
+  - key: results
+    label: filtered results
+    format: csv
+    filename: most-abundant-bands.csv
+    default: yes
+
+parameters:
+  - key: scope
+    type: enum
+    default: automatic
+    choices: [{automatic: 'protein if available, else peptide'}, peptide, protein]
+    label: Scope
+    description: Specify whether the most abundant band should be picked on the peptide or protein level.
+  - key: neighborBandCount
+    type: int
+    default: 0
+    min: 0
+    label: Number of neighbor bands to include
+  - key: excludeBands
+    type: string
+    default: ''
+    label: Exclude bands
+    description: If certain band numbers should not be picked as the most abundant bands, specify the appropriate numbers here, separated by a comma.
