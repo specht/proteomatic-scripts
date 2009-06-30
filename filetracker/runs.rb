@@ -1,7 +1,11 @@
 #Bibliotheken aufrufen
 require "rubygems"
-require "mysql"
+#require "mysql"
 require "cgi"
+require 'yaml'
+
+puts ARGV.to_yaml
+exit 1
 
 #runs auslesen und Tabellenzeilen generieren
 def run_liste(conn, cgi)
@@ -13,7 +17,7 @@ def run_liste(conn, cgi)
     OREDER BY run_id"
     )
     ausgabe =""
-    #Wenn Datensätze vorhanden sind...
+    #Wenn Datensaetze vorhanden sind...
     if result.num_rows > 0
       #...zeilenweise hinzufuegen
       while row = result.fetch_hash
@@ -26,7 +30,7 @@ def run_liste(conn, cgi)
           }
         end
       end
-      #Fertigen String zurückgeben
+      #Fertigen String zurueckgeben
       ausgabe
     end
 
@@ -36,12 +40,12 @@ conn = Mysql.new("localhost","root","testen")
 conn.select_db("yaml")
 
 #Neuen Datensatz eingeben?
-...
+
 # Daten auslesen
-...
+
 #runs ueberpruefen
-...
+
 #run neu?
-...
+
 #runs einfuegen
 
