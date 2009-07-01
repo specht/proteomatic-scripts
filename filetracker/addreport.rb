@@ -4,7 +4,7 @@ require 'mysql'
 def addReport(report)
   #runs
   puts "-----------------------"
-  print report['run']["user"].strip, "-", report['run']["script_title"].strip, "-", report['run']["host"].strip, "-", report['run']["uri"].strip, "-", report['run']["version"].strip, "-", report['run']["start_time"].strip, "-", report['run']["end_time"].strip, "\n"
+  print report['run']["user"].strip, "-", report['run']["script_title"].strip, "-", report['run']["host"].strip, "-", report['run']["script_uri"].strip, "-", report['run']["version"].strip, "-", report['run']["start_time"], "-", report['run']["end_time"], "\n"
 
   puts "-----------------------"
   puts
@@ -14,8 +14,8 @@ def addReport(report)
   host = report['run']["host"].strip
   uri = report['run']["uri"].strip
   version = report['run']["version"].strip
-  start_time = report['run']["start_time"].strip
-  end_time = report['run']["end_time"].strip
+  start_time = report['run']["start_time"]
+  end_time = report['run']["end_time"]
   
   conn.query( "INSERT INTO `runs` (user, title, host, uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{uri}', '#{version}', '#{start_time}', '#{end_time}' )")
   if conn.affected_rows = 1
@@ -91,7 +91,7 @@ end
 
 #Datenbankverbindung  
 begin
-	conn = Mysql.new("localhost" , "root" , "testen")
+	conn = Mysql.new("localhost" , "testuser" , "user")
 	conn.select_db("yaml")
 
 	ARGV.each do |path|
