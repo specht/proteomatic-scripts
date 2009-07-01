@@ -26,7 +26,6 @@ def addReport(report)
   run_id = conn.insert_id()
   
   
-  
   report['run']['parameters'].each do |parameter|
     key = parameter.keys.first
     value = parameter.values.first
