@@ -25,7 +25,7 @@ def addReport(report)
   end
   run_id = conn.insert_id()
   
-  #conn.query("UPDATE `runs` SET run_id = #{run_id}, user = #{user}, title = #{title}, host = #{host}, uri = #{uri}, version = #{version}, start_time = #{start_time}, end_time = #{end_time} WHERE run_id = #{run_id} ")
+  
   
   report['run']['parameters'].each do |parameter|
     key = parameter.keys.first
@@ -39,9 +39,6 @@ def addReport(report)
     end
   end
   
-  
-  #conn.query("UPDATE filecontents SET filecontent_id = #{filecontent_id}, identifier = #{identifier}, size = #{size} WHERE filecontent_id = #{filecontent_id}")
-
   
   #files
   report['files'].each do |file|
@@ -71,8 +68,8 @@ def addReport(report)
     else
       filecontent_id = result.fetch_row['filecontent_id']
     end
-    result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}'") 
-	# PLUS basename, directory, ctime, mtime 
+    result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}', basename='#{basename}',directory='#{directory}', ctime='#{ctime}' and mtime='#{mtime}'")
+  
   
     filewithname_id = nil
   
@@ -89,36 +86,8 @@ def addReport(report)
     end
 
 	input_file = file['input_file']
-	# filewithname_id und run_id und input_file zusammen eintragen
-   conn.query("UPDATE run_filewithname SET run_id = #{run_id}, filewithname_id = #{filewithname_id}, input_file = #{input_file};")
-  
+   conn.query("UPDATE run_filewithname SET run_id = #{run_id}, filewithname_id = #{filewithname_id}, input_file = #{input_file}")
   end
-#   conn.query("INSERT INTO filewithname (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
-#   if conn.affected_rows = 1
-#     puts "Successfully added!"
-#   else
-#     puts "Could not be added!"
-#   end
-#   
-#   conn.query("UPDATE filecontents SET filecontent_id = #{filecontent_id}, identifier = #{identifier}, size = #{size} WHERE filecontent_id = #{filecontent_id}")
-#   
-#   conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
-#   if conn.affected_rows = 1
-#     puts "Successfully added!"
-#   else
-#     puts "Could not be added!"
-#   end
-#   
-#   conn.query("UPDATE filewithname SET filewithname_id = #{filewithname}, filecontent_id = #{filecontent_id}, basename = #{basename}, directory = #{directory}, ctime = #{ctime}, mtime = #{mtime} WHERE filewithname_id = #{filewithname}")
-# 
-#   conn.query("INSERT INTO run_filewithname ( run_id, filewithname_id, input_file) VALUES ( #{run_id}, #{filewithname_id}, #{input_file})")
-#   if conn.affected_rows = 1
-#     puts "Successfully added!"
-#   else
-#     puts "Could not be added!"
-#   end
-# 
-# 
 end
 
 #Datenbankverbindung  
