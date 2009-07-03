@@ -65,7 +65,7 @@ def addReport(report)
   
     if result.num_rows == 0
       conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
-      if conn.affected_rows = 1
+      if conn.affected_rows < 1
       puts "Successfully added!"
       else
       puts "Could not be added!"
@@ -81,7 +81,7 @@ def addReport(report)
   
     if result.num_rows == 0
       conn.query("INSERT INTO `filewithname` (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
-      if conn.affected_rows = 1
+      if conn.affected_rows < 1
         puts "Successfully added!"
       else
         puts "Could not be added!"
