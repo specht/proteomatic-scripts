@@ -1,6 +1,7 @@
 require 'yaml'
 require 'mysql'
 
+
 def addReport(report)
   #runs
   puts "-----------------------"
@@ -12,13 +13,20 @@ def addReport(report)
   user = report['run']["user"].strip
   title = report ['run']["script_title"].strip
   host = report['run']["host"].strip
-  uri = report['run']["uri"].strip
+  script_uri = report['run']["script_uri"].strip
   version = report['run']["version"].strip
   start_time = report['run']["start_time"]
   end_time = report['run']["end_time"]
   
-  conn.query( "INSERT INTO `runs` (user, title, host, uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{uri}', '#{version}', '#{start_time}', '#{end_time}' )")
-  if conn.affected_rows = 1
+  conn = Mysql.new("localhost" , "testuser" , "user")
+  conn.select_db("yaml")
+  
+  timeFmtStr= "%Y-%m-%d %H:%M:%S"
+  startTimeFormatted = start_time.strftime(timeFmtStr)
+  endTimeFormatted = end_time.strftime(timeFmtStr)
+  
+  conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}')")
+  if conn.affected_rows < 1
     puts "Successfully added!"
   else
     puts "Could not be added!"
@@ -27,11 +35,10 @@ def addReport(report)
   
   
   report['run']['parameters'].each do |parameter|
-    key = parameter.keys.first
-    value = parameter.values.first
-    puts "#{key}: #{value}"
-	conn.query( "INSERT INTO `parameters`(key, value, run_id ) VALUES (#{key}, #{value}, #{run_id})")
-    if conn.affected_rows = 1
+    key = parameter.keys.first.strip
+    value = parameter.values.first.strip
+	conn.query( "INSERT INTO parameters(run_id, key, value ) VALUES ( '#{run_id}', '#{key}', '#{value}')")
+    if conn.affected_rows < 1
       puts "Successfully added!"
     else
       puts "Could not be added!"
