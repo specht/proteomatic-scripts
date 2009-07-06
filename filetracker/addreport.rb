@@ -1,7 +1,13 @@
 require 'mysql'
 require 'yaml'
 
-def addReport(report)
+def addReport(conn, report)
+	if report['files']
+		unless report['files'].first['basename']
+			puts "Skipping report... obsolete format."
+			return
+		end
+	end
   #runs
   puts "-----------------------"
   print report['run']["user"].strip, "-", report['run']["script_title"].strip, "-", report['run']["host"].strip, "-", report['run']["script_uri"].strip, "-", report['run']["version"].strip, "-", report['run']["start_time"], "-", report['run']["end_time"], "\n"
@@ -17,50 +23,42 @@ def addReport(report)
   start_time = report['run']["start_time"]
   end_time = report['run']["end_time"]
   
-  conn = Mysql.new("localhost" , "testuser" , "user")
-  conn.select_db("yaml")
-  
   timeFmtStr= "%Y-%m-%d %H:%M:%S"
   startTimeFormatted = start_time.strftime(timeFmtStr)
   endTimeFormatted = end_time.strftime(timeFmtStr)
   
   conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}')")
-  if conn.affected_rows == 1
-    puts "Successfully added!"
-  else
-    puts "Could not be added!"
+  if conn.affected_rows != 1
+    puts "A Could not be added!"
   end
   run_id = conn.insert_id()
   
-  
+ 
+if report['run']['parameters'] 
   report['run']['parameters'].each do |parameter|
     code_key = parameter.keys.first.strip
-    code_value = parameter.values.first.strip
+    code_value = parameter.values.first
+	code_value.strip! if code_value.class == String
 	conn.query( "INSERT INTO parameters(run_id, code_key, code_value ) VALUES ( '#{run_id}', '#{code_key}', '#{code_value}')")
-    if conn.affected_rows == 1
-      puts "Successfully added!"
-    else
-      puts "Could not be added!"
+    if conn.affected_rows != 1
+      puts "B Could not be added!"
     end
   end
+end
   
   
+if report['files']
   #files
   report['files'].each do |file|
-	puts file.to_yaml
-    unless file['code_basename']
-      puts "Error: Obsolete report format."
-      exit 1
-    end
     
-    identifier = "code_basename#{file['code_basename']}"
+    identifier = "code_basename#{file['basename']}"
     identifier = "md5#{file['md5']}" if file['md5']
     puts identifier
     size = file['size'].to_i
-    basename = file['code_basename']
+    basename = file['basename']
     directory = file['directory']
-    ctime = file['ctime']
-    mtime = file['mtime']
+    ctime = file['ctime'].strftime(timeFmtStr)
+    mtime = file['mtime'].strftime(timeFmtStr)
 
     result = conn.query( "SELECT filecontent_id FROM filecontents WHERE identifier='#{identifier}' and size = '#{size}'")
   
@@ -68,26 +66,26 @@ def addReport(report)
   
     if result.num_rows == 0
       conn.query("INSERT INTO `filecontents`(identifier, size) VALUES ('#{identifier}', '#{size}')")
-      if conn.affected_rows == 1
-        puts "Successfully added!"
-      else
-        puts "Could not be added!"
+      if conn.affected_rows != 1
+        puts "C Could not be added!"
       end
       filecontent_id = conn.insert_id()
     else
       filecontent_id = result.fetch_row()[0]
     end
-    
-    result = conn.query("SELECT filewithname_id FROM filewithname WHERE filecontent_id='#{filecontent_id}', code_basename='#{code_basename}',directory='#{directory}', ctime='#{ctime}' and mtime='#{mtime}'")
+
+	s = "SELECT filewithname_id FROM filewithname WHERE filecontent_id='#{filecontent_id}' AND code_basename='#{basename}' AND directory='#{directory}' AND ctime='#{ctime}' and 
+mtime='#{mtime}'"
+	puts s
+    result = conn.query(s)
+puts result
   
     filewithname_id = nil
   
     if result.num_rows == 0
-      conn.query("INSERT INTO `filewithname` (filecontent_id, code_basename, directory, ctime, mtime) VALUES ('#{filecontent_id}', '#{code_basename}', '#{directory}', '#{ctime}', '#{mtime}')")
-      if conn.affected_rows < 1
-        puts "Successfully added!"
-      else
-        puts "Could not be added!"
+      conn.query("INSERT INTO `filewithname` (filecontent_id, code_basename, directory, ctime, mtime) VALUES ('#{filecontent_id}', '#{basename}', '#{directory}', '#{ctime}', '#{mtime}')")
+      if conn.affected_rows != 1
+        puts "D Could not be added!"
       end
       filewithname_id = conn.insert_id()
     else
@@ -95,19 +93,23 @@ def addReport(report)
     end
 
 	input_file = file['input_file']
-   conn.query("UPDATE run_filewithname SET `run_id` = '#{run_id}', `filewithname_id` = '#{filewithname_id}', `input_file` = '#{input_file}'")
+	s = "INSERT INTO run_filewithname (`run_id`, `filewithname_id`, `input_file`) VALUES('#{run_id}', 
+'#{filewithname_id}', '#{input_file ? '1' : '0'}')"
+	puts s
+	conn.query(s)
   end
+end
 end
 
 #Datenbankverbindung  
 begin
 	conn = Mysql.new("localhost" , "testuser" , "user")
-	conn.select_db("yaml")
+	conn.select_db("filetracker")
 
 	ARGV.each do |path|
-	puts path
-	report = YAML::load_file(path)
-	addReport(report)
+		puts path
+		report = YAML::load_file(path)
+		addReport(conn, report)
 	end
 rescue Mysql::Error => e
      puts "Error code: #{e.errno}"
