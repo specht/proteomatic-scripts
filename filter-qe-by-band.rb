@@ -26,7 +26,7 @@ require 'yaml'
 # and discards all results that were found in other bands. If scope is set to
 # automatic, protein is chosen when the protein column is found in all QE files.
 
-class FilterQuantiationEventsByBand < ProteomaticScript
+class FilterQuantitationEventsByBand < ProteomaticScript
 	def run()
 	
 		# handle band numbers that should be excluded
@@ -196,4 +196,4 @@ class FilterQuantiationEventsByBand < ProteomaticScript
 	end
 end
 
-lk_Object = FilterQuantiationEventsByBand.new
+lk_Object = FilterQuantitationEventsByBand.new

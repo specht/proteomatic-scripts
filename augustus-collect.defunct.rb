@@ -106,6 +106,35 @@ class AugustusCollect < ProteomaticScript
 		puts "triplet split only peptides: #{lk_TripletSplitOnlyPeptides.size} (#{sprintf('%1.1f', lk_TripletSplitOnlyPeptides.size.to_f * 100.0 / (lk_ImmediatePeptides + lk_IntronSplitPeptides).size)}%)."
 		puts 
 	end
+	
+	
+	def reduceSetAccordingToModifiedOnlyCount(ak_Peptides, ak_Reference)
+		lk_Result = ak_Peptides.dup()
+		li_ModifiedOnlyCount = 0
+		ak_Reference.each do |ls_Peptide|
+			li_ModifiedOnlyCount += 1 if @mk_AllPeptideModifications[ls_Peptide].keys == [:modified]
+		end
+		
+		lf_RefModRatio = li_ModifiedOnlyCount.to_f / ak_Reference.size
+		puts "Reference set has a modified only amount of #{lf_RefModRatio}."
+		
+		lk_SortedByScore = ak_Peptides.to_a.sort do |a, b|
+			@mk_AllPeptideBestScore[a] <=> @mk_AllPeptideBestScore[b]
+		end
+		li_ModifiedOnlyCount = 0
+		lk_SortedByScore.each do |ls_Peptide|
+			li_ModifiedOnlyCount += 1 if @mk_AllPeptideModifications[ls_Peptide].keys == [:modified]
+		end
+		lf_ModRatio = li_ModifiedOnlyCount.to_f / lk_SortedByScore.size
+		puts "Putative set has an initial modified only amount of #{lf_ModRatio}."
+
+		while lf_ModRatio > lf_RefModRatio
+			ls_Peptide = lk_SortedByScore.pop()
+			li_ModifiedOnlyCount -= 1 if @mk_AllPeptideModifications[ls_Peptide].keys == [:modified]
+			lf_ModRatio = li_ModifiedOnlyCount.to_f / lk_SortedByScore.size
+		end
+		return Set.new(lk_SortedByScore)
+	end
 
 	
 	def run()
@@ -115,6 +144,7 @@ class AugustusCollect < ProteomaticScript
 		lk_AllModelPeptides = Set.new
 		lk_AllPeptideOccurences = Hash.new
 		@mk_AllPeptideModifications = Hash.new
+		@mk_AllPeptideBestScore = Hash.new
 		@input[:psmFiles].each do |ls_Path|
 		
 			puts File::basename(ls_Path)
@@ -147,6 +177,11 @@ class AugustusCollect < ProteomaticScript
 					end
 				end
 				@mk_AllPeptideModifications[ls_Peptide][:unmodified] = true if lk_PeptideHash[ls_Peptide][:foundUnmodified]
+				lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
+					lf_Score = lk_ScanHash[ls_Scan][:e]
+					@mk_AllPeptideBestScore[ls_Peptide] ||= lf_Score
+					@mk_AllPeptideBestScore[ls_Peptide] = lf_Score if lf_Score < @mk_AllPeptideBestScore[ls_Peptide]
+				end
 			end
 			
 			lk_ProteinsBySpectralCount = lk_Proteins.keys.sort { |a, b| lk_SpectralCounts[:proteins][b][:total] <=> lk_SpectralCounts[:proteins][a][:total]}
@@ -167,11 +202,6 @@ class AugustusCollect < ProteomaticScript
 		puts "GPF and model and six frames: #{(lk_AllModelPeptides & lk_AllGpfPeptides & lk_AllSixFramesPeptides).size}"
 		puts "all but sixframes: #{(lk_AllModelPeptides + lk_AllGpfPeptides).size}"
 		
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/ingrid-peptides.txt', 'w') { |f| f.puts lk_AllPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
-		
 		modelsOnly = lk_AllModelPeptides - lk_AllGpfPeptides - lk_AllSixFramesPeptides
 		gpfOnly = lk_AllGpfPeptides - lk_AllModelPeptides - lk_AllSixFramesPeptides
 		sixFramesOnly = lk_AllSixFramesPeptides - lk_AllModelPeptides - lk_AllGpfPeptides
@@ -179,21 +209,39 @@ class AugustusCollect < ProteomaticScript
 		printDetails(lk_AllModelPeptides, 'gene models')
 		printDetails(lk_AllGpfPeptides, 'GPF')
 		printDetails(lk_AllSixFramesPeptides, 'six frames')
-		printDetails(modelsOnly, 'models only')
-		printDetails(gpfOnly, 'gpf only')
-		printDetails(sixFramesOnly, 'six frames only')
-		printDetails(allThree, 'all three')
-		printDetails((lk_AllModelPeptides & lk_AllGpfPeptides) - allThree, 'gpf model overlap')
-		printDetails((lk_AllSixFramesPeptides & lk_AllGpfPeptides) - allThree, 'gpf sixframes overlap')
-		printDetails((lk_AllSixFramesPeptides & lk_AllModelPeptides) - allThree, 'sixframes model overlap')
+# 		printDetails(modelsOnly, 'models only')
+# 		printDetails(gpfOnly, 'gpf only')
+# 		printDetails(sixFramesOnly, 'six frames only')
+# 		printDetails(allThree, 'all three')
+# 		printDetails((lk_AllModelPeptides & lk_AllGpfPeptides) - allThree, 'gpf model overlap')
+# 		printDetails((lk_AllSixFramesPeptides & lk_AllGpfPeptides) - allThree, 'gpf sixframes overlap')
+# 		printDetails((lk_AllSixFramesPeptides & lk_AllModelPeptides) - allThree, 'sixframes model overlap')
 		
-		exit
+		# now we have lk_AllPeptides, lk_AllModelPeptides, lk_AllGpfPeptides, lk_AllSixFramesPeptides
+		# now cut down lk_AllGpfPeptides and lk_AllSixFramesPeptides so that the amount of
+		# modified only peptides is less or equal than the amount in lk_AllModelPeptides
 		
-		File::open('/home/michael/Promotion/ak-hippler-alignments/all-gpf-peptides.fasta', 'w') do |f|
-			lk_AllGpfPeptides.to_a.sort.each do |ls_Peptide|
-				f.puts "#{ls_Peptide}"
-			end
-		end
+		lk_AllGpfPeptides = reduceSetAccordingToModifiedOnlyCount(lk_AllGpfPeptides, lk_AllModelPeptides)
+		lk_AllSixFramesPeptides = reduceSetAccordingToModifiedOnlyCount(lk_AllSixFramesPeptides, lk_AllModelPeptides)
+		
+		printDetails(lk_AllModelPeptides, 'gene models')
+		printDetails(lk_AllGpfPeptides, 'GPF')
+		printDetails(lk_AllSixFramesPeptides, 'six frames')
+		
+		# update lk_AllPeptides
+		lk_AllPeptides = lk_AllModelPeptides + lk_AllGpfPeptides + lk_AllSixFramesPeptides
+		
+		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/all-peptides.txt', 'w') { |f| f.puts lk_AllPeptides.to_a.sort.join("\n") }
+		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
+		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
+		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
+		
+		
+# 		File::open('/home/michael/Promotion/ak-hippler-alignments/all-gpf-peptides.fasta', 'w') do |f|
+# 			lk_AllGpfPeptides.to_a.sort.each do |ls_Peptide|
+# 				f.puts "#{ls_Peptide}"
+# 			end
+# 		end
 		
 		File::open('/home/michael/Promotion/ak-hippler-alignments/redo-gpf-peptides.fasta', 'w') do |f|
 			lk_AllPeptides.to_a.sort.each do |ls_Peptide|
@@ -201,6 +249,8 @@ class AugustusCollect < ProteomaticScript
 				f.puts "#{ls_Peptide}"
 			end
 		end
+		
+		exit
 		
 		print 'Loading GPF details...'
 		lk_GpfDetails = YAML::load_file('/home/michael/Promotion/ak-hippler-alignments/gpf-results.yaml')
