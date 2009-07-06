@@ -57,7 +57,7 @@ if report['files']
   #files
   report['files'].each do |file|
     
-    identifier = "code_basename#{file['basename']}"
+    identifier = "basename#{file['basename']}"
     identifier = "md5#{file['md5']}" if file['md5']
     puts identifier
     size = file['size'].to_i
