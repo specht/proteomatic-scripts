@@ -33,6 +33,7 @@ require 'socket'
 
 
 DEFAULT_DAEMON_PORT = 5555
+UNSENT_REPORTS_PATH = 'unsent-filetracker-reports'
 
 
 class StdoutListener
@@ -1241,20 +1242,46 @@ class ProteomaticScript
 		end
 		
 		ls_RunInfo = {'run' => lk_Info, 'files' => lk_Files}.to_yaml
-		#File.open("filetracker.yaml", 'w') { |f| f.puts(ls_RunInfo) }
+		
+		lb_Success = doSubmitRunToFileTracker(ls_RunInfo)
+		if lb_Success
+			# check whether there are unsent YAML reports
+			lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
+			lk_UnsentFiles.each do |ls_Path|
+				puts "Resending unsent run to filetracker..."
+				ls_Info = File::read(ls_Path)
+				if doSubmitRunToFileTracker(ls_RunInfo)
+					FileUtils::rm(ls_Path)	
+				end
+			end
+			lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
+			FileUtils::rm_rf(UNSENT_REPORTS_PATH) if lk_UnsentFiles.empty?
+		else
+			# if the run could not be submitted, try to save the YAML report to a local file
+			FileUtils::mkpath(UNSENT_REPORTS_PATH)
+			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
+			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
+			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
+		end
+	end
+	
+	
+	def doSubmitRunToFileTracker(as_RunInfo)
+		lb_Success = false
 		begin
 			lk_Uri = URI.parse(@ms_FileTrackerUri + '/upload')
-			#lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => ls_RunInfo})
-			lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => ls_RunInfo})
+			lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => as_RunInfo})
 				
 			if (lk_Response.code[0, 3] == "200")
 				puts " done."
+				lb_Success = true
 			else
 				puts " something went wrong."
 			end
 		rescue StandardError => e
 			puts "\nUnable to connect to file tracker: #{e}"
 		end
+		return lb_Success
 	end
 	
 	
