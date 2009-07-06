@@ -35,6 +35,27 @@ require 'socket'
 DEFAULT_DAEMON_PORT = 5555
 
 
+class StdoutListener
+	def initialize(ak_OldDevice = STDOUT)
+		@mk_OldDevice = ak_OldDevice
+		@ms_Output = ''
+	end
+	
+	def write(args)
+		@mk_OldDevice.write(args)
+		@ms_Output += args
+	end
+	
+	def get()
+		return @ms_Output
+	end
+	
+	def flush()
+		@mk_OldDevice.flush()
+	end
+end
+
+
 class ProteomaticScriptDaemon
 	def initialize(ak_Script)
 		@mk_Script = ak_Script
@@ -325,6 +346,12 @@ class ProteomaticScript
 		end
 		@ms_HostName = 'unknown' unless @ms_HostName
 		
+		@ms_UserName = @ms_UserName.dup
+		@ms_HostName = @ms_HostName.dup
+		
+		@ms_UserName.strip!
+		@ms_HostName.strip!
+		
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
@@ -384,6 +411,8 @@ class ProteomaticScript
 # 			puts "#{@ms_Title} daemon listening at #{DRb.uri}"
 # 			DRb.thread.join
 		else
+			lk_Listener = StdoutListener.new(STDOUT)
+			$stdout = lk_Listener
 			begin
 				applyArguments(ARGV)
 			rescue ProteomaticArgumentException => e
@@ -394,6 +423,8 @@ class ProteomaticScript
 			finishOutputFiles()
 			@mk_EndTime = Time.now
 			puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
+			$stdout = STDOUT
+			@ms_EavesdroppedOutput = lk_Listener.get()
 			submitRunToFileTracker() if @ms_FileTrackerUri
 		end
 	end
@@ -1187,6 +1218,7 @@ class ProteomaticScript
 		lk_Info['start_time'] = @mk_StartTime
 		lk_Info['end_time'] = @mk_EndTime
 		lk_Info['parameters'] = @mk_Parameters.humanReadableConfigurationHash()
+		lk_Info['stdout'] = @ms_EavesdroppedOutput
 		
 		lk_Files = Array.new
 		
