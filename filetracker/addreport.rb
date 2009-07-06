@@ -1,8 +1,14 @@
 require 'mysql'
 require 'yaml'
 
+def q(s)
+	
+	return s.gsub(/[']/, '\\\\\'') if s.class == String
+	return s
+end
+
 def addReport(conn, report)
-	if report['files']
+	if report['files'] && report['files'].class == Array && report['files'].size > 0
 		unless report['files'].first['basename']
 			puts "Skipping report... obsolete format."
 			return
@@ -39,7 +45,7 @@ if report['run']['parameters']
     code_key = parameter.keys.first.strip
     code_value = parameter.values.first
 	code_value.strip! if code_value.class == String
-	conn.query( "INSERT INTO parameters(run_id, code_key, code_value ) VALUES ( '#{run_id}', '#{code_key}', '#{code_value}')")
+	conn.query( "INSERT INTO parameters(run_id, code_key, code_value ) VALUES ( '#{run_id}', '#{code_key}', '#{q(code_value)}')")
     if conn.affected_rows != 1
       puts "B Could not be added!"
     end
@@ -74,8 +80,7 @@ if report['files']
       filecontent_id = result.fetch_row()[0]
     end
 
-	s = "SELECT filewithname_id FROM filewithname WHERE filecontent_id='#{filecontent_id}' AND code_basename='#{basename}' AND directory='#{directory}' AND ctime='#{ctime}' and 
-mtime='#{mtime}'"
+	s = "SELECT filewithname_id FROM filewithname WHERE filecontent_id='#{filecontent_id}' AND code_basename='#{q(basename)}' AND directory='#{q(directory)}' AND ctime='#{ctime}' and mtime='#{mtime}'"
 	puts s
     result = conn.query(s)
 puts result
@@ -83,7 +88,7 @@ puts result
     filewithname_id = nil
   
     if result.num_rows == 0
-      conn.query("INSERT INTO `filewithname` (filecontent_id, code_basename, directory, ctime, mtime) VALUES ('#{filecontent_id}', '#{basename}', '#{directory}', '#{ctime}', '#{mtime}')")
+      conn.query("INSERT INTO `filewithname` (filecontent_id, code_basename, directory, ctime, mtime) VALUES ('#{filecontent_id}', '#{q(basename)}', '#{q(directory)}', '#{ctime}', '#{mtime}')")
       if conn.affected_rows != 1
         puts "D Could not be added!"
       end
