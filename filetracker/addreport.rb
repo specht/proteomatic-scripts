@@ -1,6 +1,5 @@
-require 'yaml'
 require 'mysql'
-
+require 'yaml'
 
 def addReport(report)
   #runs
@@ -26,7 +25,7 @@ def addReport(report)
   endTimeFormatted = end_time.strftime(timeFmtStr)
   
   conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}')")
-  if conn.affected_rows < 1
+  if conn.affected_rows == 1
     puts "Successfully added!"
   else
     puts "Could not be added!"
@@ -35,10 +34,10 @@ def addReport(report)
   
   
   report['run']['parameters'].each do |parameter|
-    key = parameter.keys.first.strip
-    value = parameter.values.first.strip
-	conn.query( "INSERT INTO parameters(run_id, key, value ) VALUES ( '#{run_id}', '#{key}', '#{value}')")
-    if conn.affected_rows < 1
+    code_key = parameter.keys.first.strip
+    code_value = parameter.values.first.strip
+	conn.query( "INSERT INTO parameters(run_id, code_key, code_value ) VALUES ( '#{run_id}', '#{code_key}', '#{code_value}')")
+    if conn.affected_rows == 1
       puts "Successfully added!"
     else
       puts "Could not be added!"
@@ -49,38 +48,42 @@ def addReport(report)
   #files
   report['files'].each do |file|
 	puts file.to_yaml
-    unless file['basename']
+    unless file['code_basename']
       puts "Error: Obsolete report format."
       exit 1
     end
     
-    identifier = "basename#{file['basename']}"
+    identifier = "code_basename#{file['code_basename']}"
     identifier = "md5#{file['md5']}" if file['md5']
     puts identifier
-	size = file['size'].to_i
-  
+    size = file['size'].to_i
+    basename = file['code_basename']
+    directory = file['directory']
+    ctime = file['ctime']
+    mtime = file['mtime']
+
     result = conn.query( "SELECT filecontent_id FROM filecontents WHERE identifier='#{identifier}' and size = '#{size}'")
   
     filecontent_id = nil
   
     if result.num_rows == 0
-      conn.query("INSERT INTO `filecontents`(identifier, size) VALUES (#{identifier}, #{size})")
-      if conn.affected_rows < 1
-      puts "Successfully added!"
+      conn.query("INSERT INTO `filecontents`(identifier, size) VALUES ('#{identifier}', '#{size}')")
+      if conn.affected_rows == 1
+        puts "Successfully added!"
       else
-      puts "Could not be added!"
+        puts "Could not be added!"
       end
       filecontent_id = conn.insert_id()
     else
-      filecontent_id = result.fetch_row['filecontent_id']
+      filecontent_id = result.fetch_row()[0]
     end
-    result = conn.query("SELECT filewithname_id, filecontent_id, basename, directory, ctime, mtime FROM filewithname WHERE filecontent_id='#{filecontent_id}', basename='#{basename}',directory='#{directory}', ctime='#{ctime}' and mtime='#{mtime}'")
-  
+    
+    result = conn.query("SELECT filewithname_id FROM filewithname WHERE filecontent_id='#{filecontent_id}', code_basename='#{code_basename}',directory='#{directory}', ctime='#{ctime}' and mtime='#{mtime}'")
   
     filewithname_id = nil
   
     if result.num_rows == 0
-      conn.query("INSERT INTO `filewithname` (filecontent_id, basename, directory, ctime, mtime) VALUES (#{filecontent_id}, #{basename}, #{directory}, #{ctime}, #{mtime})")
+      conn.query("INSERT INTO `filewithname` (filecontent_id, code_basename, directory, ctime, mtime) VALUES ('#{filecontent_id}', '#{code_basename}', '#{directory}', '#{ctime}', '#{mtime}')")
       if conn.affected_rows < 1
         puts "Successfully added!"
       else
@@ -88,11 +91,11 @@ def addReport(report)
       end
       filewithname_id = conn.insert_id()
     else
-      filewithname_id = result.fetch_row['filewithname_id']
+      filewithname_id = result.fetch_row()[0]
     end
 
 	input_file = file['input_file']
-   conn.query("UPDATE run_filewithname SET run_id = #{run_id}, filewithname_id = #{filewithname_id}, input_file = #{input_file}")
+   conn.query("UPDATE run_filewithname SET `run_id` = '#{run_id}', `filewithname_id` = '#{filewithname_id}', `input_file` = '#{input_file}'")
   end
 end
 
