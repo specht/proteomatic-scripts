@@ -356,7 +356,8 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		@ms_FileTrackerUri = "http://peaks.uni-muenster.de:5555"
+		#@ms_FileTrackerUri = "http://peaks.uni-muenster.de:5555"
+		@ms_FileTrackerUri = "http://localhost:5555"
 		#@ms_FileTrackerUri = nil
 		if (File::exists?('config/filetracker.config.yaml'))
 			@ms_FileTrackerUri = YAML::load_file('config/filetracker.config.yaml')['fileTrackerUri']
@@ -1269,15 +1270,24 @@ class ProteomaticScript
 	def doSubmitRunToFileTracker(as_RunInfo)
 		lb_Success = false
 		begin
-			lk_Uri = URI.parse(@ms_FileTrackerUri + '/upload')
-			lk_Response = Net::HTTP.post_form(lk_Uri, {'info' => as_RunInfo})
-				
-			if (lk_Response.code[0, 3] == "200")
-				puts " done."
-				lb_Success = true
-			else
-				puts " something went wrong."
+			client = nil
+			timeout(30) do
+				client = TCPSocket.open('localhost', 5555)
+				return false unless client
 			end
+			client.puts 'PROTEOMATIC_FILETRACKER_REPORT'
+			client.puts 'VERSION 1'
+			client.puts "LENGTH #{as_RunInfo.size}"
+			
+			client.puts as_RunInfo
+			
+			client.flush
+			ls_Message = client.readline
+			puts "SERVER RESPONDED #{ls_Message}"
+			
+			client.close
+			lb_Success = true
+
 		rescue StandardError => e
 			puts "\nUnable to connect to file tracker: #{e}"
 		end

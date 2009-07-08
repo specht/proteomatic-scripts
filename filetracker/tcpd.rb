@@ -27,14 +27,9 @@ while (session = server.accept)
 		puts 'eof!'
 		puts path
 
-		session.puts "The people ask, the people get: #{path}"
-		if (path.index('wait') == 0)
-			puts 'sleeping'
-			STDOUT.flush
-			sleep 10.0 
-			puts 'waking up'
-			STDOUT.flush
-		end
+		session.puts "ALRIGHT"
+		
+		session.flush
 		session.close
 	end
 end
