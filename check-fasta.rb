@@ -143,6 +143,9 @@ class CheckFasta < ProteomaticScript
 					lb_Error = true
 				end
 				exit(1) if lb_Error
+				
+				# lk_LineHash keeps the cropped line counts
+				lk_LineHash = Hash.new
  
 				puts 'Writing fixed database...'
 				File::open(@output[:fixedDatabase], 'w') do |lk_Out|
@@ -156,7 +159,15 @@ class CheckFasta < ProteomaticScript
 							unless ls_CurrentProtein.empty?
 								# handle protein
 								unless lk_DuplicateProteinKeys.include?(ls_CurrentKey) || lk_DuplicateProteins.include?(ls_CurrentProtein)
-									lk_Out.puts '>' + ls_CurrentKey
+									ls_CroppedKey = ls_CurrentKey[0, @param[:maxIdLength]]
+									ls_CroppedKey += '[...]' if ls_CroppedKey != ls_CurrentKey
+									if lk_LineHash.include?(ls_CroppedKey)
+										lk_LineHash[ls_CroppedKey] += 1
+										ls_CroppedKey += " (variant #{lk_LineHash[ls_CroppedKey]})"
+									else
+										lk_LineHash[ls_CroppedKey] = 1
+									end
+									lk_Out.puts '>' + ls_CroppedKey
 									lk_Out.puts wrap(ls_CurrentProtein)
 								end
 							end
@@ -171,7 +182,15 @@ class CheckFasta < ProteomaticScript
 					unless ls_CurrentProtein.empty?
 						# handle protein
 						unless lk_DuplicateProteinKeys.include?(ls_CurrentKey) || lk_DuplicateProteins.include?(ls_CurrentProtein)
-							lk_Out.puts '>' + ls_CurrentKey
+							ls_CroppedKey = ls_CurrentKey[0, @param[:maxIdLength]]
+							ls_CroppedKey += '[...]' if ls_CroppedKey != ls_CurrentKey
+							if lk_LineHash.include?(ls_CroppedKey)
+								lk_LineHash[ls_CroppedKey] += 1
+								ls_CroppedKey += " (variant #{lk_LineHash[ls_CroppedKey]})"
+							else
+								lk_LineHash[ls_CroppedKey] = 1
+							end
+							lk_Out.puts '>' + ls_CroppedKey
 							lk_Out.puts wrap(ls_CurrentProtein)
 						end
 					end
@@ -189,7 +208,15 @@ class CheckFasta < ProteomaticScript
 								ls_MergedKey += " aka #{lk_Key.join(' ')}"
 							end
 							unless a.empty?
-								lk_Out.puts ">#{ls_MergedKey}"
+								ls_CroppedKey = ls_MergedKey[0, @param[:maxIdLength]]
+								ls_CroppedKey += '[...]' if ls_CroppedKey != ls_MergedKey
+								if lk_LineHash.include?(ls_CroppedKey)
+									lk_LineHash[ls_CroppedKey] += 1
+									ls_CroppedKey += " (variant #{lk_LineHash[ls_CroppedKey]})"
+								else
+									lk_LineHash[ls_CroppedKey] = 1
+								end
+								lk_Out.puts ">#{ls_CroppedKey}"
 								lk_Out.puts wrap(a)
 							end
 						end

@@ -23,3 +23,11 @@ output:
     format: fasta
     filename: fixed-database.fasta
     default: no
+
+parameters:
+  - key: maxIdLength
+    label: Max id line length
+    type: int
+    default: 400
+    min: 32
+    suffix: characters
