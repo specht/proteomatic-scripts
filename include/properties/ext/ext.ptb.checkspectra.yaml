@@ -1,4 +1,4 @@
 binary:
   win32: checkspectra.exe
-  linux: checkspectra.sh
+  linux: checkspectra
   macx: checkspectra

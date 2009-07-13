@@ -1,4 +1,4 @@
 binary:
   win32: stripscans.exe
-  linux: stripscans.sh
+  linux: stripscans
   macx: stripscans

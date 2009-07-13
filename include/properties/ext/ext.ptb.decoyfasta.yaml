@@ -1,4 +1,4 @@
 binary:
   win32: decoyfasta.exe
-  linux: decoyfasta.sh
+  linux: decoyfasta
   macx: decoyfasta
