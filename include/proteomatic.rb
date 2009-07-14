@@ -1259,10 +1259,11 @@ class ProteomaticScript
 			FileUtils::rm_rf(UNSENT_REPORTS_PATH) if lk_UnsentFiles.empty?
 		else
 			# if the run could not be submitted, try to save the YAML report to a local file
-			FileUtils::mkpath(UNSENT_REPORTS_PATH)
-			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
-			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
-			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
+			puts "ATTENTION REPORT RESENDING *SAVE* DISABLED"
+# 			FileUtils::mkpath(UNSENT_REPORTS_PATH)
+# 			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
+# 			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
+# 			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
 		end
 	end
 	
