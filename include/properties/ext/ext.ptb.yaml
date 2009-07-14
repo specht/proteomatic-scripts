@@ -5,9 +5,9 @@ version: 0.2.6
 link: http://ptb.origo.ethz.ch/
 
 download:
-  linux: 'ftp://gpf.uni-muenster.de/download/ptb/ptb-0.2.6-linux.tar.bz2'
-  win32: 'ftp://gpf.uni-muenster.de/download/ptb/ptb-0.2.6-win32.zip'
-  macx: 'ftp://gpf.uni-muenster.de/download/ptb/ptb-0.2.6-macx.tar.bz2'
+  linux: 'http://download.origo.ethz.ch/ptb/1287/ptb-0.2.6-linux.tar.bz2'
+  win32: 'http://download.origo.ethz.ch/ptb/1287/ptb-0.2.6-win32.zip'
+  macx: 'http://download.origo.ethz.ch/ptb/1287/ptb-0.2.6-macx.tar.bz2'
 
 path:
   linux: ptb-0.2.6-linux
