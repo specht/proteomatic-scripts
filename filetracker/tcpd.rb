@@ -1,4 +1,5 @@
 require 'socket'
+require 'filetrackerhub'
 
 
 =begin
@@ -47,6 +48,7 @@ while (session = server.accept)
   yamlReport = session.read(length)
   
   puts yamlReport
+  addReport(conn, YAML::load(yamlReport))
 
   session.puts "REPORT RECEIVED"
   
