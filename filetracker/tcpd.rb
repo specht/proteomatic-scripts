@@ -1,5 +1,6 @@
 require 'socket'
 
+
 =begin
 info
 parameters
@@ -12,24 +13,47 @@ getOutputFile
 deleteJob
 =end
 
-server = TCPServer.new('', 5555);
+server = TCPServer.new('localhost',5555);
 
 while (session = server.accept)
-	Thread.new(session) do |session|
-		path = ''
-		while !session.eof?
-			print 'r'
-			t = session.gets
-			path += t
-			
-			puts ": #{t}"
-		end
-		puts 'eof!'
-		puts path
+        Thread.new(session) do |session|
+        path = ''
+ 
+  input = session.gets
+  
+  unless input.strip == 'PROTEOMATIC_FILETRACKER_REPORT'
+    session.close
+    return
+  end
+  puts input
+  
+  input = session.gets
+  
+  unless input.strip == 'VERSION 1'
+    session.close
+    return
+  end
+  puts input
+  
+  input = session.gets
+  unless input.index('LENGTH ') == 0
+    session.close
+    return
+  end
+  
+  length = input.strip.sub('LENGTH ', '').to_i
+  puts "Reading #{length} bytes!"
+  
+  yamlReport = session.read(length)
+  
+  puts yamlReport
 
-		session.puts "ALRIGHT"
-		
-		session.flush
-		session.close
-	end
-end
+  session.puts "REPORT RECEIVED"
+  
+
+  session.puts "ALRIGHT"
+                
+  session.flush
+  session.close
+  end
+  end
