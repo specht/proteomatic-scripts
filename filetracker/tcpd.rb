@@ -1,5 +1,6 @@
 require 'socket'
 require 'filetrackerhub'
+require 'mysql'
 
 
 =begin
@@ -15,6 +16,11 @@ deleteJob
 =end
 
 server = TCPServer.new('localhost',5555);
+
+begin
+conn = Mysql.new("localhost" , "testuser" , "user")
+	conn.select_db("filetracker")
+end
 
 while (session = server.accept)
         Thread.new(session) do |session|
@@ -57,5 +63,6 @@ while (session = server.accept)
                 
   session.flush
   session.close
+  conn.close
   end
   end
