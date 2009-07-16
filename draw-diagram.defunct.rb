@@ -64,19 +64,19 @@ class DrawDiagram < ProteomaticScript
 					
  		end
 		
-		# max rel std dev is 0.6
-		relstddevcutoff = 0.6
-		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+# 		# max rel std dev is 0.6
+# 		relstddevcutoff = 0.6
+# 		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+# 
+# 		# min scan count is 2
+# 		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
 
-		# min scan count is 2
-		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
-
-		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
-			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
-			lk_Items.each do |x|
-				lk_Out.puts "\"#{x['protein']}\",#{x['scancount']},#{x['peptidebandcount']},#{x['mean']},#{x['stddev']}"
-			end
-		end
+# 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
+# 			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
+# 			lk_Items.each do |x|
+# 				lk_Out.puts "\"#{x['protein']}\",#{x['scancount']},#{x['peptidebandcount']},#{x['mean']},#{x['stddev']}"
+# 			end
+# 		end
 		
 		
 # 		lk_Groups = lk_Items.collect { |x| x['localization'] }.uniq.sort
@@ -91,21 +91,27 @@ class DrawDiagram < ProteomaticScript
 # 			lk_GroupEnd[lk_GroupKeys[lk_Items[i]['localization']]] = i
 # 		end
 		
+ 		lk_Items.reject! { |x| x['peptidebandcount'].to_i > 1 }
 		File.open(@output[:diagram], 'w') do |lk_Out|
 			$gi_ItemCount = lk_Items.size
 
 			$gi_Border = 16
 			$gi_LeftBorder = 40
-			$gi_ImageWidth = 1200
-			$gi_ImageHeight = 660
+ 			$gi_ImageWidth = 1200
+ 			$gi_ImageHeight = 660
+			$gf_MinY = 7.0
+			$gf_MaxY = -1.0
+			$gi_TickWidth = 3.0
+
+			$gi_ImageWidth = 420
+			$gi_ImageHeight = 220
+			$gf_MinY = 5.0
+			
 			$gi_Left = $gi_LeftBorder
 			$gi_Top = $gi_Border
 			$gi_Width = $gi_ImageWidth - $gi_LeftBorder - $gi_Border
 			$gi_Height = $gi_ImageHeight - $gi_Border * 2
-			$gf_MinY = 7.0
-			$gf_MaxY = -1.0
-			$gi_TickWidth = 3.0
-			
+
 			lk_Out.puts '<?xml version="1.0" encoding="utf-8"?>'
 			lk_Out.puts '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
 			lk_Out.puts "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{$gi_ImageWidth}px' height='#{$gi_ImageHeight}px'>"
@@ -158,10 +164,10 @@ class DrawDiagram < ProteomaticScript
 				t[0] = lk_Item['mean'].to_f - lk_Item['stddev'].to_f
 				t[1] = lk_Item['mean'].to_f
 				t[2] = lk_Item['mean'].to_f + lk_Item['stddev'].to_f
-				if (t[1] > 6.0)
-					t[0] = 6.0
-					t[1] = 6.0
-					t[2] = 6.0
+				if (t[1] > $gf_MinY - 1)
+					t[0] = $gf_MinY - 1
+					t[1] = $gf_MinY - 1
+					t[2] = $gf_MinY - 1
 				end
 				#puts lk_Item.to_yaml if (t[2] > 7.0)
 					
