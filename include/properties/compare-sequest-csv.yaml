@@ -1,0 +1,30 @@
+group: Miscellaneous
+
+title: Compare SEQUEST CSV results
+
+description: >
+  This script compares SEQUEST protein identifications.
+
+type: processor
+
+input:
+  - key: csvFile
+    label: SEQUEST result
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: csvFile
+
+output:
+  - key: csvReport
+    label: CSV comparison report
+    format: csv
+    filename: compare-sequest-report.csv
+    default: yes
+
+parameters:
+  - key: modifiedProteinsOnly
+    label: List modified proteins only
+    description: Only include modified proteins in the comparison
+    type: flag
+    default: false
