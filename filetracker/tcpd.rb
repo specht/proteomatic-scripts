@@ -1,6 +1,7 @@
 require 'socket'
 require 'filetrackerhub'
 require 'mysql'
+require 'thread'
 
 
 =begin
@@ -21,6 +22,8 @@ begin
 conn = Mysql.new("localhost" , "testuser" , "user")
 	conn.select_db("filetracker")
 end
+
+$databaseMutex = Mutex.new
 
 while (session = server.accept)
         Thread.new(session) do |session|
@@ -53,14 +56,20 @@ while (session = server.accept)
   
   yamlReport = session.read(length)
   
-  puts yamlReport
-  addReport(conn, YAML::load(yamlReport))
-
   session.puts "REPORT RECEIVED"
   
+  # add report to database
+  $databaseMutex.synchronize do
+    addReport(conn, YAML::load(yamlReport))
+  end
+  session.puts "REPORT COMMITTED"
+  
+  # archive report
+  timestamp = Time.now.strftime("%Y-%m")
+  File.open("archive/filetracker-reports-#{timestamp}.yaml", "a") do |f|
+	f.puts yamlReport
+  end
 
-  session.puts "ALRIGHT"
-                
   session.flush
   session.close
   conn.close

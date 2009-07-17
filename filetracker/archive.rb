@@ -1,10 +1,9 @@
 require 'yaml'
 
 t = Time.now
-t.strftime("%Y-%m")
+timestamp = t.strftime("%Y-%m")
 
-file = File.open("filetracker-reports-2009-07.yaml", "a")
-file.puts t
+file = File.open("filetracker-reports-#{timestamp}.yaml", "a")
 
   if item
     item = File.open(" ", "a").each  do |file|
