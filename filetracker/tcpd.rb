@@ -16,6 +16,12 @@ getOutputFile
 deleteJob
 =end
 
+gzipVersion = `gzip -V`
+unless gzipVersion.index('gzip')
+  puts "Error: gzip is not installed."
+  exit(1)
+end
+
 server = TCPServer.new('localhost',5555);
 
 begin
@@ -24,6 +30,7 @@ conn = Mysql.new("localhost" , "testuser" , "user")
 end
 
 $databaseMutex = Mutex.new
+$fileMutex = Mutex.new
 
 while (session = server.accept)
         Thread.new(session) do |session|
@@ -66,10 +73,17 @@ while (session = server.accept)
   
   # archive report
   timestamp = Time.now.strftime("%Y-%m")
-  File.open("archive/filetracker-reports-#{timestamp}.yaml", "a") do |f|
-	f.puts yamlReport
+  currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
+  $fileMutex.synchronize do
+    File.open("archive/#{currentArchiveFilename}", "a") do |f|
+      f.puts yamlReport
+    end
+    unarchivedFiles = Dir['archive/*.yaml']
+    unarchivedFiles.each do |path|
+      next if File::basename(path).include?(currentArchiveFilename)
+      system("gzip \"#{path}\"")
+    end
   end
-
   session.flush
   session.close
   conn.close
