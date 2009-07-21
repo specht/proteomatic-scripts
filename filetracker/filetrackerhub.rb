@@ -23,12 +23,13 @@ def addReport(conn, report)
 	version = report['run']["version"].strip
 	start_time = report['run']["start_time"]
 	end_time = report['run']["end_time"]
+  std_out= report['run']["std_out"].strip
 
 	timeFmtStr= "%Y-%m-%d %H:%M:%S"
 	startTimeFormatted = start_time.strftime(timeFmtStr)
 	endTimeFormatted = end_time.strftime(timeFmtStr)
 
-	conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}')")
+	conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time, std_out ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}', '#{std_out}')")
 	if conn.affected_rows != 1
 		puts "Could not be added!"
 	end
