@@ -138,7 +138,7 @@ CREATE TABLE `runs` (
   `version` varchar(1024) NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
-  `std_out` varchar(1024) NOT NULL,
+  `std_out` longtext NOT NULL,
   PRIMARY KEY (`run_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

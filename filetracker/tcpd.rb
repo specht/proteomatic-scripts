@@ -17,7 +17,7 @@ deleteJob
 =end
 
 gzipVersion = `gzip -V`
-unless gzipVersion.index('gzip')
+unless gzipVersion.index('gzip') == 0
   puts "Error: gzip is not installed."
   exit(1)
 end
