@@ -30,6 +30,7 @@ require 'uri'
 require 'net/http'
 require 'digest/md5'
 require 'socket'
+require 'timeout'
 
 
 DEFAULT_DAEMON_PORT = 5555
@@ -356,11 +357,12 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		#@ms_FileTrackerUri = "http://peaks.uni-muenster.de:5555"
-		@ms_FileTrackerUri = "http://localhost:5555"
-		#@ms_FileTrackerUri = nil
+		@ms_FileTrackerHost = 'peaks.uni-muenster.de'
+		@mi_FileTrackerPort = 5556
 		if (File::exists?('config/filetracker.config.yaml'))
-			@ms_FileTrackerUri = YAML::load_file('config/filetracker.config.yaml')['fileTrackerUri']
+			config = YAML::load_file('config/filetracker.config.yaml')
+			@ms_FileTrackerHost = config['fileTrackerHost']
+			@mi_FileTrackerPort = config['fileTrackerPort']
 		end
 		
 		@ms_Version = File::read('include/version.rb').strip
@@ -427,7 +429,7 @@ class ProteomaticScript
 			puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
 			$stdout = STDOUT
 			@ms_EavesdroppedOutput = lk_Listener.get()
-			submitRunToFileTracker() if @ms_FileTrackerUri
+			submitRunToFileTracker() if @ms_FileTrackerHost
 		end
 	end
 	
@@ -1208,8 +1210,8 @@ class ProteomaticScript
 	
 	
 	def submitRunToFileTracker()
-		return unless @ms_FileTrackerUri
-		print "Submitting run to file tracker at #{@ms_FileTrackerUri}..."
+		return unless @ms_FileTrackerHost
+		print "Submitting run to file tracker at #{@ms_FileTrackerHost}:#{@mi_FileTrackerPort}... "
 		
 		lk_Info = Hash.new
 		lk_Info['version'] = @ms_Version
@@ -1246,6 +1248,7 @@ class ProteomaticScript
 		
 		lb_Success = doSubmitRunToFileTracker(ls_RunInfo)
 		if lb_Success
+			puts 'done.'
 			# check whether there are unsent YAML reports
 			lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
 			lk_UnsentFiles.each do |ls_Path|
@@ -1259,11 +1262,12 @@ class ProteomaticScript
 			FileUtils::rm_rf(UNSENT_REPORTS_PATH) if lk_UnsentFiles.empty?
 		else
 			# if the run could not be submitted, try to save the YAML report to a local file
-			puts "ATTENTION REPORT RESENDING *SAVE* DISABLED"
-# 			FileUtils::mkpath(UNSENT_REPORTS_PATH)
-# 			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
-# 			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
-# 			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
+			#puts "ATTENTION REPORT RESENDING *SAVE* DISABLED"
+			FileUtils::mkpath(UNSENT_REPORTS_PATH)
+			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
+			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
+			puts
+			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
 		end
 	end
 	
@@ -1273,22 +1277,23 @@ class ProteomaticScript
 		begin
 			client = nil
 			timeout(30) do
-				client = TCPSocket.open('localhost', 5555)
-				return false unless client
+				client = TCPSocket.open(@ms_FileTrackerHost, @mi_FileTrackerPort)
+				client.puts 'PROTEOMATIC_FILETRACKER_REPORT'
+				client.puts 'VERSION 1'
+				client.puts "LENGTH #{as_RunInfo.size}"
+				
+				client.puts as_RunInfo
+				
+				client.flush
+				ls_Message = client.readline
+				if ls_Message.strip == 'REPORT RECEIVED'
+					ls_Message = client.readline
+					if ls_Message.strip == 'REPORT COMMITTED'
+						lb_Success = true
+					end
+				end
+				client.close
 			end
-			client.puts 'PROTEOMATIC_FILETRACKER_REPORT'
-			client.puts 'VERSION 1'
-			client.puts "LENGTH #{as_RunInfo.size}"
-			
-			client.puts as_RunInfo
-			
-			client.flush
-			ls_Message = client.readline
-			puts "SERVER RESPONDED #{ls_Message}"
-			
-			client.close
-			lb_Success = true
-
 		rescue StandardError => e
 			puts "\nUnable to connect to file tracker: #{e}"
 		end
