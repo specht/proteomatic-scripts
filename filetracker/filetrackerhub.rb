@@ -1,7 +1,30 @@
+require 'yaml'
+
+
+def openDatabaseConnection()
+	databaseConfigPath = 'dbconfig.yaml'
+
+	unless File::exists?(databaseConfigPath)
+		puts "Error: dbconfig.yaml could not be found. Please copy dbconfig.template.yaml to dbconfig.yaml and adjust the values."
+		exit(1)
+	end
+
+	databaseConfig = YAML::load_file('dbconfig.yaml')
+	
+	puts "Using MySQL database '#{databaseConfig['database']}' at #{databaseConfig['host']}."
+
+	conn = Mysql.new(databaseConfig['host'], databaseConfig['user'], databaseConfig['password'])
+	conn.select_db(databaseConfig['database'])
+	
+	return conn
+end
+
+
 def q(s)
 	return s.gsub(/[']/, '\\\\\'') if s.class == String
 	return s
 end
+
 
 def addReport(conn, report)
 	if report['files'] && report['files'].class == Array && report['files'].size > 0
@@ -16,20 +39,21 @@ def addReport(conn, report)
 # 	puts "-----------------------"
 # 	puts
 
-	user = report['run']["user"].strip
-	title = report ['run']["script_title"].strip
-	host = report['run']["host"].strip
-	script_uri = report['run']["script_uri"].strip
-	version = report['run']["version"].strip
-	start_time = report['run']["start_time"]
-	end_time = report['run']["end_time"]
-  std_out= report['run']["std_out"].strip
-
+	user = report['run']['user'].strip
+	title = report ['run']['script_title'].strip
+	host = report['run']['host'].strip
+	script_uri = report['run']['script_uri'].strip
+	version = report['run']['version'].strip
+	start_time = report['run']['start_time']
+	end_time = report['run']['end_time']
+	std_out = report['run']['stdout']
+	std_out ||= ''
+	
 	timeFmtStr= "%Y-%m-%d %H:%M:%S"
 	startTimeFormatted = start_time.strftime(timeFmtStr)
 	endTimeFormatted = end_time.strftime(timeFmtStr)
-
-	conn.query( "INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time, std_out ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}', '#{std_out}')")
+	
+	conn.query("INSERT INTO `runs` (user, title, host, script_uri, version, start_time, end_time, std_out ) VALUES ( '#{user}', '#{title}', '#{host}', '#{script_uri}', '#{version}', '#{startTimeFormatted}', '#{endTimeFormatted}', '#{std_out}')")
 	if conn.affected_rows != 1
 		puts "Could not be added!"
 	end

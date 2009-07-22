@@ -1,0 +1,5 @@
+# please adjust values accordingly and save this file as dbconfig.yaml
+host: localhost
+database: filetracker
+user: user
+password: password

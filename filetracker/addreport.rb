@@ -5,8 +5,7 @@ require 'filetrackerhub'
 
 #Datenbankverbindung  
 begin
-	conn = Mysql.new("localhost" , "testuser" , "user")
-	conn.select_db("filetracker")
+	conn = openDatabaseConnection()
 
 	ARGV.each do |path|
 		puts path
