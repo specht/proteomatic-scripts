@@ -108,6 +108,7 @@ class WriteOmssaReport < ProteomaticScript
 				lk_Out.puts "<li><a href='#header-new-gpf-peptides'>Additional peptides identified by GPF</a></li>" if (lk_GpfPeptides - lk_ModelPeptides).size > 0 && @param[:writeAdditionalPeptidesIdentifiedByGPF]
 				lk_Out.puts "<li><a href='#header-ambiguous-peptides'>Identified peptides that appear in more than one model protein</a></li>" if (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size > 0 && @param[:writeAmbiguousPeptides]
 				lk_Out.puts "<li><a href='#header-modified-peptides'>Modified peptides</a></li>" if @param[:writeModifiedPeptides]
+				lk_Out.puts "<li><a href='#header-all-identified-peptides'>All identified peptides</a></li>" if @param[:writeAllIdentifiedPeptides]
 				lk_Out.puts '</ol>'
 			
 				lk_Out.puts "<h2 id='header-overview-and-statistical-significance'>Overview and statistical significance</h2>"
@@ -263,7 +264,7 @@ class WriteOmssaReport < ProteomaticScript
 							lk_PeptideHash[x][:scans].size == lk_PeptideHash[y][:scans].size ? x <=> y : lk_PeptideHash[y][:scans].size <=> lk_PeptideHash[x][:scans].size
 						end
 						lk_Out.puts '<table>'
-						lk_Out.puts '<tr><th>Count</th><th>Peptide</th><th>Scan</th><th>E-value</th></tr>'
+						lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Scan</th><th>E-value</th></tr>'
 						lk_GpfOnlyPeptides.each do |ls_Peptide|
 							li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 							lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'>#{ls_Peptide} #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td>#{lk_PeptideHash[ls_Peptide][:scans].first}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans].first][:e])}</td></tr>"
@@ -283,7 +284,7 @@ class WriteOmssaReport < ProteomaticScript
 						lk_Out.puts "Peptides that have additionally been found by de novo prediction and GPF searching are <span class=\'gpf-confirm\'>highlighted</span>." unless lk_GpfPeptides.empty?
 						lk_Out.puts "</p>"
 						lk_Out.puts '<table>'
-						lk_Out.puts '<tr><th>Count</th><th>Peptide</th><th>Proteins</th><th>Scan</th><th>E-value</th></tr>'
+						lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Proteins</th><th>Scan</th><th>E-value</th></tr>'
 						lk_AmbiguousPeptides.each do |ls_Peptide|
 							li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 							ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
@@ -359,6 +360,28 @@ class WriteOmssaReport < ProteomaticScript
 					else
 						lk_Out.puts '<p>No modified peptides have been found.</p>'
 					end
+				end
+				
+				if @param[:writeAllIdentifiedPeptides]
+					lk_Out.puts "<h2 id='header-all-identified-peptides'>All identified peptides</h2>"
+					lk_Out.puts "<p>"
+					lk_Out.puts "The following list contains all peptides that have been identified, regardless of whether they appear in multiple proteins or not. The list is sorted by scan count."
+					lk_Out.puts "Peptides that have additionally been found by de novo prediction and GPF searching are <span class=\'gpf-confirm\'>highlighted</span>." unless lk_GpfPeptides.empty?
+					lk_Out.puts "</p>"
+					lk_Out.puts '<table>'
+					lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Proteins</th><th>Scan</th><th>E-value</th></tr>'
+					lk_PeptideHash.keys.sort { |a, b| lk_PeptideHash[b][:scans].size <=> lk_PeptideHash[a][:scans].size }.each do |ls_Peptide|
+						li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
+						ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
+						lk_ScanInfo = lk_PeptideHash[ls_Peptide][:scans].sort do |a, b|
+							String::natcmp(a, b)
+						end
+						lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td rowspan='#{li_ScanCount}'><ul>#{lk_PeptideHash[ls_Peptide][:proteins].keys.collect { |x| "<li>#{x}</li>" }.join(' ')}</ul></td><td>#{lk_ScanInfo.first}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo.first][:e])}</td></tr>"
+						(1...li_ScanCount).each do |i|
+							lk_Out.puts "<tr><td>#{lk_ScanInfo[i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo[i]][:e])}</td></tr>"
+						end
+					end
+					lk_Out.puts '</table>'
 				end
 				
 				lk_Out.puts '</body>'
