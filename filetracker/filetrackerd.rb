@@ -37,54 +37,44 @@ while (session = server.accept)
 		
 		input = session.gets
 		
-		unless input.strip == 'PROTEOMATIC_FILETRACKER_REPORT'
-			session.close
-			return
-		end
-		
-		input = session.gets
-		
-		unless input.strip == 'VERSION 1'
-			session.close
-			return
-		end
-		
-		input = session.gets
-		unless input.index('LENGTH ') == 0
-			session.close
-			return
-		end
-		
-		length = input.strip.sub('LENGTH ', '').to_i
-		
-		yamlReport = session.read(length)
-		
-		puts "Received new report:"
-		puts yamlReport
-		
-		session.puts "REPORT RECEIVED"
-		
-		# add report to database
-		reportData = YAML::load(yamlReport)
-		$databaseMutex.synchronize do
-			addReport(conn, reportData)
-		end
-		puts "Report committed."
-		puts
-		
-		session.puts "REPORT COMMITTED"
-		
-		# archive report
-		timestamp = Time.now.strftime("%Y-%m")
-		currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
-		$fileMutex.synchronize do
-			File.open("archive/#{currentArchiveFilename}", "a") do |f|
-				f.puts yamlReport
-			end
-			unarchivedFiles = Dir['archive/*.yaml']
-			unarchivedFiles.each do |path|
-				next if File::basename(path).include?(currentArchiveFilename)
-				system("gzip \"#{path}\"")
+		if input.strip == 'PROTEOMATIC_FILETRACKER_REPORT'
+			input = session.gets
+			if input.strip == 'VERSION 1'
+				input = session.gets
+				if input.index('LENGTH ') == 0
+					length = input.strip.sub('LENGTH ', '').to_i
+					
+					yamlReport = session.read(length)
+					
+					puts "Received new report:"
+					puts yamlReport
+					
+					session.puts "REPORT RECEIVED"
+					
+					# add report to database
+					reportData = YAML::load(yamlReport)
+					$databaseMutex.synchronize do
+						addReport(conn, reportData)
+					end
+					puts "Report committed."
+					puts
+					
+					session.puts "REPORT COMMITTED"
+					
+					# archive report
+					timestamp = Time.now.strftime("%Y-%m")
+					currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
+					$fileMutex.synchronize do
+						File.open("archive/#{currentArchiveFilename}", "a") do |f|
+							f.puts yamlReport
+						end
+						unarchivedFiles = Dir['archive/*.yaml']
+						unarchivedFiles.each do |path|
+							next if File::basename(path).include?(currentArchiveFilename)
+							system("gzip \"#{path}\"")
+						end
+					end
+				end
 			end
 		end
 		session.flush
