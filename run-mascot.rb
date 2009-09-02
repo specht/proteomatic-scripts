@@ -20,7 +20,7 @@ require 'include/proteomatic'
 class RunMascot < ProteomaticScript
 	def run()
 		puts "Hello, this is the MASCOT script. MC is set to #{@param[:PFA]}."
-		ls_Config = DATA.read
+		ls_Config = DATA.read #here
 		ls_Config.sub!('#{PFA}', @param[:PFA].to_s)
 		@ms_TempPath = tempFilename('run-mascot')
 		FileUtils::mkpath(@ms_TempPath)
@@ -29,7 +29,7 @@ class RunMascot < ProteomaticScript
 		File::open(ls_ConfigPath, 'w') do |f|
 			f.puts ls_Config
 		end
-		ls_Command = "\"#{ExternalTools::binaryPath('promass.LALALALALALAQ!!!!!!!searchadapter').gsub('/', '\\')}\" -M -p:\"#{ls_ConfigPath.gsub('/', '\\')}\" -i:\"#{@input[:spectra].join(' ').gsub('/', '\\')}\" -f:\"#{ls_OutPath.gsub('/', '\\')}\" -mz:\"#{@input[:spectraXml].join(' ').gsub('/', '\\')}\""
+		ls_Command = "\"#{ExternalTools::binaryPath('promass.tatatatsearchadapter').gsub('/', '\\')}\" -M -p:\"#{ls_ConfigPath.gsub('/', '\\')}\" -i:\"#{@input[:spectra].join(' ').gsub('/', '\\')}\" -f:\"#{ls_OutPath.gsub('/', '\\')}\" -mz:\"#{@input[:spectraXml].join(' ').gsub('/', '\\')}\""
 		puts ls_Command
 		system(ls_Command)
 		FileUtils::mv(ls_OutPath, @output[:resultFile])
