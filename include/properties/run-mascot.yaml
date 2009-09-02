@@ -1,0 +1,39 @@
+group: Mascot
+
+title: Run Mascot
+
+type: processor
+
+description: ""
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [xml-mzxml]
+    min: 1
+  - key: databases
+    label: database
+    formats: [fasta]
+    min: 1
+    
+proposePrefix:
+  - spectra
+
+defaultOutputDirectory: spectra
+    
+output:
+  - key: resultFile
+    label: Mascot results
+    format: csv
+    filename: mascot-results.csv
+    default: yes
+
+    
+externalParameters: 
+  - promass.searchadapter
+
+needs:
+  - ext.promass
+
+filetracker:
+  - dontMd5InputFiles: [spectra]
