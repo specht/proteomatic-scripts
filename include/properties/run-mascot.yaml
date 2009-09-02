@@ -9,13 +9,17 @@ description: ""
 input:
   - key: spectra
     label: spectra
+    formats: [mgf]
+    min: 1
+  - key: spectraXml
+    label: mzXML spectra
     formats: [xml-mzxml]
     min: 1
-  - key: databases
-    label: database
-    formats: [fasta]
-    min: 1
-    
+#  - key: databases
+#    label: database
+#    formats: [fasta]
+#    min: 1
+#    
 proposePrefix:
   - spectra
 
@@ -24,13 +28,19 @@ defaultOutputDirectory: spectra
 output:
   - key: resultFile
     label: Mascot results
-    format: csv
-    filename: mascot-results.csv
+    format: xml-pepxml
+    filename: mascot-results.pep.xml
     default: yes
-
     
-externalParameters: 
-  - promass.searchadapter
+parameters:
+  - key: PFA
+    label: Missed cleavages
+    type: int
+    default: 3
+    min: 0
+    description: Define the maximum number of allowed missed cleavages.
+
+
 
 needs:
   - ext.promass
