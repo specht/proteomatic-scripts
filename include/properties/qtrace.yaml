@@ -5,8 +5,8 @@ title: qTrace
 description: >
    Perform petide quantitation on MS1 full or SIM scans. All peptides that
    are to be quantified must be specified either via the peptides parameter
-   or via text or PSM list files. By default, peptides that are specified 
-   via PSM list files are only searched for in those spectra files which the 
+   or via text or PSM list files. By default, peptides that are specified
+   via PSM list files are only searched for in those spectra files which the
    peptides have been identified in.
 
 type: processor

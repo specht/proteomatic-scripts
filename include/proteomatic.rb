@@ -357,12 +357,23 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		@ms_FileTrackerHost = 'peaks.uni-muenster.de'
-		@mi_FileTrackerPort = 5556
+		@ms_FileTrackerHost = nil
+		@mi_FileTrackerPort = 5555
+		
+		# try to read filetracker config file
 		if (File::exists?('config/filetracker.config.yaml'))
 			config = YAML::load_file('config/filetracker.config.yaml')
 			@ms_FileTrackerHost = config['fileTrackerHost']
 			@mi_FileTrackerPort = config['fileTrackerPort']
+		end
+		
+		# see if there's a filetracker configuration on the command line
+		if ARGV.include?('--useFileTracker')
+			fileTrackerHostAndPort = ARGV[ARGV.index('--useFileTracker') + 1]
+			ARGV.slice!(ARGV.index('--useFileTracker'), 2)
+			fileTrackerHostAndPortList = fileTrackerHostAndPort.split(':')
+			@ms_FileTrackerHost = fileTrackerHostAndPortList[0]
+			@mi_FileTrackerPort = fileTrackerHostAndPortList[1].to_i
 		end
 		
 		@ms_Version = File::read('include/version.rb').strip
@@ -436,15 +447,18 @@ class ProteomaticScript
 	def help()
 		ls_Result = ''
 		ls_Result += "#{underline("#{@ms_Title} (a Proteomatic script, version #{@ms_Version})", '=')}\n"
-		ls_Result += indent(wordwrap("#{@ms_Description}\n"), 4, false) + "\n" unless @ms_Description.empty?
-		ls_Result += "Usage:\n    ruby #{$0} [options] [input files]\n\n"
-		ls_Result += indent(wordwrap("Options:\n--help           print this help\n" +
-			"--proposePrefix  propose a prefix depending on the input files specified\n" +
-			"--daemon [port]  run this script as a daemon, default port is #{DEFAULT_DAEMON_PORT}"), 4, false)
+		ls_Result += wordwrap("#{@ms_Description}") + "\n" unless @ms_Description.empty?
+		ls_Result += "Usage:\n    ruby #{$0} [options/parameters]"
+		ls_Result += " [input files]" unless @mk_Input['groupOrder'].empty?
+		ls_Result += "\n\n"
+		ls_Result += indent(wordwrap("Options:\n--help\n     print this help\n\n" +
+			"--proposePrefix\n     propose a prefix depending on the input files specified\n\n" +
+			"--useFileTracker [host:port]\n     specify a filetracker, this overrides filetracker.conf.yaml\n\n" +
+			"--daemon [port]\n     run this script as a daemon, default port is #{DEFAULT_DAEMON_PORT}"), 4, false)
 		ls_Result += "\n"
 		ls_Result += @mk_Parameters.helpString()
 		if @mk_Input
-			ls_Result += "#{underline('Input files', '-')}\n"
+			ls_Result += "#{underline('Input files', '-')}\n" unless @mk_Input['groupOrder'].empty?
 			@mk_Input['groupOrder'].each do |ls_Group|
 				ls_Range = ''
 				ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
@@ -764,7 +778,7 @@ class ProteomaticScript
 			exit 1
 		end
 		@mk_ScriptProperties.default = ''
-		@ms_Description = @mk_ScriptProperties['description']
+		@ms_Description = @mk_ScriptProperties['description'].strip
 		@ms_Description.freeze
 		@ms_Title = @mk_ScriptProperties['title']
 		@ms_Title.freeze
@@ -1213,61 +1227,65 @@ class ProteomaticScript
 		return unless @ms_FileTrackerHost
 		print "Submitting run to file tracker at #{@ms_FileTrackerHost}:#{@mi_FileTrackerPort}... "
 		
-		lk_Info = Hash.new
-		lk_Info['version'] = @ms_Version
-		lk_Info['user'] = @ms_UserName
-		lk_Info['host'] = @ms_HostName
-		lk_Info['script_uri'] = @ms_ScriptName + '.rb'
-		lk_Info['script_title'] = @ms_Title
-		lk_Info['start_time'] = @mk_StartTime
-		lk_Info['end_time'] = @mk_EndTime
-		lk_Info['parameters'] = @mk_Parameters.humanReadableConfigurationHash()
-		lk_Info['stdout'] = @ms_EavesdroppedOutput
-		
-		lk_Files = Array.new
-		
-		@input.each_key do |ls_Key|
-			@input[ls_Key].each do |ls_Path|
-				next unless File::exists?(ls_Path)
-				lk_FileInfo = getFileInfo(ls_Path, !(@mk_DontMd5InputFiles.include?(ls_Key.to_s)))
-				lk_FileInfo['input_file'] = true
-				lk_Files.push(lk_FileInfo)
-			end
-		end
-		@output.each_key do |ls_Key|
-			ls_Path = @output[ls_Key].sub('.proteomatic.part', '')
-			next unless File::exists?(ls_Path)
-			lb_DoMd5 = !(@mk_DontMd5OutputFiles.include?(ls_Key.to_s))
-			lb_DoMd5 = @mk_DontMd5OutputFiles.empty? if @ms_ScriptType == 'converter'
-			lk_FileInfo = getFileInfo(ls_Path, lb_DoMd5)
-			lk_FileInfo['input_file'] = false
-			lk_Files.push(lk_FileInfo)
-		end
-		
-		ls_RunInfo = {'run' => lk_Info, 'files' => lk_Files}.to_yaml
-		
-		lb_Success = doSubmitRunToFileTracker(ls_RunInfo)
-		if lb_Success
-			puts 'done.'
-			# check whether there are unsent YAML reports
-			lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
-			lk_UnsentFiles.each do |ls_Path|
-				puts "Resending unsent run to filetracker..."
-				ls_Info = File::read(ls_Path)
-				if doSubmitRunToFileTracker(ls_RunInfo)
-					FileUtils::rm(ls_Path)	
+		begin
+			lk_Info = Hash.new
+			lk_Info['version'] = @ms_Version
+			lk_Info['user'] = @ms_UserName
+			lk_Info['host'] = @ms_HostName
+			lk_Info['script_uri'] = @ms_ScriptName + '.rb'
+			lk_Info['script_title'] = @ms_Title
+			lk_Info['start_time'] = @mk_StartTime
+			lk_Info['end_time'] = @mk_EndTime
+			lk_Info['parameters'] = @mk_Parameters.humanReadableConfigurationHash()
+			lk_Info['stdout'] = @ms_EavesdroppedOutput
+			
+			lk_Files = Array.new
+			
+			@input.each_key do |ls_Key|
+				@input[ls_Key].each do |ls_Path|
+					next unless File::exists?(ls_Path)
+					lk_FileInfo = getFileInfo(ls_Path, !(@mk_DontMd5InputFiles.include?(ls_Key.to_s)))
+					lk_FileInfo['input_file'] = true
+					lk_Files.push(lk_FileInfo)
 				end
 			end
-			lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
-			FileUtils::rm_rf(UNSENT_REPORTS_PATH) if lk_UnsentFiles.empty?
-		else
-			# if the run could not be submitted, try to save the YAML report to a local file
-			#puts "ATTENTION REPORT RESENDING *SAVE* DISABLED"
-			FileUtils::mkpath(UNSENT_REPORTS_PATH)
-			ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
-			File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
-			puts
-			puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
+			@output.each_key do |ls_Key|
+				ls_Path = @output[ls_Key].sub('.proteomatic.part', '')
+				next unless File::exists?(ls_Path)
+				lb_DoMd5 = !(@mk_DontMd5OutputFiles.include?(ls_Key.to_s))
+				lb_DoMd5 = @mk_DontMd5OutputFiles.empty? if @ms_ScriptType == 'converter'
+				lk_FileInfo = getFileInfo(ls_Path, lb_DoMd5)
+				lk_FileInfo['input_file'] = false
+				lk_Files.push(lk_FileInfo)
+			end
+			
+			ls_RunInfo = {'run' => lk_Info, 'files' => lk_Files}.to_yaml
+			
+			lb_Success = doSubmitRunToFileTracker(ls_RunInfo)
+			if lb_Success
+				puts 'done.'
+				# check whether there are unsent YAML reports
+				lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
+				lk_UnsentFiles.each do |ls_Path|
+					puts "Resending unsent run to filetracker..."
+					ls_Info = File::read(ls_Path)
+					if doSubmitRunToFileTracker(ls_RunInfo)
+						FileUtils::rm(ls_Path)	
+					end
+				end
+				lk_UnsentFiles = Dir[File::join(UNSENT_REPORTS_PATH, '*')]
+				FileUtils::rm_rf(UNSENT_REPORTS_PATH) if lk_UnsentFiles.empty?
+			else
+				# if the run could not be submitted, try to save the YAML report to a local file
+				#puts "ATTENTION REPORT RESENDING *SAVE* DISABLED"
+				FileUtils::mkpath(UNSENT_REPORTS_PATH)
+				ls_Filename = tempFilename('unsent', UNSENT_REPORTS_PATH)
+				File::open(ls_Filename, 'w') { |f| f.puts ls_RunInfo }
+				puts
+				puts "The filetracker report was saved to #{UNSENT_REPORTS_PATH} and will be resent the next time a Proteomatic script is run."
+			end
+		rescue StandardError => e
+			puts "Oops, something went wrong while trying to submit the filetracker report."
 		end
 	end
 	

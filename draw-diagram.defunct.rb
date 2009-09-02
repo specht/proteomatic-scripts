@@ -36,6 +36,7 @@ class DrawDiagram < ProteomaticScript
 	def run()
 		lk_GroupColorsFG = ['#3465a4', '#888a85']
 		lk_GroupColorsBG = ['#729fcf', '#eeeeec']
+		lk_OriginalLines = Hash.new
 		lk_Items = Array.new
 		File.open(@input[:csvFile].first, 'r') do |lk_File|
 			lk_Header = mapCsvHeader(lk_File.readline, :col_sep => ',')
@@ -47,6 +48,7 @@ class DrawDiagram < ProteomaticScript
 					lk_Item[x] ||= ''
 				end
 				lk_Items << lk_Item
+				lk_OriginalLines[lk_Item['protein']] = ls_Line
 			end
 		end
 		
@@ -64,12 +66,12 @@ class DrawDiagram < ProteomaticScript
 					
  		end
 		
-# 		# max rel std dev is 0.6
-# 		relstddevcutoff = 0.6
-# 		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
-# 
-# 		# min scan count is 2
-# 		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
+		# max rel std dev is 0.6
+		relstddevcutoff = 0.6
+		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+
+		# min scan count is 2
+		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
 
 # 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
 # 			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
@@ -91,7 +93,13 @@ class DrawDiagram < ProteomaticScript
 # 			lk_GroupEnd[lk_GroupKeys[lk_Items[i]['localization']]] = i
 # 		end
 		
+		# this is for PBC 1 / PBC 2 or more
  		lk_Items.reject! { |x| x['peptidebandcount'].to_i > 1 }
+		
+		lk_Items.each do |lk_Item|
+			puts lk_OriginalLines[lk_Item['protein']]
+		end
+		
 		File.open(@output[:diagram], 'w') do |lk_Out|
 			$gi_ItemCount = lk_Items.size
 

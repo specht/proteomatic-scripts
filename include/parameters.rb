@@ -257,7 +257,7 @@ class Parameters
 				else
 					ls_Line += "<#{lk_Parameter['type']}> (default: #{lk_Parameter['default']})"
 				end
-				ls_Result += "#{indent(wordwrap(ls_Line), 2, false)}\n"
+				ls_Result += "#{indent(wordwrap(ls_Line), 2, false).rstrip + "\n"}"
 				ls_Explanation = (lk_Parameter.has_key?('description') ? lk_Parameter['description'] : lk_Parameter['label'])
 				ls_Explanation = indent(wordwrap(ls_Explanation), 4)
 				ls_Result += "#{ls_Explanation}\n"
