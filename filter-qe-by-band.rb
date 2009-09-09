@@ -98,6 +98,7 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 			lk_Spots.each { |ls_Spot| lk_BandToRun[ls_Spot] = ls_RunName }
 			ls_AllPattern = nil
 			lk_AllParts = Array.new
+# 			puts "Spots: #{lk_Spots.to_a.sort.join(', ')}"
 			lk_Spots.each do |ls_Spot|
 				ls_Pattern, lk_Parts = splitNumbersAndLetters(ls_Spot)
 				unless ls_AllPattern
@@ -106,6 +107,7 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 				else
 					if ls_AllPattern != ls_Pattern
 						puts "Error: The band numbers could not be determined because the spot names are inconsistent. The first offending spot name was #{ls_Spot}."
+						puts "Global pattern: #{ls_AllPattern}, other pattern: #{ls_Pattern}"
 						exit 1
 					end
 					(0...lk_Parts.size).each { |i| lk_AllParts[i][lk_Parts[i]] = ls_Spot }
@@ -115,6 +117,8 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 			# now only one part should be left, and this should be a number, too!
 			if (lk_AllParts.size != 1)
 				puts "Error: The band numbers could not be determined because there's more than one variable number in the spot names."
+				puts "Global pattern: #{ls_AllPattern}"
+				puts lk_AllParts.collect { |x| x.keys.join(', ') }.join(' / ')
 				exit 1
 			end
 			lk_AllParts.first.each_pair do |ls_BandNumber, ls_SpotName|
