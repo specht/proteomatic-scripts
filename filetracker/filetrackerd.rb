@@ -35,6 +35,7 @@ server = TCPServer.new(serverHost, serverPort);
 # $fileMutex = Mutex.new
 $fileMonitor = Monitor.new
 $databaseMonitor = Monitor.new
+$screenMonitor = Monitor.new
 
 
 def expectString(session, s)
@@ -52,26 +53,34 @@ while (newSession = server.accept)
 		begin
 			Timeout::timeout(30) do
 				path = ''
-				puts "START: #{Time.now.to_s}"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} START: #{Time.now.to_s}"; 
+					STDOUT.flush
+				end
 				unless expectString(session, "PROTEOMATIC_FILETRACKER_REPORT\n")
 					session.close
 					Thread.exit
 				end
-				print "1"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} 1"; 
+					STDOUT.flush
+				end
 				unless expectString(session, "VERSION 1\n")
 					session.close
 					Thread.exit
 				end
-				print "2"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} 2"; 
+					STDOUT.flush
+				end
 				unless expectString(session, "LENGTH ")
 					session.close
 					Thread.exit
 				end
-				puts "3"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} 3"; 
+					STDOUT.flush
+				end
 				# read at most 7 digits (9999999 bytes max.)
 				lengthString = ''
 				7.times do
@@ -81,12 +90,16 @@ while (newSession = server.accept)
 					lengthString += c
 				end
 				length = lengthString.to_i
-				puts "length: #{length}"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} length: #{length}";
+					STDOUT.flush
+				end
 
 				yamlReport = session.read(length)
-				puts "got report"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} got report"; 
+					STDOUT.flush
+				end
 				
 				#puts "Received new report:"
 				#puts yamlReport
@@ -96,20 +109,28 @@ while (newSession = server.accept)
 				# add report to database
 				reportData = YAML::load(yamlReport)
 				$databaseMonitor.synchronize do
-					puts "TRY ADD REPORT"; 
-					STDOUT.flush
+					$screenMonitor.synchronize do
+						puts "#{Thread.current} TRY ADD REPORT"; 
+						STDOUT.flush
+					end
 					addReport(conn, reportData)
-					puts "END ADD REPORT"; 
+					$screenMonitor.synchronize do
+						puts "#{Thread.current} END ADD REPORT"; 
+						STDOUT.flush
+					end
+				end
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} Report committed at #{Time.now.to_s}."
 					STDOUT.flush
 				end
-				puts "Report committed at #{Time.now.to_s}."
-				STDOUT.flush
 				
 				session.puts "REPORT COMMITTED"
 				
 				# archive report
-				puts "TRY ARCHIVE REPORT"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} TRY ARCHIVE REPORT"; 
+					STDOUT.flush
+				end
 				timestamp = Time.now.strftime("%Y-%m")
 				currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
 				$fileMonitor.synchronize do
@@ -122,8 +143,10 @@ while (newSession = server.accept)
 						system("gzip \"#{path}\"")
 					end
 				end
-				puts "END ARCHIVE REPORT"; 
-				STDOUT.flush
+				$screenMonitor.synchronize do
+					puts "#{Thread.current} END ARCHIVE REPORT"; 
+					STDOUT.flush
+				end
 =begin
 			if input.strip == 'PROTEOMATIC_FILETRACKER_REPORT'
 				input = session.gets
