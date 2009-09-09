@@ -51,18 +51,22 @@ while (newSession = server.accept)
 	Thread.new(newSession) do |session|
 		Timeout::timeout(30) do
 			path = ''
+puts "START: #{Time.now.to_s}"; STDOUT.flush
 			unless expectString(session, "PROTEOMATIC_FILETRACKER_REPORT\n")
 				session.close
 				Thread.exit
 			end
+print "1"; STDOUT.flush
 			unless expectString(session, "VERSION 1\n")
 				session.close
 				Thread.exit
 			end
+print "2"; STDOUT.flush
 			unless expectString(session, "LENGTH ")
 				session.close
 				Thread.exit
 			end
+puts "3"; STDOUT.flush
 			# read at most 7 digits (9999999 bytes max.)
 			lengthString = ''
 			7.times do
@@ -72,8 +76,10 @@ while (newSession = server.accept)
 				lengthString += c
 			end
 			length = lengthString.to_i
+puts "length: #{length}"; STDOUT.flush
 
 			yamlReport = session.read(length)
+puts "got report"; STDOUT.flush
 			
 			#puts "Received new report:"
 			#puts yamlReport
@@ -83,13 +89,17 @@ while (newSession = server.accept)
 			# add report to database
 			reportData = YAML::load(yamlReport)
 			$databaseMonitor.synchronize do
+puts "TRY ADD REPORT"; STDOUT.flush
 				addReport(conn, reportData)
+puts "END ADD REPOR"; STDOUT.flush
 			end
 			puts "Report committed at #{Time.now.to_s}."
+			STDOUT.flush
 			
 			session.puts "REPORT COMMITTED"
 			
 			# archive report
+puts "TRY ARCHIVE REPORT"; STDOUT.flush
 			timestamp = Time.now.strftime("%Y-%m")
 			currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
 			$fileMonitor.synchronize do
@@ -102,6 +112,7 @@ while (newSession = server.accept)
 					system("gzip \"#{path}\"")
 				end
 			end
+puts "END ARCHIVE REPORT"; STDOUT.flush
 =begin
 		if input.strip == 'PROTEOMATIC_FILETRACKER_REPORT'
 			input = session.gets
