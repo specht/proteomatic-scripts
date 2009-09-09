@@ -1303,9 +1303,10 @@ class ProteomaticScript
 				client.puts as_RunInfo
 				
 				client.flush
-				ls_Message = client.readline
+				ls_Message = ''
+				timeout(30) { ls_Message = client.readline }
 				if ls_Message.strip == 'REPORT RECEIVED'
-					ls_Message = client.readline
+					timeout(30) { ls_Message = client.readline }
 					if ls_Message.strip == 'REPORT COMMITTED'
 						lb_Success = true
 					end
