@@ -134,6 +134,7 @@ while (newSession = server.accept)
 				timestamp = Time.now.strftime("%Y-%m")
 				currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
 				$fileMonitor.synchronize do
+					FileUtils::mkdir('archive') unless File::exists?('archive')
 					File.open("archive/#{currentArchiveFilename}", "a") do |f|
 						f.puts yamlReport
 					end
