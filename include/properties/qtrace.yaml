@@ -99,10 +99,12 @@ parameters:
     step: 0.1
     description: This mass accuracy is used when peaks are tested for absence.
   - key: checkLightForbiddenPeaks
+    label: Check light forbidden peaks
     type: flag
     default: yes
     description: Check whether light forbidden peaks are absent
   - key: checkHeavyForbiddenPeaks
+    label: Check heavy forbidden peaks
     type: flag
     default: no
     description: Check whether heavy forbidden peaks are absent
