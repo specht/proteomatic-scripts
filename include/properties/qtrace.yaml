@@ -26,16 +26,16 @@ input:
 defaultOutputDirectory: spectraFiles
 
 output:
-#   - key: xhtmlReport
-#     label: XHTML results
-#     format: xhtml
-#     filename: qtrace-results.xhtml
-#     default: no
   - key: qtraceCsv
     label: quantitation results
     format: csv
     filename: qtrace-results.csv
     default: yes
+  - key: xhtmlReport
+    label: XHTML results
+    format: xhtml
+    filename: qtrace-results.xhtml
+    default: no
 
 parameters:
   - key: peptides
@@ -52,7 +52,7 @@ parameters:
     label: Label
     type: enum
     default: RP
-    choices: [{R: 'heavy R'}, {RP: 'heavy R and P'}]
+    choices: [{R: 'heavy arginine'}, {RP: 'heavy arginine and proline'}, {N15: 'N15'}]
   - key: scanType
     label: Scans to analyze
     type: enum
@@ -98,6 +98,14 @@ parameters:
     min: 0.0
     step: 0.1
     description: This mass accuracy is used when peaks are tested for absence.
+  - key: checkLightForbiddenPeaks
+    type: flag
+    default: yes
+    description: Check whether light forbidden peaks are absent
+  - key: checkHeavyForbiddenPeaks
+    type: flag
+    default: no
+    description: Check whether heavy forbidden peaks are absent
   - key: searchAllInAll
     label: Search for all peptides in all spectra files
     type: flag

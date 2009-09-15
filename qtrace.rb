@@ -116,10 +116,18 @@ class QTrace < ProteomaticScript
 			end
 		end
 		
+		# create XHTML out file
+		if @output[:xhtmlReport]
+			File.open(@output[:xhtmlReport], 'w') do |lk_Out|
+			end
+		end
+		
 		lb_FirstRun = true
 		@input[:spectraFiles].each do |ls_SpectraFile|
+			lb_LastRun = (ls_SpectraFile == @input[:spectraFiles].last)
 			ls_Spot = File::basename(ls_SpectraFile).split('.').first
 			ls_CsvPath = File::join(ls_TempPath, ls_Spot + '-out.csv')
+			ls_XhtmlPath = File::join(ls_TempPath, ls_Spot + '-out.xhtml')
 			ls_PeptidesPath = File::join(ls_TempPath, ls_Spot + '-peptides.txt')
 
 			# write all target peptides into one file
@@ -130,7 +138,13 @@ class QTrace < ProteomaticScript
 				lk_Out.puts(lk_ThisPeptides.to_a.sort.join("\n"))
 			end
 
-			ls_Command = "\"#{ExternalTools::binaryPath('qtrace.qtrace')}\" --label #{@param[:label]} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\""
+			csvOutputOptions = '--csvOutput no '
+			csvOutputOptions = "--csvOutput yes --csvOutputTarget \"#{ls_CsvPath}\" " if @output[:qtraceCsv]
+			
+			xhtmlOutputOptions = ' '
+			xhtmlOutputOptions = "--xhtmlOutputTarget \"#{ls_XhtmlPath}\" " if @output[:xhtmlReport]
+			
+			ls_Command = "\"#{ExternalTools::binaryPath('qtrace.qtrace')}\" --label #{@param[:label]} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --checkLightForbiddenPeaks #{@param[:checkLightForbiddenPeaks]} --checkHeavyForbiddenPeaks #{@param[:checkHeavyForbiddenPeaks]} #{csvOutputOptions} #{xhtmlOutputOptions} --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\""
 			runCommand(ls_Command, true)
 			
 			if @output[:qtraceCsv]
@@ -141,6 +155,25 @@ class QTrace < ProteomaticScript
 						lk_In.each_line do |ls_Line|
 							lk_Out.puts ls_Line
 						end
+					end
+				end
+			end
+			
+			if @output[:xhtmlReport]
+				File.open(@output[:xhtmlReport], 'a') do |lk_Out|
+					File.open(ls_XhtmlPath, 'r') do |lk_In|
+						contents = lk_In.read
+						contentStart = contents.index('<!-- BEGIN PEPTIDE')
+						if lb_FirstRun
+							header = contents[0, contentStart]
+							lk_Out.puts header
+						end
+						contents = contents[contentStart, contents.size]
+						contentsEnd = contents.rindex('<!-- END PEPTIDE')
+						footer = contents[contentsEnd, contents.size]
+						contents = contents[0, contentsEnd]
+						lk_Out.puts contents
+						lk_Out.puts footer if lb_LastRun
 					end
 				end
 			end
