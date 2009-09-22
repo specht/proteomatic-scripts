@@ -72,12 +72,12 @@ class QTrace < ProteomaticScript
 		lk_PeptidesForAll.uniq!
 		
 		lk_PeptidesForAll.reject! do |ls_Peptide|
-			# reject peptide if it's empty or if it does not contain arginine (R)
-			ls_Peptide.empty? || (!ls_Peptide.include?('R'))
+			# reject peptide if it's empty
+			ls_Peptide.empty?
 		end
 		lk_Peptides.each_key do |ls_Spot|
 			lk_Peptides[ls_Spot].reject! do |ls_Peptide|
-				ls_Peptide.empty? || (!ls_Peptide.include?('R'))
+				ls_Peptide.empty?
 			end
 		end
 
@@ -103,7 +103,7 @@ class QTrace < ProteomaticScript
 		(0...ls_ExcludeList.size).each do |i|
 			lk_PeptidesForAll.reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }
 			lk_Peptides.each_key do |ls_Spot|
-				lk_Peptides[ls_Spot].reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }			
+				lk_Peptides[ls_Spot].reject! { |ls_Peptide| ls_Peptide.include?(ls_ExcludeList[i, 1]) }
 			end
 		end
 		
