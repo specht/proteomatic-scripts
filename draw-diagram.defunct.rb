@@ -68,10 +68,13 @@ class DrawDiagram < ProteomaticScript
 		
 		# max rel std dev is 0.6
 		relstddevcutoff = 0.6
+		puts lk_Items.size
 		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+		puts lk_Items.size
 
 		# min scan count is 2
 		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
+		puts lk_Items.size
 
 # 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
 # 			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
@@ -94,11 +97,11 @@ class DrawDiagram < ProteomaticScript
 # 		end
 		
 		# this is for PBC 1 / PBC 2 or more
- 		lk_Items.reject! { |x| x['peptidebandcount'].to_i > 1 }
+ 		lk_Items.reject! { |x| x['peptidebandchargecount'].to_i > 1 }
 		
-		lk_Items.each do |lk_Item|
-			puts lk_OriginalLines[lk_Item['protein']]
-		end
+# 		lk_Items.each do |lk_Item|
+# 			puts lk_OriginalLines[lk_Item['protein']]
+# 		end
 		
 		File.open(@output[:diagram], 'w') do |lk_Out|
 			$gi_ItemCount = lk_Items.size
@@ -113,7 +116,8 @@ class DrawDiagram < ProteomaticScript
 
 			$gi_ImageWidth = 420
 			$gi_ImageHeight = 220
-			$gf_MinY = 5.0
+			$gf_MinY = 6.0
+ 			$gf_MaxY = 0.0
 			
 			$gi_Left = $gi_LeftBorder
 			$gi_Top = $gi_Border
@@ -195,7 +199,7 @@ class DrawDiagram < ProteomaticScript
 # 						stroke = ls_Color
 # 						fill = '#eeeeec'
 # 					end
-					lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='2.0' stroke='#{stroke}' fill='#{fill}'/>"
+					lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='1.8' stroke='#{stroke}' fill='#{fill}'/>"
 					#lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='2.0' stroke='none' fill='#000'/>"
  				end
 			end
