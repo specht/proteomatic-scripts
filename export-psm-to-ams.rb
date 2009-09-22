@@ -94,11 +94,13 @@ class ExportPsmToAms < ProteomaticScript
 							li_Charge = lk_ScanNameParts[3].to_i
 							ls_Spot = lk_ScanNameParts.first
 							ls_SpotFilename = lk_SpotToSpectraFile[ls_Spot]
-							lf_CalculatedMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:calculatedMass].to_f
-							lf_MeasuredMass = lk_ScanHash[ls_Scan][:peptides][ls_Peptide][:measuredMass].to_f
+							ls_ScanKey = ls_Scan
+							ls_ScanKey = ls_Scan[0, ls_Scan.size - 4] if (ls_Scan[-4, 4] == '.dta') && (lk_ScanHash[ls_ScanKey] == nil)
+							lf_CalculatedMass = lk_ScanHash[ls_ScanKey][:peptides][ls_Peptide][:calculatedMass].to_f
+							lf_MeasuredMass = lk_ScanHash[ls_ScanKey][:peptides][ls_Peptide][:measuredMass].to_f
 							lf_MeasuredMass = lf_CalculatedMass unless lf_MeasuredMass
-							lf_EValue = lk_ScanHash[ls_Scan][:e]
-							ls_SpectrumData = lk_ScanData[ls_Scan]
+							lf_EValue = lk_ScanHash[ls_ScanKey][:e]
+							ls_SpectrumData = lk_ScanData[ls_ScanKey]
 							ls_SpectrumData = '' unless ls_SpectrumData
 							# database and reference intentionally left blank because 2DB does
 							# the search by itself.
