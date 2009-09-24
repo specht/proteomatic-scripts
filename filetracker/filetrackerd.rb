@@ -107,23 +107,23 @@ while (newSession = server.accept)
 				session.puts "REPORT RECEIVED"
 				
 				# add report to database
-				reportData = YAML::load(yamlReport)
-				$databaseMonitor.synchronize do
-					$screenMonitor.synchronize do
-						puts "#{Thread.current} TRY ADD REPORT"; 
-						STDOUT.flush
-					end
-					addReport(conn, reportData)
-					$screenMonitor.synchronize do
-						puts "#{Thread.current} END ADD REPORT"; 
-						STDOUT.flush
-					end
-				end
-				$screenMonitor.synchronize do
-					puts "#{Thread.current} Report committed at #{Time.now.to_s}."
-					STDOUT.flush
-				end
-				
+# 				reportData = YAML::load(yamlReport)
+# 				$databaseMonitor.synchronize do
+# 					$screenMonitor.synchronize do
+# 						puts "#{Thread.current} TRY ADD REPORT"; 
+# 						STDOUT.flush
+# 					end
+# 					addReport(conn, reportData)
+# 					$screenMonitor.synchronize do
+# 						puts "#{Thread.current} END ADD REPORT"; 
+# 						STDOUT.flush
+# 					end
+# 				end
+# 				$screenMonitor.synchronize do
+# 					puts "#{Thread.current} Report committed at #{Time.now.to_s}."
+# 					STDOUT.flush
+# 				end
+# 				
 				session.puts "REPORT COMMITTED"
 				
 				# archive report
@@ -138,11 +138,11 @@ while (newSession = server.accept)
 					File.open("archive/#{currentArchiveFilename}", "a") do |f|
 						f.puts yamlReport
 					end
-					unarchivedFiles = Dir['archive/*.yaml']
-					unarchivedFiles.each do |path|
-						next if File::basename(path).include?(currentArchiveFilename)
-						system("gzip \"#{path}\"")
-					end
+# 					unarchivedFiles = Dir['archive/*.yaml']
+# 					unarchivedFiles.each do |path|
+# 						next if File::basename(path).include?(currentArchiveFilename)
+# 						system("gzip \"#{path}\"")
+# 					end
 				end
 				$screenMonitor.synchronize do
 					puts "#{Thread.current} END ARCHIVE REPORT"; 
