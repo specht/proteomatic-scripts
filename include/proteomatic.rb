@@ -1269,7 +1269,7 @@ class ProteomaticScript
 				lk_UnsentFiles.each do |ls_Path|
 					puts "Resending unsent run to filetracker..."
 					ls_Info = File::read(ls_Path)
-					if doSubmitRunToFileTracker(ls_RunInfo)
+					if doSubmitRunToFileTracker(ls_Info)
 						FileUtils::rm(ls_Path)	
 					end
 				end
