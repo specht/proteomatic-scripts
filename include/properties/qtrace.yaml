@@ -113,7 +113,7 @@ parameters:
     type: flag
     default: false
     description: Try to quantify all peptides in all spectra files, even if peptides have not been identified in some spectra files.
-    
+
 needs:
   - ext.qtrace
 

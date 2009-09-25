@@ -70,10 +70,9 @@ parameters:
     min: 1
     default: 5
     label: Minimum amino acid chain length
-    
+
 needs:
   - ext.gpf
-  
-  
+
 filetracker:
   - dontMd5InputFiles: [genome]

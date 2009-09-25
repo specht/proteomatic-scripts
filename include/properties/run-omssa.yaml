@@ -5,7 +5,7 @@ title: Run OMSSA
 type: processor
 
 description: >
-  This script runs OMSSA on a given set of spectral files and databases. 
+  This script runs OMSSA on a given set of spectral files and databases.
 
 input:
   - key: spectra
@@ -16,12 +16,12 @@ input:
     label: database
     formats: [fasta]
     min: 1
-    
+
 proposePrefix:
   - spectra
 
 defaultOutputDirectory: spectra
-    
+
 output:
   - key: resultFile
     label: OMSSA results
@@ -36,8 +36,8 @@ parameters:
     type: int
     default: 2000
     min: 1
-    
-externalParameters: 
+
+externalParameters:
   - omssa.omssacl
 
 needs:

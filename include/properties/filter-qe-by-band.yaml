@@ -19,7 +19,7 @@ input:
     min: 1
 
 defaultOutputDirectory: quantitationEvents
-	
+
 output:
   - key: results
     label: filtered results

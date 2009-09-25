@@ -6,7 +6,7 @@ group: GPF
 title: Run GPF
 
 description: >
-  Run GPF on de novo predicted peptides.  
+  Run GPF on de novo predicted peptides.
 
 type: processor
 
@@ -34,7 +34,7 @@ parameters:
   - key: genome
     label: Genome
     type: enum
-    choices: [{'/ssd/cre4.fasta.monoisotopic-trypsin.gpfindex': 
+    choices: [{'/ssd/cre4.fasta.monoisotopic-trypsin.gpfindex':
 'Chlamydomonas 4.0'}]
   - key: masses
     label: Masses
@@ -71,6 +71,6 @@ parameters:
     min: 1
     default: 5
     label: Minimum amino acid chain length
-    
+
 needs:
   - ext.gpf

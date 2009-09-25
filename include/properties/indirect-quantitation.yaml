@@ -20,7 +20,7 @@ input:
     max: 1
 
 defaultOutputDirectory: acFiles
-	
+
 proposePrefix:
   - acFiles
   - bcFiles
