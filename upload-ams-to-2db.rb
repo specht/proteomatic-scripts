@@ -16,8 +16,6 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'include/proteomatic'
-require 'include/ext/multipart'
-require 'net/http'
 require 'yaml'
 require 'uri'
 
@@ -73,17 +71,45 @@ class UploadAMSto2DB < ProteomaticScript
 #---------------------------------------------------------
 =end
 
-#    h = Net::HTTP.new('localhost', 80)
-#	resp, body = h.post(@param[:databaseTarget] + "/admin/AMSUpload.php?password=#{@param[:password]}&username=#{@param[:user]}")
-#	puts "#{resp.code}"
-#	puts body
+    h = Net::HTTP.new('localhost', 80)
+	resp, body = h.post(@param[:databaseTarget] + "/admin/AMSUpload.php?password=#{@param[:password]}&username=#{@param[:user]}")
+	puts "#{resp.code}"
+	puts body
 
-      uri = URI.parse(url)
-      req = Net::HTTP::Post.new(url)
-      req.set_form_data({\'password\' => \'test\'})
-      res = Net::HTTP.new('localhost', 80).start { |http| http.request(req) }	
-	
 	end
 end
 
 lk_Object = UploadAMSto2DB.new
+
+
+__END__
+POST #{2DB_URI} HTTP/1.1
+
+Content-Type: multipart/form-data; boundary=---------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1
+User-Agent: Java/1.6.0_13
+Host: localhost:19810
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+Connection: keep-alive
+
+Content-Length: #{CONTENT_LENGTH}
+
+-----------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1
+
+Content-Disposition: form-data; name="file"; filename="#{FILE_NAME}"
+Content-Type: application/octet-stream
+
+#{FILE_CONTENT}
+
+-----------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1
+
+Content-Disposition: form-data; name="username"
+
+#{USER_NAME}
+
+-----------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1
+
+Content-Disposition: form-data; name="password"
+
+#{ENCODED_PASSWORD}
+
+-----------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1--
