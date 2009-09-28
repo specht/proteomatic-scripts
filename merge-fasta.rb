@@ -33,7 +33,6 @@ class MergeFasta < ProteomaticScript
 						lk_File.each do |ls_Line|
 							ls_Line.strip!
 							if !ls_Line.empty?
-								ls_Line.insert(1, ls_Basename + ';') if (ls_Line[0, 1] == '>')
 								lk_Out.puts ls_Line
 							end
 						end
