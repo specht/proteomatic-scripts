@@ -69,7 +69,7 @@ class DrawDiagram < ProteomaticScript
 		# max rel std dev is 0.6
 		relstddevcutoff = 0.6
 		puts lk_Items.size
-		lk_Items.reject! { |x| x['relstddev'].to_f > relstddevcutoff }
+		lk_Items.reject! { |x| x['rsd'].to_f > relstddevcutoff }
 		puts lk_Items.size
 
 		# min scan count is 2
@@ -97,7 +97,7 @@ class DrawDiagram < ProteomaticScript
 # 		end
 		
 		# this is for PBC 1 / PBC 2 or more
- 		lk_Items.reject! { |x| x['peptidebandchargecount'].to_i > 1 }
+ 		lk_Items.reject! { |x| x['peptidebandchargecount'].to_i < 2 }
 		
 # 		lk_Items.each do |lk_Item|
 # 			puts lk_OriginalLines[lk_Item['protein']]
@@ -114,10 +114,10 @@ class DrawDiagram < ProteomaticScript
 			$gf_MaxY = -1.0
 			$gi_TickWidth = 3.0
 
-			$gi_ImageWidth = 420
-			$gi_ImageHeight = 220
-			$gf_MinY = 6.0
- 			$gf_MaxY = 0.0
+# 			$gi_ImageWidth = 420
+# 			$gi_ImageHeight = 220
+# 			$gf_MinY = 6.0
+#  			$gf_MaxY = 0.0
 			
 			$gi_Left = $gi_LeftBorder
 			$gi_Top = $gi_Border
@@ -173,9 +173,9 @@ class DrawDiagram < ProteomaticScript
 				x = scalex(i)
 				t = Hash.new
 				
-				t[0] = lk_Item['mean'].to_f - lk_Item['stddev'].to_f
+				t[0] = lk_Item['mean'].to_f - lk_Item['sd'].to_f
 				t[1] = lk_Item['mean'].to_f
-				t[2] = lk_Item['mean'].to_f + lk_Item['stddev'].to_f
+				t[2] = lk_Item['mean'].to_f + lk_Item['sd'].to_f
 				if (t[1] > $gf_MinY - 1)
 					t[0] = $gf_MinY - 1
 					t[1] = $gf_MinY - 1
@@ -193,12 +193,16 @@ class DrawDiagram < ProteomaticScript
  				[1].each do |k|
 					#y = scaley(lk_Item["p#{k}"].to_f)
 					y = scaley(t[k])
-					stroke = 'none'
-					fill = ls_Color
 # 					if lk_Item['marker'].include?('unknown')
 # 						stroke = ls_Color
 # 						fill = '#eeeeec'
 # 					end
+					stroke = 'none'
+					fill = ls_Color
+					if lk_Item['method'] == 'AMT'
+						fill = '#ffffff'
+						stroke = ls_Color
+					end
 					lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='1.8' stroke='#{stroke}' fill='#{fill}'/>"
 					#lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='2.0' stroke='none' fill='#000'/>"
  				end
