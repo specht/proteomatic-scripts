@@ -1,9 +1,9 @@
-group: OMSSA/Miscellaneous
+group: Proteomics/Comparison
 
-title: Compare PSM lists
+title: Compare OMSSA PSM lists
 
 description: >
-  Compare cropped peptide-spectral matches.
+  Compare cropped OMSSA peptide-spectral matches.
 
 type: processor
 
