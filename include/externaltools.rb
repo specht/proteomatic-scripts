@@ -39,6 +39,14 @@ class ExternalTools
 			elsif stringEndsWith(as_Path, '.tar.bz2', false)
 				system("bzip2 -dc #{as_Path} | tar xf -")
 				return
+			else
+				ls_Command = "#{binaryPath('7zip.7zip')} x #{as_Path}"
+				%x{#{ls_Command}}
+				unless $? == 0
+					puts 'Error: There was an error while executing 7zip.'
+					exit 1
+				end
+				return
 			end
 		elsif (@@ms_Platform == 'win32')
 			ls_Command = "#{binaryPath('7zip.7zip')} x #{as_Path}"
