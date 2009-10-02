@@ -447,7 +447,8 @@ class ProteomaticScript
 	def help()
 		ls_Result = ''
 		ls_Result += "#{underline("#{@ms_Title} (a Proteomatic script, version #{@ms_Version})", '=')}\n"
-		ls_Result += wordwrap("#{@ms_Description}") + "\n" unless @ms_Description.empty?
+		# strip HTML tags from description and squeeze spaces
+		ls_Result += wordwrap("#{@ms_Description.gsub(/<\/?[^>]*>/, '').squeeze(' ')}") + "\n" unless @ms_Description.empty?
 		ls_Result += "Usage:\n    ruby #{$0} [options/parameters]"
 		ls_Result += " [input files]" unless @mk_Input['groupOrder'].empty?
 		ls_Result += "\n\n"
