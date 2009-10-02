@@ -67,12 +67,12 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetP
 			li_EntryCount += 1
 			print "\rReading PSM entries... #{li_EntryCount}" if (li_EntryCount % 1000 == 0)
 			lk_Line = ls_Line.parse_csv()
-			ls_Scan = lk_Line[lk_HeaderMap['filenameid']]
-			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']]
+			ls_Scan = lk_Line[lk_HeaderMap['filenameid']].strip
+			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']].strip
 			ls_Peptide = ls_OriginalPeptide.upcase
 			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 
-			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
+			ls_DefLine = lk_Line[lk_HeaderMap['defline']].strip
 			unless (ls_DefLine.index(as_TargetPrefix) == 0) || (ls_DefLine.index(as_DecoyPrefix) == 0)
 				unless ls_DefLine.index('__putative__') == 0
 					lk_Warnings.add("Warning: There is a PSM which does not come from a target/decoy search in #{ls_Filename}.")
@@ -277,11 +277,11 @@ def loadPsm(as_Path, ak_Options = {})
 					end
 				end
 			end
-			ls_Scan = lk_Line[lk_HeaderMap['filenameid']]
-			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']]
+			ls_Scan = lk_Line[lk_HeaderMap['filenameid']].strip
+			ls_OriginalPeptide = lk_Line[lk_HeaderMap['peptide']].strip
 			ls_Peptide = ls_OriginalPeptide.upcase
 			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
-			ls_DefLine = lk_Line[lk_HeaderMap['defline']]
+			ls_DefLine = lk_Line[lk_HeaderMap['defline']].strip
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[lk_HeaderMap['mods']]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
@@ -548,4 +548,3 @@ def loadPsm(as_Path, ak_Options = {})
 	
 	return lk_Result
 end
-
