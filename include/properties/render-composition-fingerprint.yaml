@@ -9,7 +9,7 @@ type: converter
 
 input:
   - key: csvFiles
-    label: Composition fingerprint
+    label: composition fingerprint
     formats: [csv]
     min: 1
 
