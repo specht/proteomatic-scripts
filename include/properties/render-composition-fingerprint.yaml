@@ -1,0 +1,22 @@
+group: Chitinator
+
+title: Render composition fingerprint
+
+description: >
+  Render a composition fingerprint.
+
+type: converter
+
+input:
+  - key: csvFiles
+    label: Composition fingerprint
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: csvFiles
+
+output:
+  - key: csvFiles
+    label: SVG files
+    format: svg
+    filename: '#{basename}.svg'
