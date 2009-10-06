@@ -357,8 +357,8 @@ class ProteomaticScript
 		@ms_UserName.freeze
 		@ms_HostName.freeze
 		
-		@ms_FileTrackerHost = nil
-		@mi_FileTrackerPort = nil
+		@ms_FileTrackerHost = 'peaks.uni-muenster.de'
+		@mi_FileTrackerPort = 5556
 		
 		# try to read filetracker config file
 		if (File::exists?('config/filetracker.config.yaml'))
