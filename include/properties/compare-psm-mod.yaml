@@ -27,3 +27,13 @@ output:
     format: html
     filename: compare-psm-mod-report.html
     default: yes
+  - key: peptideReport
+    label: peptide level CSV report
+    format: csv
+    filename: peptide-level-comparison.csv
+    default: no
+  - key: proteinReport
+    label: protein level CSV report
+    format: csv
+    filename: protein-level-comparison.csv
+    default: no

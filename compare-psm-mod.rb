@@ -39,6 +39,7 @@ class ComparePsmMod < ProteomaticScript
 	def run()
 		lk_Files = @input[:sequestResults] + @input[:omssaResults]
 		lk_Ids = lk_Files.collect { |x| File::basename(x).sub('.csv', '') }.sort
+		lk_ProteinCountForId = Hash.new
 
 		# lk_AllResults:
 		#   protein 1:
@@ -55,6 +56,7 @@ class ComparePsmMod < ProteomaticScript
 			#puts lk_Results.to_yaml
 			# lk_Results[:proteins] => {'protein' => ['pep1', 'pep2']}
 			# lk_Results[:peptideHash] => {'peptide' => {:scans => [scans...]}}
+			lk_ProteinCountForId[ls_Id] = lk_Results[:proteins].size
 			puts "#{lk_Results[:proteins].size} proteins."
 			lk_Results[:proteins].keys.each do |ls_Protein|
 				lk_Results[:proteins][ls_Protein].each do |ls_Peptide|
@@ -122,6 +124,7 @@ class ComparePsmMod < ProteomaticScript
 					end
 				end
 			end
+			lk_ProteinCountForId[ls_Id] = lk_ThisProteins.size
 			puts "#{lk_ThisProteins.size} proteins."
 		end
 		
@@ -154,6 +157,62 @@ class ComparePsmMod < ProteomaticScript
 			lk_ProteinInterestingnessScores[ls_Protein] = ld_Interestingness
 		end
 		
+		if @output[:peptideReport]
+			File::open(@output[:peptideReport], 'w') do |f|
+				f.puts "Protein,Peptide(s),#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}"
+				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
+					lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
+						f.print "\"#{ls_Protein}\","
+						lb_IsModified = ls_ModPeptide.index(/[a-z]/)
+						ls_UnmodClass = ''
+						if lb_IsModified
+							ls_UnmodClass = ' modpep'
+						else
+							ls_UnmodClass = ' unmodpep'
+						end
+						f.print "\"#{ls_ModPeptide}\","
+						lk_Ids.each do |ls_Id|
+							li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+							li_Count ||= '0'
+							f.print "#{li_Count},#{lb_IsModified ? 'mod' : '-'},"
+						end
+						f.puts
+					end
+				end
+			end
+		end
+		
+		if @output[:proteinReport]
+			File::open(@output[:proteinReport], 'w') do |f|
+				f.puts "Protein,#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}"
+				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
+					f.print "\"#{ls_Protein}\","
+					lk_IdSums = Hash.new
+					lk_IdModSums = Hash.new
+					lk_Ids.each do |x| 
+						lk_IdSums[x] = 0
+						lk_IdModSums[x] = 0
+					end
+					lk_AllResults[ls_Protein].keys.each do |ls_ModPeptide|
+						lk_Ids.each do |ls_Id|
+							li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+							li_Count ||= 0
+							lk_IdSums[ls_Id] += li_Count
+							lk_IdModSums[ls_Id] += li_Count if ls_ModPeptide =~ /[a-z]/
+						end
+					end
+					lk_Ids.each do |ls_Id|
+						li_Count = lk_IdSums[ls_Id]
+						li_Count = '0' if li_Count == 0
+						li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
+						li_ModifiedPeptideCount = '0' if li_ModifiedPeptideCount == 0
+						f.print "#{li_Count},#{li_ModifiedPeptideCount},"
+					end
+					f.puts
+				end
+			end
+		end
+		
 		if @output[:htmlReport]
 			File::open(@output[:htmlReport], 'w') do |f|
 				lk_IdNumbers = []
@@ -164,17 +223,20 @@ class ComparePsmMod < ProteomaticScript
 				f.puts "</head>"
 				f.puts "<body>"
 				f.puts "<table>"
-				f.puts "<tr><th class='number'>No.</th><th>Run</th></tr>"
+				f.puts "<tr><th class='number'>No.</th><th>Run</th><th>Proteins identified</th></tr>"
 				(0...lk_Ids.size).each do |i|
-					f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td></tr>"
+					f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinCountForId[lk_Ids[i]]}</td></tr>"
 				end
 				f.puts "</table>"
+				f.puts "<p>Total proteins: #{lk_AllResults.size}</p>"
 				f.puts "<p>"
-				f.puts "<span onclick=\"toggle('peptide')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle peptides</span> &nbsp;"
+				f.puts "<span onclick=\"toggle('peptide', 'row')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle peptides</span> &nbsp;"
+				f.puts "<span onclick=\"toggle('unmodpep', 'row')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle unmodified peptides</span> &nbsp;"
+				f.puts "<span onclick=\"toggle('modcell', 'cell')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle modification counts</span> &nbsp;"
 				f.puts "</p>"
 				f.puts "<table>"
 				f.puts "<tr>"
-				f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\'>' + x + '</th>' }.join('')}"
+				f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\'>' + x + '</th><th class=\'modcell\'>mod</th>' }.join('')}"
 				f.puts "</tr>"
 				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
 					f.puts "<tr class='protein'>"
@@ -198,16 +260,23 @@ class ComparePsmMod < ProteomaticScript
 						li_Count = '&ndash;' if li_Count == 0
 						li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
 						li_ModifiedPeptideCount = '&ndash;' if li_ModifiedPeptideCount == 0
-						f.print "<td class=\'number\'>#{li_Count}&nbsp;(#{li_ModifiedPeptideCount})</td>"
+						f.print "<td class=\'number\'>#{li_Count}</td><td class='modcell'>#{li_ModifiedPeptideCount}</td>"
 					end
 					f.puts "</tr>"
 					lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
-						f.puts "<tr class='peptide'>"
+						lb_IsModified = ls_ModPeptide.index(/[a-z]/)
+						ls_UnmodClass = ''
+						if lb_IsModified
+							ls_UnmodClass = ' modpep'
+						else
+							ls_UnmodClass = ' unmodpep'
+						end
+						f.puts "<tr class='peptide#{ls_UnmodClass}'>"
 						f.puts "<td>#{ls_ModPeptide.gsub(/([a-z])/, '<b>\1</b>')}</td>"
 						lk_Ids.each do |ls_Id|
 							li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
 							li_Count ||= '&ndash;'
-							f.print "<td class=\'number\'>#{li_Count}</td>"
+							f.print "<td class=\'number\'>#{li_Count}</td><td class='modcell'>#{lb_IsModified ? 'mod' : '&ndash;'}</td>"
 						end
 						f.puts "</tr>"
 					end
@@ -254,6 +323,15 @@ table {
 .number {
 	width: 3em;
 	text-align: right;
+}
+.unmodpep {
+	background-color: #fff;
+}
+.modpep {
+	background-color: #fce94f;
+}
+.protein {
+	background-color: #fff;
 }
 
 </style>
@@ -393,12 +471,25 @@ function checkUncheckSome(controller,theElements) {
 	var visible = new Array();
 	visible['protein'] = true;
 	visible['peptide'] = true;
-	function toggle(key)
+	visible['unmodpep'] = true;
+	visible['modcell'] = true;
+	
+	function toggle(key, rowOrCol)
 	{
 		if (visible[key])
 			changecss('.' + key, 'display', 'none');
 		else
-			changecss('.' + key, 'display', 'table-row');
+			changecss('.' + key, 'display', 'table-' + rowOrCol);
 		visible[key] = !visible[key]
+		if (key == 'peptide')
+		{
+			visible['unmodpep'] = visible['peptide']
+			changecss('.unmodpep', 'display', null);
+		}
+		if (key == 'unmodpep')
+		{
+			visible['peptide'] = true
+			changecss('.peptide', 'display', null);
+		}
 	}
 </script>
