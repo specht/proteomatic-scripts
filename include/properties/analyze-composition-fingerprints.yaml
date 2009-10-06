@@ -1,0 +1,14 @@
+group: Chitinator
+
+title: Analyze composition fingerprints
+
+description: >
+  This script analyzes composition fingerprints.
+
+type: processor
+
+input:
+  - key: compositionFingerprint
+    label: composition fingerprint
+    formats: [csv]
+    min: 1
