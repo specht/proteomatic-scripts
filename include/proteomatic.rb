@@ -937,23 +937,28 @@ class ProteomaticScript
 		@mk_Output = lk_OutputFiles
 		@mk_Output.freeze
 
-		# check if there's a default output directory if output files are to be written
-		if @mk_ScriptProperties.has_key?('output')
-			if !@mk_ScriptProperties.has_key?('defaultOutputDirectory')
-				puts "Internal error: No default output directory specified for this script."
-				exit 1
-			end
-			@ms_DefaultOutputDirectoryGroup = @mk_ScriptProperties['defaultOutputDirectory']
-			if !@mk_Input['groups'].has_key?(@ms_DefaultOutputDirectoryGroup)
-				puts "Internal error: Invalid default output directory specified for this script."
-				exit 1
-			end
-			
-			# check whether prefix proposal entries are sane
-			@mk_ScriptProperties['proposePrefix'].each do |x|
-				unless @mk_Input['groups'].has_key?(x)
-					puts "Script error: proposePrefix contains non-existent input group."
+		# check if there's a default output directory if output files 
+		# are to be written, but only do this if we have input files.
+		# if there are no input files and the script creates data from
+		# scratch, there's no default output directory
+		unless @mk_Input['groups'].empty?
+			if @mk_ScriptProperties.has_key?('output')
+				if !@mk_ScriptProperties.has_key?('defaultOutputDirectory')
+					puts "Internal error: No default output directory specified for this script."
 					exit 1
+				end
+				@ms_DefaultOutputDirectoryGroup = @mk_ScriptProperties['defaultOutputDirectory']
+				if !@mk_Input['groups'].has_key?(@ms_DefaultOutputDirectoryGroup)
+					puts "Internal error: Invalid default output directory specified for this script."
+					exit 1
+				end
+				
+				# check whether prefix proposal entries are sane
+				@mk_ScriptProperties['proposePrefix'].each do |x|
+					unless @mk_Input['groups'].has_key?(x)
+						puts "Script error: proposePrefix contains non-existent input group."
+						exit 1
+					end
 				end
 			end
 		end

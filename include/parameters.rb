@@ -304,7 +304,16 @@ class Parameters
 					ls_Result += " #{lk_Parameter['commandLine']}" if lk_Parameter['value']
 				else
 					unless lk_Parameter['ignoreIfEmpty'] && lk_Parameter['value'].empty?
-						ls_Result += " #{lk_Parameter['commandLine']} #{lk_Parameter['value']}"
+						lk_Value = lk_Parameter['value']
+						if ['float', 'int'].include?(lk_Parameter['type'])
+							if lk_Parameter['commandLineFactor']
+								lk_Value *= lk_Parameter['commandLineFactor']
+							end
+						end
+						if lk_Parameter['type'] == 'string'
+							lk_Value = '"' + lk_Value + '"'
+						end
+						ls_Result += " #{lk_Parameter['commandLine']} #{lk_Value}"
  					end
 				end
 			end

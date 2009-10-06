@@ -39,18 +39,6 @@ class RenderCompositionFingerprint < ProteomaticScript
 	def run()
 		ls_SvgTemplate = DATA.read
 
-=begin
-		File::open('out.svg', 'w') do |f|
-			# <path d='M500,0 L-499.123,41.8757 -495.606,93.6384 z' fill='#7b7b7b' mask='url(#m74)' />
-			arcs = ''
-			arcs += arc(0.0, 60.0, 0.0, 1.0, '#a00')
-			arcs += arc(60.0, 100.0, 0.0, 0.33, '#0a0')
-			arcs += arc(60.0, 100.0, 0.33, 0.66, '#00a')
-			arcs += arc(60.0, 100.0, 0.66, 1.0, '#aa0')
-			template.sub!('#{PRODUCTS}', arcs);
-			f.puts template
-		end
-=end
 		@input[:csvFiles].each do |ls_InPath|
 			
 			# parse composition fingerprint
@@ -73,7 +61,16 @@ class RenderCompositionFingerprint < ProteomaticScript
 			# render SVG
 			File::open(@output[ls_InPath], 'w') do |f|
 				arcs = ''
-				lk_Amounts.each do |product, amount|
+				lk_Amounts.keys.sort do |a, b|
+					aa = a.split('/')[0].to_i
+					ad = a.split('/')[1].to_i
+					adp = aa + ad
+					ba = b.split('/')[0].to_i
+					bd = b.split('/')[1].to_i
+					bdp = ba + bd
+					(adp == bdp) ? (aa <=> ba) : (adp <=> bdp)
+				end. each do |product|
+					amount = lk_Amounts[product]
 					# ld_DP0 = pow(ld_DP0, 0.1) * 2.0 - 1.0;
 					amountA = product.split('/')[0].to_i
 					amountD = product.split('/')[1].to_i
@@ -87,7 +84,7 @@ class RenderCompositionFingerprint < ProteomaticScript
 					angle = 2.0 * Math.asin(0.5 / (2.0 * r1)) / Math::PI
 					a0 -= angle unless amountA == 0
 					a1 += angle unless amountA == dp
-					arcs += arc(r0 - 0.5, r1 + 0.5, a0, a1, "##{color}#{color}#{color}")
+					arcs += arc(r0 - 0.3, r1 + 0.3, a0, a1, "##{color}#{color}#{color}")
 				end
 				ls_Svg = ls_SvgTemplate.dup
 				ls_Svg.sub!('#{PRODUCTS}', arcs);
