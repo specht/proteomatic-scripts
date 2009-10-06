@@ -1,0 +1,33 @@
+binary:
+  win32: chitinator.exe
+  linux: chitinator
+  macx: chitinator
+
+parameters:
+
+  - key: runs
+    commandLine: --runs
+    label: Runs
+    type: int
+    default: 1000
+    min: 1
+  - key: DP
+    commandLine: --DP
+    label: DP
+    type: int
+    default: 800
+    min: 1
+  - key: DA
+    commandLine: --DA
+    commandLineFactor: 0.01
+    label: DA
+    type: float
+    default: 66.0
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+  - key: enzyme
+    commandLine: --enzyme
+    label: Enzyme
+    type: string
+    default: "A|D"
