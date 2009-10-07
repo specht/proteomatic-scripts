@@ -27,14 +27,17 @@ class MergeSequestCsv < ProteomaticScript
 	def run()
 		
 		ls_AllHeader = nil
+		ls_AllHeaderPath = nil
 		if @output[:mergedResults]
 			@input[:sequestResults].each do |ls_Path|
 				File::open(ls_Path, 'r') do |f|
-					ls_ThisHeader = f.readline + f.readline
-					ls_ThisHeader.strip!
+					ls_ThisHeader = f.readline.strip + "\n" + f.readline.strip
 					ls_AllHeader ||= ls_ThisHeader
+					ls_AllHeaderPath ||= ls_Path
 					if (ls_AllHeader != ls_ThisHeader)
 						puts "Error: first two lines must be identical in all input files!"
+						puts "#{File::basename(ls_AllHeaderPath)}: [#{ls_AllHeader}]"
+						puts "#{File::basename(ls_Path)}: [#{ls_ThisHeader}]"
 						exit 1
 					end
 				end
