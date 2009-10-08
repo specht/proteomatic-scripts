@@ -43,6 +43,8 @@ class AnalyzeCompositionFingerprints < ProteomaticScript
 			sum = 0.0
 			averageDP = 0.0
 			averageDA = 0.0
+			aSum = 0.0
+			dSum = 0.0
 			lk_Fingerprint[ls_Path].keys.each do |key|
 				lk_Fingerprint[ls_Path][key] /= maximum
 				sum += lk_Fingerprint[ls_Path][key]
@@ -53,10 +55,12 @@ class AnalyzeCompositionFingerprints < ProteomaticScript
 				# add relative to average DA (weighted!)
 				averageDA += relativeDA * lk_Fingerprint[ls_Path][key]
 				averageDP += (a + d).to_f * lk_Fingerprint[ls_Path][key]
+				aSum += a.to_f * lk_Fingerprint[ls_Path][key]
+				dSum += d.to_f * lk_Fingerprint[ls_Path][key]
 			end
 			averageDA /= sum
 			averageDP /= sum
-			puts "DP #{sprintf('%5.2f', averageDP)} / DA #{sprintf('%1.2f', averageDA * 100.0)}% / #{File::basename(ls_Path)}"
+			puts "DP #{sprintf('%5.2f', averageDP)} / DA #{sprintf('%5.2f', averageDA * 100.0)}% / DA (mass) #{sprintf('%5.2f', aSum / (aSum + dSum) * 100.0)}% / #{File::basename(ls_Path)}"
 		end
 	end
 end

@@ -12,3 +12,12 @@ input:
     label: composition fingerprint
     formats: [csv]
     min: 2
+
+defaultOutputDirectory: compositionFingerprint
+
+output:
+  - key: distances
+    label: distances
+    format: csv
+    filename: composition-fingerprint-distances.csv
+    default: yes
