@@ -44,22 +44,27 @@ class CompareCompositionFingerprints < ProteomaticScript
 				lk_Fingerprint[ls_Path][key] /= maximum
 			end
 		end
-		(0...lk_Fingerprint.keys.size).each do |a|
-			(a...lk_Fingerprint.keys.size).each do |b|
-				next if a == b
-				aPath = @input[:compositionFingerprint][a]
-				bPath = @input[:compositionFingerprint][b]
-				print "#{File::basename(aPath)}/#{File::basename(bPath)}: "
-				ld_Distance = 0.0
-				lk_AllKeys = Set.new(lk_Fingerprint[aPath].keys) | Set.new(lk_Fingerprint[bPath].keys)
-				lk_AllKeys.each do |key|
-					aAmount = lk_Fingerprint[aPath][key]
-					bAmount = lk_Fingerprint[bPath][key]
-					aAmount ||= 0.0
-					bAmount ||= 0.0
-					ld_Distance += (aAmount - bAmount) ** 2.0
+		if @output[:distances]
+			File::open(@output[:distances], 'w') do |lk_Out|
+				lk_Out.puts "Distance,A,B"
+				(0...lk_Fingerprint.keys.size).each do |a|
+					(a...lk_Fingerprint.keys.size).each do |b|
+						next if a == b
+						aPath = @input[:compositionFingerprint][a]
+						bPath = @input[:compositionFingerprint][b]
+						ld_Distance = 0.0
+						lk_AllKeys = Set.new(lk_Fingerprint[aPath].keys) | Set.new(lk_Fingerprint[bPath].keys)
+						lk_AllKeys.each do |key|
+							aAmount = lk_Fingerprint[aPath][key]
+							bAmount = lk_Fingerprint[bPath][key]
+							aAmount ||= 0.0
+							bAmount ||= 0.0
+							ld_Distance += (aAmount - bAmount) ** 2.0
+						end
+						ld_Distance = ld_Distance ** 0.5
+						lk_Out.puts "#{sprintf('%f', ld_Distance)},#{File::basename(aPath)},#{File::basename(bPath)}"
+					end
 				end
-				puts ld_Distance
 			end
 		end
 	end

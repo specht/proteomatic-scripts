@@ -91,19 +91,37 @@ parameters:
     default: 2
     description: Specify how many isotope peaks should be considered (1 means monoisotopic only).
     min: 1
-  - key: variableLabel
+  - key: ms1VariableLabel
     group: Search space
-    commandLine: --variableLabel
-    label: Variable label
+    commandLine: --ms1VariableLabel
+    label: MS1 Variable label
     type: csvString
     choices: [{'0': 'MS2 label (+2 Da)'}, {'1': 'water loss'}]
     default: ''
     display: row
     ignoreIfEmpty: true
-  - key: fixedLabel
+  - key: ms1FixedLabel
     group: Search space
-    commandLine: --fixedLabel
-    label: Fixed label
+    commandLine: --ms1FixedLabel
+    label: MS1 Fixed label
+    type: csvString
+    choices: [{'0': 'MS2 label (+2 Da)'}, {'1': 'water loss'}]
+    default: ''
+    display: row
+    ignoreIfEmpty: true
+  - key: ms2VariableLabel
+    group: Search space
+    commandLine: --ms2VariableLabel
+    label: MS2 Variable label
+    type: csvString
+    choices: [{'0': 'MS2 label (+2 Da)'}, {'1': 'water loss'}]
+    default: ''
+    display: row
+    ignoreIfEmpty: true
+  - key: ms2FixedLabel
+    group: Search space
+    commandLine: --ms2FixedLabel
+    label: MS2 Fixed label
     type: csvString
     choices: [{'0': 'MS2 label (+2 Da)'}, {'1': 'water loss'}]
     default: ''
