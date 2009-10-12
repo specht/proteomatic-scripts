@@ -20,6 +20,41 @@ require 'include/ext/fastercsv'
 require 'include/misc'
 require 'yaml'
 
+$gk_Gradient = [
+	[0.0, '#ffffff'],
+	[0.2, '#fce94f'],
+	[0.4, '#fcaf3e'],
+	[0.7, '#a40000'],
+	[1.0, '#000000']]
+	
+	
+def mix(a, b, amount)
+	rA = Integer('0x' + a[1, 2]).to_f / 255.0
+	gA = Integer('0x' + a[3, 2]).to_f / 255.0
+	bA = Integer('0x' + a[5, 2]).to_f / 255.0
+	rB = Integer('0x' + b[1, 2]).to_f / 255.0
+	gB = Integer('0x' + b[3, 2]).to_f / 255.0
+	bB = Integer('0x' + b[5, 2]).to_f / 255.0
+	rC = rB * amount + rA * (1.0 - amount)
+	gC = gB * amount + gA * (1.0 - amount)
+	bC = bB * amount + bA * (1.0 - amount)
+	result = sprintf('#%02x%02x%02x', (rC * 255.0).to_i, (gC * 255.0).to_i, (bC * 255.0).to_i)
+	return result
+end
+	
+	
+def gradient(x)
+	x = 0.0 if x < 0.0
+	x = 1.0 if x > 1.0
+	i = 0
+	while (i < $gk_Gradient.size - 2 && $gk_Gradient[i + 1][0] < x)
+		i += 1
+	end
+	colorA = $gk_Gradient[i][1]
+	colorB = $gk_Gradient[i + 1][1]
+	return mix(colorA, colorB, (x - $gk_Gradient[i][0]) / ($gk_Gradient[i + 1][0] - $gk_Gradient[i][0]))
+end
+	
 
 class RenderCompositionFingerprint < ProteomaticScript
 	def arc(r0, r1, a0, a1, color)
@@ -54,9 +89,9 @@ class RenderCompositionFingerprint < ProteomaticScript
 			end
 			
 			# scale all so that maximum is at 1.0
-			ld_Maximum = 0.0
-			lk_Amounts.values.each { |x| ld_Maximum = x if x > ld_Maximum }
-			lk_Amounts.keys.each { |x| lk_Amounts[x] /= ld_Maximum }
+			ld_Sum = 0.0
+			lk_Amounts.values.each { |x| ld_Sum += x }
+			lk_Amounts.keys.each { |x| lk_Amounts[x] /= ld_Sum }
 			
 			# render SVG
 			File::open(@output[ls_InPath], 'w') do |f|
@@ -80,14 +115,26 @@ class RenderCompositionFingerprint < ProteomaticScript
 					r1 = 500.0 * (1.0 - ((dp + 1) ** -0.2))
 					a0 = 1.0 / (dp + 1) * amountA
 					a1 = 1.0 / (dp + 1) * (amountA + 1)
-					color = sprintf('%02x', ((1.0 - amount) ** 10.0)* 255.0)
+					amount = (1.0 - amount) ** 20.0
+					color = gradient(1.0 - amount)
 					angle = 2.0 * Math.asin(0.5 / (2.0 * r1)) / Math::PI
 					a0 -= angle unless amountA == 0
 					a1 += angle unless amountA == dp
-					arcs += arc(r0 - 0.3, r1 + 0.3, a0, a1, "##{color}#{color}#{color}")
+					arcs += arc(r0 - 0.3, r1 + 0.3, a0, a1, "#{color}")
 				end
 				ls_Svg = ls_SvgTemplate.dup
 				ls_Svg.sub!('#{PRODUCTS}', arcs);
+				ls_Gradient = ''
+				$gk_Gradient.each do |pair|
+					ls_Gradient += "<stop offset='#{pair[0] * 100.0}%' style='stop-color:#{pair[1]}; stop-opacity:1'/>\n"
+				end
+				ls_Svg.sub!('#{GRADIENT}', ls_Gradient);
+				ls_Legend = ''
+				[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].each do |a|
+					ls_Legend += "<text text-anchor='end' x='990' y='#{348 + a * 200.0}' fill='#000' style='font-family: Bitstream Charter' font-size='16px'>#{sprintf('%1.2g', 1.0 - (a ** (1.0 / 20.0)))}</text>"
+				end
+				ls_Svg.sub!('#{LEGEND}', ls_Legend);
+
 				f.puts ls_Svg
 			end
 		end
@@ -101,6 +148,11 @@ __END__
 <marker id='arrow' viewBox='0 0 20 10' refX='0' refY='5' markerUnits='strokeWidth' markerWidth='8' markerHeight='6' orient='auto' fill='#000'><path d='M 0 0 L 20 5 L 0 10 z' /></marker>
 <g transform='translate(40,40)'>
 <g transform='translate(500,0)'>
+<defs>
+<linearGradient id="burn" x1="0%" y1="100%" x2="0%" y2="0%">
+#{GRADIENT}
+</linearGradient>
+</defs>
 #{PRODUCTS}
 </g>
 <line x1='500' y1='0' x2='500' y2='470' fill='none' stroke='#000' stroke-width='2.5' marker-end='url(#arrow)' />
@@ -131,5 +183,7 @@ __END__
 <!--
 <text x='0' y='548' fill='#000' style='font-family: Bitstream Charter' font-size='20px'>enzyme: A|D, DP: 1000, DA: 11, 1000 iterations, error: 0.000238406</text>
 -->
+<rect x='1000' y='340' width='20' height='200' style='fill:url(#burn)'/>
+#{LEGEND}
 </g>
 </svg>
