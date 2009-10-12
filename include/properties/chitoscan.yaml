@@ -21,6 +21,11 @@ output:
     format: csv
     filename: composition-fingerprint.csv
     default: yes
+  - key: ms2Products
+    label: MS2 products
+    format: csv
+    filename: ms2-products.csv
+    default: yes
   - key: massRangeFingerprint
     label: mass range fingerprint
     format: csv

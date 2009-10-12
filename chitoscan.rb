@@ -26,6 +26,7 @@ class ChitoScan < ProteomaticScript
 	def run()
 		ls_Command = "\"#{ExternalTools::binaryPath('chitinator.chitoscan')}\""
 		ls_Command += " --writeCompositionFingerprint \"#{@output[:compositionFingerprint]}\"" if @output[:compositionFingerprint]
+		ls_Command += " --writeMs2Products \"#{@output[:ms2Products]}\"" if @output[:ms2Products]
 		ls_Command += " --writeMassRangeFingerprint \"#{@output[:massRangeFingerprint]}\"" if @output[:massRangeFingerprint]
 		ls_Command += " --writeMassCollisionFingerprint \"#{@output[:massCollisionFingerprint]}\"" if @output[:massCollisionFingerprint]
 		ls_Command += ' ' + @mk_Parameters.commandLineFor('chitinator.chitoscan')
