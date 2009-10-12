@@ -12,7 +12,6 @@ input:
   - key: spectra
     label: spectra
     formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
-    min: 1
 
 defaultOutputDirectory: spectra
 
@@ -22,6 +21,16 @@ output:
     format: csv
     filename: composition-fingerprint.csv
     default: yes
+  - key: massRangeFingerprint
+    label: mass range fingerprint
+    format: csv
+    filename: mass-range-fingerprint.csv
+    default: no
+  - key: massCollisionFingerprint
+    label: mass collision fingerprint
+    format: csv
+    filename: mass-collision-fingerprint.csv
+    default: no
 
 externalParameters:
   - chitinator.chitoscan

@@ -1155,7 +1155,7 @@ class ProteomaticScript
 						ls_Basename.slice!(-ls_Extension.size, ls_Extension.size) if ls_Extension != ''
 						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename'].gsub('#{basename}', ls_Basename).gsub('#{extension}', ls_Extension)
 						@param.keys.each do |ls_Param|
-							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', @param[ls_Param])
+							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', "#{@param[ls_Param]}")
 						end
 						ls_OutPath = File::join(ls_Directory, @param['outputPrefix'.intern] + ls_OutFilename)
 						if (File::exists?(ls_OutPath))
