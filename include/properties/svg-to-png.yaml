@@ -20,3 +20,10 @@ output:
     label: PNG files
     format: png
     filename: '#{basename}.png'
+
+parameters:
+  - key: zoom
+    type: float
+    default: 1.0
+    decimals: 2
+    label: Zoom

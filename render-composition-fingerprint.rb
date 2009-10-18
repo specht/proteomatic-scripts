@@ -101,16 +101,29 @@ class RenderCompositionFingerprint < ProteomaticScript
 			end
 			
 			# scale all so that maximum is at 1.0
-			ld_Sum = 0.0
-			ld_Max = 0.0
-			lk_Amounts.values.each do |x| 
-				ld_Sum += x
-				ld_Max = x if x > ld_Max
+			lk_Sum = Hash.new
+			lk_Max = Hash.new
+			lk_Amounts.keys.each do |key| 
+				dp = key.split('/')[0].to_i + key.split('/')[1].to_i
+				dp = 0 unless @param[:normalizeWithinRings] == 'yes'
+				x = lk_Amounts[key]
+				lk_Sum[dp] ||= 0.0
+				lk_Max[dp] ||= 0.0
+				lk_Sum[dp] += x
+				lk_Max[dp] = x if x > lk_Max[dp]
 			end
 			if @param[:normalize] == 'sum'
-				lk_Amounts.keys.each { |x| lk_Amounts[x] /= ld_Sum }
+				lk_Amounts.keys.each do |key| 
+					dp = key.split('/')[0].to_i + key.split('/')[1].to_i
+					dp = 0 unless @param[:normalizeWithinRings] == 'yes'
+					lk_Amounts[key] /= lk_Sum[dp]
+				end
 			elsif @param[:normalize] == 'maximum'
-				lk_Amounts.keys.each { |x| lk_Amounts[x] /= ld_Max }
+				lk_Amounts.keys.each do |key| 
+					dp = key.split('/')[0].to_i + key.split('/')[1].to_i
+					dp = 0 unless @param[:normalizeWithinRings] == 'yes'
+					lk_Amounts[key] /= lk_Max[dp]
+				end
 			end
 			
 			# render SVG

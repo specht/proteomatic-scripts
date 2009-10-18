@@ -21,7 +21,7 @@ require 'include/proteomatic'
 class SvgToPng < ProteomaticScript
 	def run()
 		@input[:svgFiles].each do |ls_InPath|
-			command = "rsvg-convert -o \"#{@output[ls_InPath]}\" \"#{ls_InPath}\""
+			command = "rsvg-convert -z #{@param[:zoom]} -o \"#{@output[ls_InPath]}\" \"#{ls_InPath}\""
 			system(command)
 		end
 	end

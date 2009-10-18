@@ -23,7 +23,7 @@ defaultOutputDirectory: fingerprints
 
 output:
   - key: fingerprints
-    label: multiplies fingerprints
+    label: multiplied fingerprints
     format: csv
     filename: "#{basename}-multiplied.csv"
     default: yes

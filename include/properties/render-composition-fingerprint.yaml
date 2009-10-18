@@ -27,6 +27,11 @@ parameters:
     type: enum
     default: 'sum'
     choices: ['sum', 'maximum', 'none']
+  - key: normalizeWithinRings
+    label: Normalize within rings
+    type: enum
+    default: 'no'
+    choices: ['no', 'yes']
   - key: gradient
     label: Gradient
     type: enum
