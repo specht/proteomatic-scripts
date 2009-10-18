@@ -50,7 +50,7 @@ class RunPeaks < ProteomaticScript
 			if ['dta', 'mgf'].include?(@inputFormat[ls_Path])
 				# it's DTA or MGF, give that directly to PEAKS
 				lk_PreparedSpectraFiles.push(ls_Path)
-				File::cp(ls_Path, ls_TempInPath)
+				FileUtils::cp(ls_Path, ls_TempInPath)
 			else
 				# it's something else, convert it first
 				lk_XmlFiles.push("\"" + ls_Path + "\"") 
