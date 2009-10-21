@@ -79,8 +79,14 @@ class RunPeaks < ProteomaticScript
 		runCommand(ls_Command)
 		
 		Dir::chdir(ls_OldPath)
-        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.fas'), @output[:fasFile]) if @output[:fasFile]
-        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.ann'), @output[:annFile]) if @output[:annFile]
+		if @output[:fasFile]
+			File::open(@output[:fasFile], 'w') do |f|
+				Dir[File::join(ls_TempOutPath, '*.fas')].each do |path|
+					contents = File::read(path)
+					f.puts contents
+				end
+			end
+		end
         FileUtils::rm_rf(ls_TempPath)
         puts 'done.'
 	end
