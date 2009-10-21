@@ -507,7 +507,7 @@ class ProteomaticScript
 			ls_Result += "\n"
 			@mk_Input['groupOrder'].each do |ls_Group|
 				next if (Set.new(@mk_Input['groups'][ls_Group]['formats']) & @mk_Input['ambiguousFormats']).empty?
-				ls_Result += wordwrap("-#{ls_Group}: subsequent files are interpreted as #{@mk_Input['groups'][ls_Group]['label']}")
+				ls_Result += wordwrap("-#{ls_Group}: subsequent files are interpreted as #{@mk_Input['groups'][ls_Group]['label']} files")
 				ls_Result += "\n"
 			end
 		end

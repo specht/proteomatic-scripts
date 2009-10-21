@@ -1,0 +1,53 @@
+binary:
+  win32: blastall.exe
+  linux: blastall
+  macx: blastall
+
+parameters:
+  - key: program
+    group: General parameters
+    label: BLAST program
+    type: enum
+    choices: [blastp, psi-blast, phi-blast]
+    default: blastp
+    commandLine: -p
+  - key: wordSize
+    group: General parameters
+    label: Word size
+    type: int
+    default: 0
+    commandLine: -W
+  - key: eThreshold
+    group: General parameters
+    label: E-value threshold
+    type: float
+    default: 10.0
+    min: 0.0
+    decimals: 2
+    step: 0.01
+    commandLine: -e
+  - key: matrix
+    group: Scoring parameters
+    label: Matrix
+    type: enum
+    default: BLOSUM62
+    choices: [PAM30, PAM70, BLOSUM80, BLOSUM62, BLOSUM45]
+    commandLine: -M
+  - key: gapOpeningCost
+    group: Scoring parameters
+    label: Gap opening cost
+    type: int
+    default: -1
+    commandLine: -G
+  - key: gapExtensionCost
+    group: Scoring parameters
+    label: Gap extension cost
+    type: int
+    default: -1
+    commandLine: -E
+  - key: filterLCR
+    group: Filters and Masking
+    label: Filter low complexity regions
+    type: enum
+    choices: [{'T': 'yes'}, {'F': 'no'}]
+    commandLine: -F
