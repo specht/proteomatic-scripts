@@ -25,7 +25,7 @@ require 'fileutils'
 
 class RunPeaks < ProteomaticScript
 	def run()
-		ls_PeaksConfig = readData('config')
+		ls_PeaksConfig = readData('config').strip
 		
 		ls_VariableMods = ''
 		if @param[:variableModifications] && !@param[:variableModifications].empty?
@@ -35,7 +35,8 @@ class RunPeaks < ProteomaticScript
 		end
 		
 		ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
-		ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]))
+		ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
+		ls_PeaksConfig.sub!("\n\n", "\n")
 		
 		puts ls_PeaksConfig
 		
@@ -73,7 +74,7 @@ class RunPeaks < ProteomaticScript
 		
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} #{ls_ParamFile} \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
+		ls_Parameters = "-xfi \"#{ls_TempInPath}\" \"#{ls_TempOutPath}\" \"#{ls_ParamFile}\" \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
 		ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
 		print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
