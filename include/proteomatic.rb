@@ -592,6 +592,77 @@ class ProteomaticScript
 		return ls_Result
 	end
 	
+    def yamlInfo()
+        ls_Result = ''
+        ls_Result << "---yamlInfo\n"
+        info = Hash.new
+        info['type'] = @ms_ScriptType
+        if (@ms_ScriptType == 'converter')
+            info['converterKey'] = @mk_Output.values.first['key']
+            info['converterLabel'] = @mk_Output.values.first['label']
+            info['converterFilename'] = @mk_Output.values.first['filename']
+        end
+        info['parameters'] = @mk_Parameters.yamlInfo()
+        
+        if @mk_Input
+            info['input'] = Array.new
+            @mk_Input['groupOrder'].each do |ls_Group|
+                inputInfo = Hash.new
+                inputInfo['key'] = @mk_Input['groups'][ls_Group]['key']
+                inputInfo['label'] = @mk_Input['groups'][ls_Group]['label']
+                ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join(' | ')}"
+                ls_Range = ''
+                ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
+                ls_Range += 'max' if @mk_Input['groups'][ls_Group]['max']
+                ls_FileLabel = ''
+                description = ''
+                if (ls_Range == 'min')
+                    description += "at least #{@mk_Input['groups'][ls_Group]['min']} "
+                    ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['min'] != 1 ? 's' : ''} "
+                elsif (ls_Range == 'max')
+                    description += "at most #{@mk_Input['groups'][ls_Group]['max']} "
+                    ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['max'] != 1 ? 's' : ''} "
+                elsif (ls_Range == 'minmax')
+                    if (@mk_Input['groups'][ls_Group]['min'] == @mk_Input['groups'][ls_Group]['max'])
+                        description += "exactly #{@mk_Input['groups'][ls_Group]['min']} "
+                        ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['min'] != 1 ? 's' : ''} "
+                    else
+                        description += "at least #{@mk_Input['groups'][ls_Group]['min']}, but no more than #{@mk_Input['groups'][ls_Group]['max']} "
+                        ls_FileLabel = 'files '
+                    end
+                else
+                    ls_FileLabel = 'files '
+                end
+                description += 'optional: ' if (ls_Range == '')
+                description += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
+                description += "(#{ls_Format})"
+                inputInfo['description'] = description
+                inputInfo['extensions'] = @mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('/')
+                inputInfo['min'] = @mk_Input['groups'][ls_Group]['min'] if @mk_Input['groups'][ls_Group]['min']
+                inputInfo['max'] = @mk_Input['groups'][ls_Group]['max'] if @mk_Input['groups'][ls_Group]['max']
+                info['input'] << inputInfo
+            end
+            if @ms_DefaultOutputDirectoryGroup
+                info['defaultOutputDirectory'] = @mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']
+            end
+            if @mk_ScriptProperties['proposePrefix']
+                info['proposePrefixList'] = Array.new
+                @mk_ScriptProperties['proposePrefix'].each do |x|
+                    info['proposePrefixList'] << x
+                end
+            end
+            unless @mk_Input['ambiguousFormats'].empty?
+                info['ambiguousInputGroups'] = Array.new
+                @mk_Input['groupOrder'].each do |ls_Group|
+                    next if (Set.new(@mk_Input['groups'][ls_Group]['formats']) & @mk_Input['ambiguousFormats']).empty?
+                    info['ambiguousInputGroups'] << ls_Group
+                end
+            end
+        end
+        ls_Result << info.to_yaml
+        return ls_Result
+    end
+    
 	def info()
 		ls_Result = ''
 		ls_Result << "---info\n"
@@ -611,6 +682,10 @@ class ProteomaticScript
 			puts getParameters()
 			exit 0
 		end
+        if ARGV == ['---yamlInfo']
+            puts yamlInfo()
+            exit 0
+        end
 		if ARGV == ['--help']
 			puts help()
 			exit 0
@@ -892,10 +967,10 @@ class ProteomaticScript
 		# handle output files
 		#if @mk_ScriptProperties.has_key?('output')
 			lk_Directory = {'group' => 'Output files', 'key' => 'outputDirectory', 
-				'label' => 'Output directory', 'type' => 'string', 'default' => '', 'colspan' => 2}
+				'label' => 'Output directory', 'type' => 'string', 'default' => ''}
 			@mk_Parameters.addParameter(lk_Directory)
 			lk_Prefix = {'group' => 'Output files', 'key' => 'outputPrefix', 
-				'label' => 'Output file prefix', 'type' => 'string', 'default' => '', 'colspan' => 2}
+				'label' => 'Output file prefix', 'type' => 'string', 'default' => ''}
 			@mk_Parameters.addParameter(lk_Prefix)
 		#end
 

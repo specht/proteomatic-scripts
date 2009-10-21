@@ -224,6 +224,27 @@ class Parameters
 		return ls_Result
 	end
 	
+    def parameterInfo(as_Key)
+        result = Hash.new
+        @mk_Parameters[as_Key].each do |ls_Key, ls_Value|
+            if (ls_Key == 'choices')
+                lk_Choices = ls_Value
+                result['choices'] = Array.new
+                lk_Choices.each do |lk_Choice|
+                    lk_Choice
+                    if lk_Choice.class == Hash
+                        result['choices'] << { lk_Choice.keys.first => lk_Choice[lk_Choice.keys.first] }
+                    else
+                        result['choices'] << lk_Choice
+                    end
+                end
+            else
+                result[ls_Key] = ls_Value
+            end
+        end
+        return result
+    end
+    
 	def helpString()
 		ls_Result = ''
 		lk_Groups = Array.new
@@ -272,6 +293,12 @@ class Parameters
 		return ls_Result
 	end
 	
+    def yamlInfo()
+        info = Array.new
+        @mk_ParametersOrder.each { |ls_Key| info << parameterInfo(ls_Key) }
+        return info
+    end
+    
 	def humanReadableConfigurationHash()
 		lk_Result = Array.new
 		@mk_ParametersOrder.each { |ls_Key| lk_Result.push({@mk_Parameters[ls_Key]['label'] => humanReadableValue(ls_Key, value(ls_Key))}) }
