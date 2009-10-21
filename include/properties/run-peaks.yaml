@@ -35,6 +35,11 @@ parameters:
     default: 1.0
     suffix: Da
     min: 0.0
+  - key: enzyme
+    label: Enzyme
+    type: enum
+    default: trypsin
+    choices: [{trypsin: Trypsin}]
   - key: variableModifications
     label: Variable modifications
     type: csvString

@@ -18,13 +18,14 @@
 # Run Peaks (a Proteomatic script)
 
 require 'include/proteomatic'
+require 'include/misc'
 require 'yaml'
 require 'fileutils'
 
 
 class RunPeaks < ProteomaticScript
 	def run()
-		ls_PeaksConfig = DATA.read
+		ls_PeaksConfig = readData('config')
 		
 		ls_VariableMods = ''
 		if @param[:variableModifications] && !@param[:variableModifications].empty?
@@ -34,6 +35,7 @@ class RunPeaks < ProteomaticScript
 		end
 		
 		ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
+		ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]))
 		
 		puts ls_PeaksConfig
 		
@@ -95,6 +97,8 @@ end
 lk_Object = RunPeaks.new
 
 __END__
+
+__CONFIG__
 <?xml version="1.0" encoding="UTF-8"?>
 <PEAKS_Properties>
 <combine_result_files>1</combine_result_files>
@@ -107,11 +111,16 @@ __END__
 <par_tol>1.5</par_tol>
 <user_residue_list version="1.0">
 <res_ptm_set name="Proteomatic resptm">
-<enzyme>Trypsin</enzyme>
-<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
-<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
-<res_c_term>RK</res_c_term>
+#{ENZYME}
 #{VARIABLE_MODS}
 </res_ptm_set>
 </user_residue_list>
 </PEAKS_Properties>
+__CONFIG__
+
+__ENZYME_TRYPSIN__
+<enzyme>Trypsin</enzyme>
+<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>RK</res_c_term>
+__ENZYME_TRYPSIN__
