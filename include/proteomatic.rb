@@ -62,8 +62,6 @@ class ProteomaticScriptDaemon
 	def initialize(ak_Script)
 		@mk_Script = ak_Script
 		@ms_ScriptHelp = @mk_Script.help()
-		@ms_ScriptInfo = @mk_Script.info()
-		@ms_ScriptGetParameters = @mk_Script.getParameters()
 		
 		@mk_Tickets = Hash.new
 		@mk_TicketOrder = Array.new
@@ -172,18 +170,6 @@ class ProteomaticScriptDaemon
 
 	def help()
 		return @ms_ScriptHelp
-	end
-
-	def getParameters()
-		return @ms_ScriptGetParameters
-	end
-	
-	def info()
-		return @ms_ScriptInfo
-	end
-
-	def infoAndParameters()
-		return @ms_ScriptInfo + @ms_ScriptGetParameters
 	end
 
 	def submit(ak_Arguments, ak_Files, as_OutputDirectory)
@@ -398,14 +384,12 @@ class ProteomaticScript
 			exit 0
 		end
 		
-		unless ARGV == ['---info']
-			begin
-				setupParameters()
-			rescue ProteomaticArgumentException => e
-				puts e
-				exit 1
-			end
-		end
+        begin
+            setupParameters()
+        rescue ProteomaticArgumentException => e
+            puts e
+            exit 1
+        end
 		handleArguments()
 		
 		if @mb_Daemon
@@ -519,83 +503,18 @@ class ProteomaticScript
 		return ls_Result
 	end
 	
-	def getParameters()
-		ls_Result = ''
-		ls_Result << "---getParameters\n"
-		ls_Result << "!!!begin info\n"
-		ls_Result << "type\n#{@ms_ScriptType}\n"
-		if (@ms_ScriptType == 'converter')
-			ls_Result << "converterKey\n#{@mk_Output.values.first['key']}\n"
-			ls_Result << "converterLabel\n#{@mk_Output.values.first['label']}\n"
-			ls_Result << "converterFilename\n#{@mk_Output.values.first['filename']}\n"
-		end
-		ls_Result << "!!!end info\n"
-		ls_Result << @mk_Parameters.parametersString()
-		if @mk_Input
-			@mk_Input['groupOrder'].each do |ls_Group|
-				ls_Result << "!!!begin input\n"
-				ls_Result += "key\n#{@mk_Input['groups'][ls_Group]['key']}\n"
-				ls_Result += "label\n#{@mk_Input['groups'][ls_Group]['label']}\n"
-				ls_Result += "description\n";
-				ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join(' | ')}"
-				ls_Range = ''
-				ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
-				ls_Range += 'max' if @mk_Input['groups'][ls_Group]['max']
-				ls_FileLabel = ''
-				if (ls_Range == 'min')
-					ls_Result += "at least #{@mk_Input['groups'][ls_Group]['min']} "
-					ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['min'] != 1 ? 's' : ''} "
-				elsif (ls_Range == 'max')
-					ls_Result += "at most #{@mk_Input['groups'][ls_Group]['max']} "
-					ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['max'] != 1 ? 's' : ''} "
-				elsif (ls_Range == 'minmax')
-					if (@mk_Input['groups'][ls_Group]['min'] == @mk_Input['groups'][ls_Group]['max'])
-						ls_Result += "exactly #{@mk_Input['groups'][ls_Group]['min']} "
-						ls_FileLabel = "file#{@mk_Input['groups'][ls_Group]['min'] != 1 ? 's' : ''} "
-					else
-						ls_Result += "at least #{@mk_Input['groups'][ls_Group]['min']}, but no more than #{@mk_Input['groups'][ls_Group]['max']} "
-						ls_FileLabel = 'files '
-					end
-				else
-					ls_FileLabel = 'files '
-				end
-				ls_Result += 'optional: ' if (ls_Range == '')
-				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
-				ls_Result += "(#{ls_Format})"
-				ls_Result += "\n"
-				ls_Result += "extensions\n" + @mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('/') + "\n"
-				ls_Result += "min\n#{@mk_Input['groups'][ls_Group]['min']}\n" if @mk_Input['groups'][ls_Group]['min']
-				ls_Result += "max\n#{@mk_Input['groups'][ls_Group]['max']}\n" if @mk_Input['groups'][ls_Group]['max']
-				ls_Result << "!!!end input\n"
-			end
-			if @ms_DefaultOutputDirectoryGroup
-				ls_Result << "!!!begin defaultOutputDirectory\n"
-				ls_Result << "#{@mk_Input['groups'][@ms_DefaultOutputDirectoryGroup]['key']}\n"
-				ls_Result << "!!!end defaultOutputDirectory\n"
-			end
-			if @mk_ScriptProperties['proposePrefix']
-				ls_Result << "!!!begin proposePrefixList\n"
-				@mk_ScriptProperties['proposePrefix'].each do |x|
-					ls_Result << "#{x}\n"
-				end
-				ls_Result << "!!!end proposePrefixList\n"
-			end
-			unless @mk_Input['ambiguousFormats'].empty?
-				ls_Result << "!!!begin ambiguousInputGroups\n"
-				@mk_Input['groupOrder'].each do |ls_Group|
-					next if (Set.new(@mk_Input['groups'][ls_Group]['formats']) & @mk_Input['ambiguousFormats']).empty?
-					ls_Result += "#{ls_Group}\n"
-				end
-				ls_Result << "!!!end ambiguousInputGroups\n"
-			end
-		end
-		return ls_Result
-	end
-	
     def yamlInfo()
         ls_Result = ''
         ls_Result << "---yamlInfo\n"
         info = Hash.new
+        info['title'] = @ms_Title
+        info['description'] = @ms_Description
+        info['group'] = @ms_Group
+        if ARGV.include?('--short')
+            ls_Result << info.to_yaml
+            return ls_Result
+        end
+            
         info['type'] = @ms_ScriptType
         if (@ms_ScriptType == 'converter')
             info['converterKey'] = @mk_Output.values.first['key']
@@ -663,26 +582,13 @@ class ProteomaticScript
         return ls_Result
     end
     
-	def info()
-		ls_Result = ''
-		ls_Result << "---info\n"
-		ls_Result << "#{@ms_Title}\n"
-		ls_Result << "#{@ms_Group}\n"
-		ls_Result << "#{@ms_Description}\n"
-		return ls_Result
-	end
-	
 	def handleArguments()
 		if ARGV.first == '--daemon'
 			@mb_Daemon = true
 			@mi_DaemonPort = DEFAULT_DAEMON_PORT
 			@mi_DaemonPort = ARGV[1].to_i if ARGV.size > 1
 		end
-		if ARGV == ['---getParameters']
-			puts getParameters()
-			exit 0
-		end
-        if ARGV == ['---yamlInfo']
+        if ARGV.first == '---yamlInfo'
             puts yamlInfo()
             exit 0
         end
@@ -690,10 +596,6 @@ class ProteomaticScript
 			puts help()
 			exit 0
 		end		
-		if ARGV == ['---info']
-			puts info()
-			exit 0
-		end
 	end
 	private :handleArguments
 
@@ -874,14 +776,14 @@ class ProteomaticScript
 		
 		# check dependencies if called from GUI
 		if @mk_ScriptProperties.has_key?('needs')
-			if ARGV == ['---getParameters'] 
+			if (ARGV.first == '---yamlInfo') && (!ARGV.include?('--short'))
 				ls_Response = ''
 				@mk_ScriptProperties['needs'].each do |ls_ExtTool|
 					next unless ls_ExtTool[0, 4] == 'ext.'
 					ls_Response << "#{ExternalTools::packageTitle(ls_ExtTool)}\n" unless ExternalTools::installed?(ls_ExtTool)
 				end
 				unless ls_Response.empty?
-					puts '---getParametersUnresolvedDependencies'
+					puts '---hasUnresolvedDependencies'
 					puts ls_Response
 					exit 0
 				end
