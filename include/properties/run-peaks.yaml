@@ -39,7 +39,7 @@ parameters:
     label: Enzyme
     type: enum
     default: trypsin
-    choices: [{trypsin: Trypsin}]
+    choices: [{trypsin: Trypsin}, {pepsinC: "Pepsin C-term"}, {pepsinN: "Pepsin N-term"}]
   - key: variableModifications
     label: Variable modifications
     type: csvString
