@@ -137,7 +137,7 @@ __ENZYME_PEPSINC__
 
 __ENZYME_PEPSINN__
 <enzyme>Pepsin N-term</enzyme>
-<res_n_term>FLWY</res_c_term>
+<res_n_term>FLWY</res_n_term>
 <res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
-<res_c_term>ARNDCEQGHLKMFPSTWYV</res_n_term>
+<res_c_term>ARNDCEQGHLKMFPSTWYV</res_c_term>
 __ENZYME_PEPSINN__
