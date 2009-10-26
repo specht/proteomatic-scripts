@@ -26,7 +26,7 @@ class CompareCompositionFingerprints < ProteomaticScript
 	def run()
 		lk_Fingerprint = Hash.new
 		@input[:compositionFingerprint].each do |ls_Path|
-			maximum = 0.0
+			sum = 0.0
 			File::open(ls_Path) do |f|
 				header = mapCsvHeader(f.readline)
 				f.each_line do |line|
@@ -36,12 +36,12 @@ class CompareCompositionFingerprints < ProteomaticScript
 					lk_Fingerprint[ls_Path][key] ||= 0.0
 					amount = lineArray[header['amount']].to_f
 					lk_Fingerprint[ls_Path][key] += amount
-					maximum = lk_Fingerprint[ls_Path][key] if lk_Fingerprint[ls_Path][key] > maximum
+					sum += lk_Fingerprint[ls_Path][key]
 				end
 			end
 			# normalize fingerprint
 			lk_Fingerprint[ls_Path].keys.each do |key|
-				lk_Fingerprint[ls_Path][key] /= maximum
+				lk_Fingerprint[ls_Path][key] /= sum
 			end
 		end
 		if @output[:distances]

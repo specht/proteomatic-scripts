@@ -1,0 +1,2 @@
+extensions: ['.phr', '.pin', '.psq']
+description: BLAST-formatted database

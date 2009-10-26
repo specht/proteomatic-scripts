@@ -21,11 +21,6 @@ output:
     format: fasta
     filename: peaks-results.fas
     default: yes
-  - key: annFile
-    label: PEAKS annotation
-    format: xml-peaks-ann
-    filename: peaks-results.ann
-    default: yes
 
 parameters:
   - key: precursorIonTolerance
@@ -40,6 +35,11 @@ parameters:
     default: 1.0
     suffix: Da
     min: 0.0
+  - key: enzyme
+    label: Enzyme
+    type: enum
+    default: trypsin
+    choices: [{trypsin: Trypsin}, {pepsinC: "Pepsin C-term"}, {pepsinN: "Pepsin N-term"}]
   - key: variableModifications
     label: Variable modifications
     type: csvString

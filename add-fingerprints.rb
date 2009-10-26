@@ -21,18 +21,34 @@ require 'include/misc'
 require 'yaml'
 require 'fileutils'
 
-class ChitoScan < ProteomaticScript
+class AddFingerprints < ProteomaticScript
 
 	def run()
-		ls_Command = "\"#{ExternalTools::binaryPath('chitinator.chitoscan')}\""
-		ls_Command += " --writeCompositionFingerprint \"#{@output[:compositionFingerprint]}\"" if @output[:compositionFingerprint]
-		ls_Command += " --writeMs2Products \"#{@output[:ms2Products]}\"" if @output[:ms2Products]
-		ls_Command += " --writeMassRangeFingerprint \"#{@output[:massRangeFingerprint]}\"" if @output[:massRangeFingerprint]
-		ls_Command += " --writeMassCollisionFingerprint \"#{@output[:massCollisionFingerprint]}\"" if @output[:massCollisionFingerprint]
-		ls_Command += ' ' + @mk_Parameters.commandLineFor('chitinator.chitoscan')
-		ls_Command += ' ' + @input[:spectra].collect { |x| '"' + x + '"' }.join(' ')
-		runCommand(ls_Command, true)
+		lk_Sum = Hash.new
+		@input[:fingerprints].each do |inPath|
+			File::open(inPath) do |lk_In|
+				headerLine = lk_In.readline
+				header = mapCsvHeader(headerLine)
+				lk_In.each_line do |line|
+					lineArray = line.parse_csv()
+					key = "#{lineArray[header['a']].to_i}/#{lineArray[header['d']].to_i}"
+					amount = lineArray[header['amount']].to_f
+					lk_Sum[key] ||= 0.0
+					lk_Sum[key] += amount
+				end
+			end
+		end
+		if @output[:sumFingerprint]
+			File::open(@output[:sumFingerprint], 'w') do |lk_Out|
+				lk_Out.puts "Amount,A,D"
+				lk_Sum.keys.each do |key|
+					a = key.split('/')[0]
+					d = key.split('/')[1]
+					lk_Out.puts "#{lk_Sum[key]},#{a},#{d}"
+				end
+			end
+		end
 	end
 end
 
-lk_Object = ChitoScan.new
+lk_Object = AddFingerprints.new

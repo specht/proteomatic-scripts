@@ -18,13 +18,14 @@
 # Run Peaks (a Proteomatic script)
 
 require 'include/proteomatic'
+require 'include/misc'
 require 'yaml'
 require 'fileutils'
 
 
 class RunPeaks < ProteomaticScript
 	def run()
-		ls_PeaksConfig = DATA.read
+		ls_PeaksConfig = readData('config').strip
 		
 		ls_VariableMods = ''
 		if @param[:variableModifications] && !@param[:variableModifications].empty?
@@ -34,6 +35,10 @@ class RunPeaks < ProteomaticScript
 		end
 		
 		ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
+		ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
+        
+        # no empty lines allowed in PEAKS config
+		ls_PeaksConfig.sub!("\n\n", "\n")
 		
 		puts ls_PeaksConfig
 		
@@ -50,7 +55,7 @@ class RunPeaks < ProteomaticScript
 			if ['dta', 'mgf'].include?(@inputFormat[ls_Path])
 				# it's DTA or MGF, give that directly to PEAKS
 				lk_PreparedSpectraFiles.push(ls_Path)
-				File::cp(ls_Path, ls_TempInPath)
+				FileUtils::cp(ls_Path, ls_TempInPath)
 			else
 				# it's something else, convert it first
 				lk_XmlFiles.push("\"" + ls_Path + "\"") 
@@ -71,7 +76,7 @@ class RunPeaks < ProteomaticScript
 		
 		lf_PrecursorTolerance = @param[:precursorIonTolerance]
 		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi #{ls_TempInPath} #{ls_TempOutPath} #{ls_ParamFile} \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
+		ls_Parameters = "-xfi \"#{ls_TempInPath}\" \"#{ls_TempOutPath}\" \"#{ls_ParamFile}\" \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
 		ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
 		print 'Running PEAKS...'
 		ls_OldPath = Dir::pwd()
@@ -79,8 +84,14 @@ class RunPeaks < ProteomaticScript
 		runCommand(ls_Command)
 		
 		Dir::chdir(ls_OldPath)
-        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.fas'), @output[:fasFile]) if @output[:fasFile]
-        File::rename(File::join(ls_TempOutPath, 'xml2mgf-out.ann'), @output[:annFile]) if @output[:annFile]
+		if @output[:fasFile]
+			File::open(@output[:fasFile], 'w') do |f|
+				Dir[File::join(ls_TempOutPath, '*.fas')].each do |path|
+					contents = File::read(path)
+					f.puts contents
+				end
+			end
+		end
         FileUtils::rm_rf(ls_TempPath)
         puts 'done.'
 	end
@@ -89,6 +100,8 @@ end
 lk_Object = RunPeaks.new
 
 __END__
+
+__CONFIG__
 <?xml version="1.0" encoding="UTF-8"?>
 <PEAKS_Properties>
 <combine_result_files>1</combine_result_files>
@@ -101,11 +114,30 @@ __END__
 <par_tol>1.5</par_tol>
 <user_residue_list version="1.0">
 <res_ptm_set name="Proteomatic resptm">
-<enzyme>Trypsin</enzyme>
-<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
-<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
-<res_c_term>RK</res_c_term>
+#{ENZYME}
 #{VARIABLE_MODS}
 </res_ptm_set>
 </user_residue_list>
 </PEAKS_Properties>
+__CONFIG__
+
+__ENZYME_TRYPSIN__
+<enzyme>Trypsin</enzyme>
+<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>RK</res_c_term>
+__ENZYME_TRYPSIN__
+
+__ENZYME_PEPSINC__
+<enzyme>Pepsin C-term</enzyme>
+<res_n_term>ARNDCEQGHLKMFPSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>FLWY</res_c_term>
+__ENZYME_PEPSINC__
+
+__ENZYME_PEPSINN__
+<enzyme>Pepsin N-term</enzyme>
+<res_n_term>FLWY</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>ARNDCEQGHLKMFPSTWYV</res_c_term>
+__ENZYME_PEPSINN__

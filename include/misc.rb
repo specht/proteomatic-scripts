@@ -234,3 +234,14 @@ def splitNumbersAndLetters(as_String)
 	end
 	return ls_Pattern, lk_Parts
 end
+
+def readData(id = nil)
+	DATA.rewind
+	s = DATA.read
+	return s unless id
+	startIndex = s.index('__' + id.upcase + '__')
+	return '' unless startIndex
+	endIndex = s.index('__' + id.upcase + '__', startIndex + 1)
+	return '' unless endIndex
+	return s[startIndex + id.size + 4, endIndex - startIndex - id.size - 4]
+end
