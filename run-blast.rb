@@ -158,7 +158,7 @@ class RunBlast < ProteomaticScript
                     if batchSize >= 20
                         # we have 20 queries now, run BLAST
                         queryOut.close
-                        runBlast(databases.first, queryBatchPath, resultFile)
+                        runBlast(databases.to_a.first, queryBatchPath, resultFile)
                         print("\rRunning BLAST, processed #{queryCount} queries...")
                         # clear query batch file
                         queryOut = File::open(queryBatchPath, 'w')
@@ -172,7 +172,7 @@ class RunBlast < ProteomaticScript
             queryOut.close
             # run BLAST if we have queries left
             if batchSize > 0
-                runBlast(databases.first, queryBatchPath, resultFile)
+                runBlast(databases.to_a.first, queryBatchPath, resultFile)
                 print("\rRunning BLAST, processed #{queryCount} queries...")
             end
             puts
