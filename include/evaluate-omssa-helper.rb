@@ -97,7 +97,7 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetP
 				li_TestStartScan = Integer(lk_ScanParts[-3])
 				li_TestStopScan = Integer(lk_ScanParts[-2])
 				li_TestCharge = Integer(lk_ScanParts[-1])
-				if (li_TestCharge < 1 || (li_TestStopScan < li_TestStartScan))
+				if (li_TestCharge < 0 || (li_TestStopScan < li_TestStartScan))
 					li_ErrorCount += 1
 					ls_ErrorLine = ls_Scan
 					next
@@ -318,7 +318,7 @@ def loadPsm(as_Path, ak_Options = {})
 				li_TestStartScan = Integer(lk_ScanParts[-3])
 				li_TestStopScan = Integer(lk_ScanParts[-2])
 				li_TestCharge = Integer(lk_ScanParts[-1])
-				if (li_TestCharge < 1 || (li_TestStopScan < li_TestStartScan))
+				if (li_TestCharge < 0 || (li_TestStopScan < li_TestStartScan))
 					li_ErrorCount += 1
 					ls_ErrorLine = ls_Scan
 					next
