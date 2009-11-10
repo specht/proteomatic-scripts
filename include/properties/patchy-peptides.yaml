@@ -1,0 +1,47 @@
+group: Proteomics/Identification/PEAKS
+
+title: Patchy peptides
+
+type: processor
+
+description: >
+  This script stitches de novo predictions together, thus creating patchy peptides.
+
+input:
+  - key: peptides
+    label: PEAKS de novo peptide
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - peptides
+
+defaultOutputDirectory: peptides
+
+output:
+  - key: csvResults
+    label: CSV results
+    format: csv
+    filename: patchy-peptides.csv
+    default: no
+  - key: fastaResults
+    label: FASTA results
+    format: fasta
+    filename: patchy-peptides.fasta
+    default: yes
+
+parameters:
+  - key: minOverlap
+    label: Minimum overlap
+    type: int
+    min: 1
+    default: 3
+  - key: minScore
+    label: Minimum PEAKS score
+    type: float
+    min: 0.0
+    max: 100.0
+    decimals: 2
+    step: 0.01
+    suffix: %
+    default: 10.0
