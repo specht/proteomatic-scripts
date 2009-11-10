@@ -81,6 +81,7 @@ class RunBlast < ProteomaticScript
                 end
             end
         end
+        FileUtils::rm(tempResultPath)
     end
     
     def run()
