@@ -22,10 +22,10 @@ proposePrefix:
 defaultOutputDirectory: queries
 
 output:
-  - key: resultFile
-    label: BLAST results
-    format: xml
-    filename: blast-results.xml
+  - key: csvResults
+    label: CSV BLAST results
+    format: csv
+    filename: blast-results.csv
     default: yes
 
 parameters:

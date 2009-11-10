@@ -128,6 +128,20 @@ __ENZYME_TRYPSIN__
 <res_c_term>RK</res_c_term>
 __ENZYME_TRYPSIN__
 
+__ENZYME_LYSC__
+<enzyme>Trypsin</enzyme>
+<res_n_term>ARNDCEQGHLKMFPSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>K</res_c_term>
+__ENZYME_LYSC__
+
+__ENZYME_CHYMOTRYPSIN__
+<enzyme>Trypsin</enzyme>
+<res_n_term>ARNDCEQGHLKMFSTWYV</res_n_term>
+<res_middle>ARNDCEQGHLKMFPSTWYV</res_middle>
+<res_c_term>FYWML</res_c_term>
+__ENZYME_CHYMOTRYPSIN__
+
 __ENZYME_PEPSINC__
 <enzyme>Pepsin C-term</enzyme>
 <res_n_term>ARNDCEQGHLKMFPSTWYV</res_n_term>
