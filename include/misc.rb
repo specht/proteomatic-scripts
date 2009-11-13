@@ -17,14 +17,30 @@
 
 require 'include/ext/fastercsv'
 
+
+def meanAndSd(ak_Values)
+    ld_Mean = 0.0
+    ld_Sd = 0.0
+    
+    ak_Values.each { |x| ld_Mean += x }
+    ld_Mean /= ak_Values.size
+    
+    ak_Values.each { |x| ld_Sd += ((x - ld_Mean) ** 2.0) }
+    ld_Sd /= ak_Values.size
+    
+    begin
+        ld_Sd = Math.sqrt(ld_Sd)
+    rescue StandardError => e
+        return nil, nil
+    end
+    
+    return ld_Mean, ld_Sd
+end
+
+
 def stddev(ak_Values)
-	lf_Mean = 0.0
-	ak_Values.each { |f| lf_Mean += f.to_f }
-	lf_Mean /= ak_Values.size
-	
-	lf_Sum = 0.0
-	ak_Values.each { |f| lf_Sum += (f.to_f - lf_Mean) * (f.to_f - lf_Mean) }
-	return Math.sqrt(lf_Sum / ak_Values.size)
+    mean, sd = meanAndSd(ak_Values)
+    return sd
 end
 
 

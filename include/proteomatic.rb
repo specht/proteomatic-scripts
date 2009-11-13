@@ -1374,7 +1374,7 @@ class ProteomaticScript
 	end
 
 	def run()
-		raise 'Internal error: run() must be overridden!'
+		raise 'Internal error: run() must be implemented!'
 		exit 1
 	end
 	
