@@ -22,6 +22,17 @@ def meanAndSd(ak_Values)
     ld_Mean = 0.0
     ld_Sd = 0.0
     
+    lb_AllInfinity = true
+    ak_Values.each do |x|
+        unless x == 1.0 / 0.0
+            lb_AllInfinity = false
+            break
+        end
+    end
+    if lb_AllInfinity
+        return 1.0 / 0.0, nil
+    end
+    
     ak_Values.each { |x| ld_Mean += x }
     ld_Mean /= ak_Values.size
     

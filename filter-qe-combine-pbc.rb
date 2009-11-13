@@ -77,12 +77,8 @@ class CombinePbc < ProteomaticScript
             end
             ratioMean, ratioSD = meanAndSd(ratios)
             ratioRSD = nil
-            if ratioMean == nil
-                if amountHeavy == 0.0
-                    ratioMean = 1.0 / 0
-                end
-            else
-                ratioRSD = ratioSD / ratioMean
+            unless ratioMean == nil
+                ratioRSD = ratioSD / ratioMean if ratioSD && ratioMean
             end
             pbcHash[pbcKey][:amountLight] = amountLight
             pbcHash[pbcKey][:amountHeavy] = amountHeavy
@@ -148,12 +144,8 @@ class CombinePbc < ProteomaticScript
                         end
                         ratioMean, ratioSD = meanAndSd(ratios)
                         ratioRSD = nil
-                        if ratioMean == nil
-                            if amountHeavy == 0.0
-                                ratioMean = 1.0 / 0
-                            end
-                        else
-                            ratioRSD = ratioSD / ratioMean
+                        unless ratioMean == nil
+                            ratioRSD = ratioSD / ratioMean if ratioSD && ratioMean
                         end
                         if (pbcCount == 1)
                             # if the PBC count has gone down to 1, use scan results
@@ -166,6 +158,7 @@ class CombinePbc < ProteomaticScript
                 end
             end
         end
+        exit
 	end
 end
 

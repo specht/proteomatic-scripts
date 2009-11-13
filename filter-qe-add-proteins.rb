@@ -74,7 +74,7 @@ class QuantitationAddProteins < ProteomaticScript
 		# is exactly 1:1
 		lk_PeptideToProtein = Hash.new
 		lk_AllPeptides.each do |ls_Peptide|
-			if lk_MatchResults.include?(ls_Peptide)
+			if lk_MatchResults[ls_Peptide]
 				if lk_MatchResults[ls_Peptide].size == 1
 					lk_PeptideToProtein[ls_Peptide] = lk_MatchResults[ls_Peptide].keys.first
 				end
