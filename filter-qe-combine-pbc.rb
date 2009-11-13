@@ -101,7 +101,7 @@ class CombinePbc < ProteomaticScript
                          pbcHash[a][:protein] <=> pbcHash[b][:protein]) : 
                         a <=> b
                 end.each do |pbcKey|
-                    lk_Out.print "\"#{pbcHash[pbcKey][:protein]}\","
+                    lk_Out.print "\"#{pbcHash[pbcKey][:protein]}\"," if hasProteins
                     lk_Out.puts "#{pbcHash[pbcKey][:peptide]},\"#{pbcHash[pbcKey][:band]}\",#{pbcHash[pbcKey][:charge]},#{pbcHash[pbcKey][:scanCount]},#{pbcHash[pbcKey][:amountLight]},#{pbcHash[pbcKey][:amountHeavy]},#{pbcHash[pbcKey][:ratio]},#{pbcHash[pbcKey][:scanRatioMean]},#{pbcHash[pbcKey][:scanRatioSD]},#{pbcHash[pbcKey][:scanRatioRSD]}"
                 end
             end
@@ -158,7 +158,6 @@ class CombinePbc < ProteomaticScript
                 end
             end
         end
-        exit
 	end
 end
 
