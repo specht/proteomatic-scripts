@@ -158,7 +158,6 @@ class CombinePbc < ProteomaticScript
                 end
             end
         end
-        exit
 	end
 end
 
