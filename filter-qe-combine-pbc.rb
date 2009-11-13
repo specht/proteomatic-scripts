@@ -77,12 +77,8 @@ class CombinePbc < ProteomaticScript
             end
             ratioMean, ratioSD = meanAndSd(ratios)
             ratioRSD = nil
-            if ratioMean == nil
-                if amountHeavy == 0.0
-                    ratioMean = 1.0 / 0
-                end
-            else
-                ratioRSD = ratioSD / ratioMean
+            unless ratioMean == nil
+                ratioRSD = ratioSD / ratioMean if ratioSD && ratioMean
             end
             pbcHash[pbcKey][:amountLight] = amountLight
             pbcHash[pbcKey][:amountHeavy] = amountHeavy
@@ -105,7 +101,7 @@ class CombinePbc < ProteomaticScript
                          pbcHash[a][:protein] <=> pbcHash[b][:protein]) : 
                         a <=> b
                 end.each do |pbcKey|
-                    lk_Out.print "\"#{pbcHash[pbcKey][:protein]}\","
+                    lk_Out.print "\"#{pbcHash[pbcKey][:protein]}\"," if hasProteins
                     lk_Out.puts "#{pbcHash[pbcKey][:peptide]},\"#{pbcHash[pbcKey][:band]}\",#{pbcHash[pbcKey][:charge]},#{pbcHash[pbcKey][:scanCount]},#{pbcHash[pbcKey][:amountLight]},#{pbcHash[pbcKey][:amountHeavy]},#{pbcHash[pbcKey][:ratio]},#{pbcHash[pbcKey][:scanRatioMean]},#{pbcHash[pbcKey][:scanRatioSD]},#{pbcHash[pbcKey][:scanRatioRSD]}"
                 end
             end
@@ -124,9 +120,9 @@ class CombinePbc < ProteomaticScript
                     ratioRSD = nil
                     if pbcCount == 1
                         # if PBC count is 1, use the individual scan ratios
-                        ratioMean = pbcHash[proteinHash[protein].first][:scanRatioMean]
-                        ratioSD = pbcHash[proteinHash[protein].first][:scanRatioSD]
-                        ratioRSD = pbcHash[proteinHash[protein].first][:scanRatioRSD]
+                        ratioMean = pbcHash[proteinHash[protein].to_a.first][:scanRatioMean]
+                        ratioSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioSD]
+                        ratioRSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioRSD]
                     else
                         # if PBC count is greater than 1, use PBC ratios
                         ratios = Array.new
@@ -148,18 +144,14 @@ class CombinePbc < ProteomaticScript
                         end
                         ratioMean, ratioSD = meanAndSd(ratios)
                         ratioRSD = nil
-                        if ratioMean == nil
-                            if amountHeavy == 0.0
-                                ratioMean = 1.0 / 0
-                            end
-                        else
-                            ratioRSD = ratioSD / ratioMean
+                        unless ratioMean == nil
+                            ratioRSD = ratioSD / ratioMean if ratioSD && ratioMean
                         end
                         if (pbcCount == 1)
                             # if the PBC count has gone down to 1, use scan results
-                            ratioMean = pbcHash[proteinHash[protein].first][:scanRatioMean]
-                            ratioSD = pbcHash[proteinHash[protein].first][:scanRatioSD]
-                            ratioRSD = pbcHash[proteinHash[protein].first][:scanRatioRSD]
+                            ratioMean = pbcHash[proteinHash[protein].to_a.first][:scanRatioMean]
+                            ratioSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioSD]
+                            ratioRSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioRSD]
                         end
                     end
                     lk_Out.puts "\"#{protein}\",#{pbcCount},#{scanCount},#{ratioMean},#{ratioSD},#{ratioRSD}"

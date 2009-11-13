@@ -86,7 +86,7 @@ class QTrace < ProteomaticScript
 		if @param[:searchAllInAll]
 			lk_Peptides.each_key do |ls_Spot|
 				lk_Peptides[ls_Spot].reject! do |ls_Peptide|
-					lk_PeptidesForAll.push_back(ls_Peptide)
+					lk_PeptidesForAll << ls_Peptide
 				end
 			end
 			lk_Peptides = Hash.new
