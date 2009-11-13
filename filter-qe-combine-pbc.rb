@@ -120,9 +120,9 @@ class CombinePbc < ProteomaticScript
                     ratioRSD = nil
                     if pbcCount == 1
                         # if PBC count is 1, use the individual scan ratios
-                        ratioMean = pbcHash[proteinHash[protein].first][:scanRatioMean]
-                        ratioSD = pbcHash[proteinHash[protein].first][:scanRatioSD]
-                        ratioRSD = pbcHash[proteinHash[protein].first][:scanRatioRSD]
+                        ratioMean = pbcHash[proteinHash[protein].to_a.first][:scanRatioMean]
+                        ratioSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioSD]
+                        ratioRSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioRSD]
                     else
                         # if PBC count is greater than 1, use PBC ratios
                         ratios = Array.new
@@ -149,9 +149,9 @@ class CombinePbc < ProteomaticScript
                         end
                         if (pbcCount == 1)
                             # if the PBC count has gone down to 1, use scan results
-                            ratioMean = pbcHash[proteinHash[protein].first][:scanRatioMean]
-                            ratioSD = pbcHash[proteinHash[protein].first][:scanRatioSD]
-                            ratioRSD = pbcHash[proteinHash[protein].first][:scanRatioRSD]
+                            ratioMean = pbcHash[proteinHash[protein].to_a.first][:scanRatioMean]
+                            ratioSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioSD]
+                            ratioRSD = pbcHash[proteinHash[protein].to_a.first][:scanRatioRSD]
                         end
                     end
                     lk_Out.puts "\"#{protein}\",#{pbcCount},#{scanCount},#{ratioMean},#{ratioSD},#{ratioRSD}"
