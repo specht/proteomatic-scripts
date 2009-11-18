@@ -503,7 +503,7 @@ class ProteomaticScript
 		return ls_Result
 	end
 	
-    def yamlInfo()
+    def yamlInfo(ab_Short = false)
         ls_Result = ''
         ls_Result << "---yamlInfo\n"
         info = Hash.new
@@ -521,7 +521,9 @@ class ProteomaticScript
             info['converterLabel'] = @mk_Output.values.first['label']
             info['converterFilename'] = @mk_Output.values.first['filename']
         end
-        info['parameters'] = @mk_Parameters.yamlInfo()
+        unless ab_Short
+            info['parameters'] = @mk_Parameters.yamlInfo()
+        end
         
         if @mk_Input
             info['input'] = Array.new
@@ -589,7 +591,7 @@ class ProteomaticScript
 			@mi_DaemonPort = ARGV[1].to_i if ARGV.size > 1
 		end
         if ARGV.first == '---yamlInfo'
-            puts yamlInfo()
+            puts yamlInfo(ARGV.include?('--short'))
             exit 0
         end
 		if ARGV == ['--help']
@@ -801,27 +803,29 @@ class ProteomaticScript
 		@mk_Parameters = Parameters.new
 
 		# add external tool parameters if desired
-		if (@mk_ScriptProperties.has_key?('externalParameters'))
-			@mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-				lk_Properties = YAML::load_file("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
-				lk_Properties['parameters'].each do |lk_Parameter| 
-					lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
-					@mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
-				end
-			end
-		end
+        unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
+            if (@mk_ScriptProperties.has_key?('externalParameters'))
+                @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
+                    lk_Properties = YAML::load_file("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+                    lk_Properties['parameters'].each do |lk_Parameter| 
+                        lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
+                        @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
+                    end
+                end
+            end
 		
-		# add script parameters
-		if @mk_ScriptProperties.include?('parameters')
-			@mk_ScriptProperties['parameters'].each do |lk_Parameter| 
-				if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
-					puts "Internal error: Parameter key must not start with 'input' or 'output'."
-					puts lk_Parameter.to_yaml
-					exit 1
-				end
-				@mk_Parameters.addParameter(lk_Parameter)
-			end
-		end
+            # add script parameters
+            if @mk_ScriptProperties.include?('parameters')
+                @mk_ScriptProperties['parameters'].each do |lk_Parameter| 
+                    if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
+                        puts "Internal error: Parameter key must not start with 'input' or 'output'."
+                        puts lk_Parameter.to_yaml
+                        exit 1
+                    end
+                    @mk_Parameters.addParameter(lk_Parameter)
+                end
+            end
+        end
 		
 		# handle filetracker options
 		@mk_DontMd5InputFiles = Array.new
