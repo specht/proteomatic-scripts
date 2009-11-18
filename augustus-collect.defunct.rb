@@ -206,6 +206,11 @@ class AugustusCollect < ProteomaticScript
 		gpfOnly = lk_AllGpfPeptides - lk_AllModelPeptides - lk_AllSixFramesPeptides
 		sixFramesOnly = lk_AllSixFramesPeptides - lk_AllModelPeptides - lk_AllGpfPeptides
 		allThree = lk_AllSixFramesPeptides & lk_AllModelPeptides & lk_AllGpfPeptides
+        
+        File::open('/home/michael/Promotion/ak-hippler-alignments/collect-out/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
+        File::open('/home/michael/Promotion/ak-hippler-alignments/collect-out/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
+        File::open('/home/michael/Promotion/ak-hippler-alignments/collect-out/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
+        
 		printDetails(lk_AllModelPeptides, 'gene models')
 		printDetails(lk_AllGpfPeptides, 'GPF')
 		printDetails(lk_AllSixFramesPeptides, 'six frames')
@@ -220,8 +225,11 @@ class AugustusCollect < ProteomaticScript
 		# now we have lk_AllPeptides, lk_AllModelPeptides, lk_AllGpfPeptides, lk_AllSixFramesPeptides
 		# now cut down lk_AllGpfPeptides and lk_AllSixFramesPeptides so that the amount of
 		# modified only peptides is less or equal than the amount in lk_AllModelPeptides
-		
+
+        puts "Cropping GPF peptides..."
 		lk_AllGpfPeptides = reduceSetAccordingToModifiedOnlyCount(lk_AllGpfPeptides, lk_AllModelPeptides)
+        
+        puts "Cropping six frames peptides..."
 		lk_AllSixFramesPeptides = reduceSetAccordingToModifiedOnlyCount(lk_AllSixFramesPeptides, lk_AllModelPeptides)
 		
 		printDetails(lk_AllModelPeptides, 'gene models')
@@ -231,10 +239,8 @@ class AugustusCollect < ProteomaticScript
 		# update lk_AllPeptides
 		lk_AllPeptides = lk_AllModelPeptides + lk_AllGpfPeptides + lk_AllSixFramesPeptides
 		
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/all-peptides.txt', 'w') { |f| f.puts lk_AllPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/model-peptides.txt', 'w') { |f| f.puts lk_AllModelPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
-		File::open('/home/michael/Promotion/ak-hippler-alignments/exp/sixframes/sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
+        File::open('/home/michael/Promotion/ak-hippler-alignments/collect-out/cut-down-gpf-peptides.txt', 'w') { |f| f.puts lk_AllGpfPeptides.to_a.sort.join("\n") }
+        File::open('/home/michael/Promotion/ak-hippler-alignments/collect-out/cut-down-sixframes-peptides.txt', 'w') { |f| f.puts lk_AllSixFramesPeptides.to_a.sort.join("\n") }
 		
 		
 # 		File::open('/home/michael/Promotion/ak-hippler-alignments/all-gpf-peptides.fasta', 'w') do |f|

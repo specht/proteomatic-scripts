@@ -1,0 +1,33 @@
+group: Proteomics/Identification/BLAST
+
+title: Write BLAST report
+
+description: >
+  Create a BLAST report for patchy peptides BLAST results.
+
+type: processor
+
+input:
+  - key: resultFile
+    label: BLAST result
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: resultFile
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: blast-report.html
+    default: yes
+
+parameters:
+  - key: tagCropThreshold
+    label: Crop tags worse than
+    type: float
+    default: 5.0
+    min: 0.0
+    max: 100.0
+    step: 1.0
+    suffix: '%'

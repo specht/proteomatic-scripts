@@ -1,4 +1,0 @@
-binary:
-  win32: extractspectra.exe
-  linux: extractspectra
-  macx: extractspectra

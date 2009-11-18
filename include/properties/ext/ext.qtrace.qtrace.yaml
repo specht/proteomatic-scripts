@@ -1,4 +1,0 @@
-binary:
-  win32: qtrace.exe
-  linux: qtrace
-  macx: qtrace

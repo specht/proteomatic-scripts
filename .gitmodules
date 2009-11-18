@@ -1,0 +1,3 @@
+[submodule "cli-tools-atlas"]
+	path = cli-tools-atlas
+	url = git@gpf.uni-muenster.de:cli-tools-atlas.git

@@ -79,11 +79,16 @@ class RunGpf < ProteomaticScript
 		File::open(ls_QueryFile, 'w') { |lk_File| lk_File.write(ls_Query) }
 		
 		ls_ResultFile = tempFilename("gpf-results-");
-		
-		ls_Command = "#{ExternalTools::binaryPath('gpf.gpfbatch')} #{ls_GpfOptions} #{ls_GenomePath} #{ls_QueryFile} #{ls_ResultFile}"
+        
+		ls_CsvPathSwitch = ''
+        if @output[:csvResults]
+            ls_CsvPathSwitch = " --csvResultsPath \"#{@output[:csvResults]}\" "
+        end
+
+        ls_Command = "#{ExternalTools::binaryPath('gpf.gpfbatch')} #{ls_GpfOptions} --yamlResultsPath \"#{ls_ResultFile}\" #{ls_CsvPathSwitch} #{ls_GenomePath} #{ls_QueryFile}"
 		runCommand(ls_Command)
 		
-		FileUtils::cp(ls_ResultFile, @output[:gpfResults]) if @output[:gpfResults]
+		FileUtils::cp(ls_ResultFile, @output[:yamlResults]) if @output[:yamlResults]
 		
 		lk_Hits = Set.new
 		

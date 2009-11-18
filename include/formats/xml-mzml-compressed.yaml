@@ -1,2 +1,0 @@
-extensions: ['.mzML.zip', '.mzML.gz', '.mzML.bz2']
-description: mzML (compressed)

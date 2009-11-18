@@ -26,6 +26,64 @@ require 'yaml'
 require 'fileutils'
 
 class RunBlast < ProteomaticScript
+    def runBlast(databasePath, queryBatchPath, resultPath)
+        tempResultPath = tempFilename('run-blast-results')
+        command = "\"#{ExternalTools::binaryPath('blast.blastall')}\" "
+        command += @mk_Parameters.commandLineFor("blast.blastall") + " "
+        # database file
+        command += "-d \"#{databasePath}\" "
+        # input query file
+        command += "-i \"#{queryBatchPath}\" "
+        # XML output
+        command += "-m 7 "
+        # redirect output
+        command += "-o \"#{tempResultPath}\""
+        runCommand(command, true)
+        
+        cache = Hash.new
+        File::open(resultPath, 'a') do |out|
+            File::open(tempResultPath, 'r') do |f|
+                f.each_line do |line|
+                    line.strip!
+                    content = line.gsub(/\<[^\>]+\>/, '')
+                    
+                    cache[:iteration] = Hash.new if line.index('<Iteration>') == 0
+                    cache[:hit] = Hash.new if line.index('<Hit>') == 0
+                    cache[:hsp] = Hash.new if line.index('<Hsp>') == 0
+                    
+                    cache[:iteration][:queryDef] = content if line.index('<Iteration_query-def>') == 0
+                    
+                    cache[:hit][:hitId]= content if line.index('<Hit_id>') == 0
+                    cache[:hit][:hitDef]= content if line.index('<Hit_def>') == 0
+
+                    cache[:hsp][:hspBitScore]= content if line.index('<Hsp_bit-score>') == 0
+                    cache[:hsp][:hspScore]= content if line.index('<Hsp_score>') == 0
+                    cache[:hsp][:hspEValue]= content if line.index('<Hsp_evalue>') == 0
+                    cache[:hsp][:qSeq]= content if line.index('<Hsp_qseq>') == 0
+                    cache[:hsp][:hSeq]= content if line.index('<Hsp_hseq>') == 0
+                    cache[:hsp][:midLine]= content if line.index('<Hsp_midline>') == 0
+                    
+                    if line.index('</Hsp>') == 0
+                        # reached the end of a HSP, print it
+                        #puts cache.to_yaml
+                        list = Array.new
+                        list << cache[:iteration][:queryDef]
+                        list << cache[:hit][:hitId]
+                        list << cache[:hit][:hitDef]
+                        list << cache[:hsp][:hspBitScore]
+                        list << cache[:hsp][:hspScore]
+                        list << cache[:hsp][:hspEValue]
+                        list << cache[:hsp][:qSeq]
+                        list << cache[:hsp][:hSeq]
+                        list << cache[:hsp][:midLine]
+                        out.puts list.to_csv()
+                    end
+                end
+            end
+        end
+        FileUtils::rm(tempResultPath)
+    end
+    
     def run()
         databases = Set.new
         @input[:databases].each do |path|
@@ -45,7 +103,16 @@ class RunBlast < ProteomaticScript
             puts "Error: You cannot specify more than one database for BLAST."
             exit 1
         end
-        resultFile = tempFilename('run-blast-results')
+        unless @output[:csvResults]
+            puts "Notice: CSV output not activated. Skipping BLAST..."
+            exit 0
+        end
+        resultFile = @output[:csvResults]
+        File::open(resultFile, 'w') do |f|
+            list = ['Query Def', 'Hit Id', 'Hit Def', 'Hsp Bit Score', 'Hsp Score', 'HSP E-value', 'Query Sequence', 'Hit Sequence', 'Mid line']
+            f.puts list.to_csv()
+        end
+        
         queryFile = nil
         unless @param[:peptides].empty?
             peptides = @param[:peptides].split(%r{[,;\s/]+})
@@ -58,7 +125,7 @@ class RunBlast < ProteomaticScript
                     i = 0
                     peptides.each do |peptide|
                         i += 1
-                        outFile.puts ">query_#{i}"
+                        outFile.puts ">query_#{i} #{peptide}"
                         outFile.puts peptide
                     end
                 end
@@ -75,21 +142,42 @@ class RunBlast < ProteomaticScript
         else
             queryFile = @input[:queries].first
         end
-        command = "\"#{ExternalTools::binaryPath('blast.blastall')}\" "
-        command += @mk_Parameters.commandLineFor("blast.blastall") + " "
-        # database file
-        command += "-d \"#{databases.to_a.first}\" "
-        # input query file
-        command += "-i \"#{queryFile}\" "
-        # XML output
-        command += "-m 7 "
-        # redirect output
-        command += "-o \"#{resultFile}\""
-        print('Running BLAST...')
-        runCommand(command, true)
-        puts('done.')
         
-        FileUtils::mv(resultFile, @output[:resultFile]) if @output[:resultFile]
+        # now extract small batches from queryFile
+        # with the nr database, one query produced ~600 KiB of XML,
+        # so do batches of 20, we'll have about 12 MiB of XML
+        
+        queryBatchPath = tempFilename('run-blast-query-batch')
+        
+        File::open(queryFile, 'r') do |queryIn|
+            batchSize = 0
+            queryCount = 0
+            queryOut = File::open(queryBatchPath, 'w')
+            queryIn.each_line do |line|
+                if (line.strip[0, 1] == '>')
+                    # a new query starts here
+                    if batchSize >= 20
+                        # we have 20 queries now, run BLAST
+                        queryOut.close
+                        runBlast(databases.to_a.first, queryBatchPath, resultFile)
+                        print("\rRunning BLAST, processed #{queryCount} queries...")
+                        # clear query batch file
+                        queryOut = File::open(queryBatchPath, 'w')
+                        batchSize = 0
+                    end
+                    batchSize += 1
+                    queryCount += 1
+                end
+                queryOut.puts(line)
+            end
+            queryOut.close
+            # run BLAST if we have queries left
+            if batchSize > 0
+                runBlast(databases.to_a.first, queryBatchPath, resultFile)
+                print("\rRunning BLAST, processed #{queryCount} queries...")
+            end
+            puts
+        end
     end
 end
 
