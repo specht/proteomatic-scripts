@@ -50,7 +50,7 @@ if ($argument == '---yamlInfo')
 	exit(0);
 }
 
-var_dump($argv);
+//var_dump($argv);
 
 require_once('lib/parsecsv.lib.php');
 $csv = new parseCSV();
