@@ -1,0 +1,28 @@
+group: Proteomics/Miscellaneous
+
+title: Y ions mass calculator
+
+description: >
+  Calculate y fragment ion masses plus doubly and triply charged peptide masses.
+
+type: processor
+
+input:
+  - key: peptides
+    label: peptides
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: peptides
+
+output:
+  - key: peptideMasses
+    label: Peptide and fragment masses
+    format: html
+    filename: peptide-masses.html
+    default: yes
+  - key: msPeptideMasses
+    label: MS peptide masses
+    format: txt
+    filename: ms-peptide-masses.txt
+    default: yes

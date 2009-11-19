@@ -1,0 +1,24 @@
+group: Proteomics/Quantitation/Miscellaneous
+
+title: Draw diagram
+
+description: >
+  Whee! What can I say... A diagram!
+
+type: processor
+
+input:
+  - key: csvFile
+    label: CSV file
+    formats: [csv]
+    min: 1
+    max: 1
+
+defaultOutputDirectory: csvFile
+
+output:
+  - key: diagram
+    label: diagram
+    format: svg
+    filename: diagram.svg
+    default: yes

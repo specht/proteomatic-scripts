@@ -1,0 +1,22 @@
+group: Proteomics/Spectra
+
+title: Check spectra
+
+type: processor
+
+description: >
+  This script checks a spectra file.
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+    min: 1
+
+defaultOutputDirectory: spectra
+
+needs:
+  - ext.ptb
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

@@ -1,0 +1,48 @@
+group: Proteomics/Spectra
+
+title: RAW to mzML
+
+description: >
+  Convert Thermo Finnigan RAW files to the open mzML format. 
+  This script only runs on computers that have the Thermo Finnigan
+  XDK installed.
+
+type: converter
+
+input:
+  - key: rawFiles
+    label: RAW data
+    formats: [raw-thermo]
+    min: 1
+
+defaultOutputDirectory: rawFiles
+
+output:
+  - key: rawFiles
+    label: mzML files
+    format: xml-mzml
+    filename: '#{basename}#{stripMs1Scans}.mzML#{compression}'
+
+parameters:
+  - key: compression
+    label: Compress result file
+    type: enum
+    choices: [{'': 'no compression'}, {'.gz': 'gzip'}, {'.bz2' : 'bzip2'}]
+    default: '.gz'
+  - key: stripMs1Scans
+    label: Strip MS1 scans
+    type: enum
+    choices: [{'': 'no'}, {'-no-ms1': 'yes'}]
+    default: ''
+
+needs:
+  - ext.pwiz
+  - ext.7zip
+  - ext.ptb
+
+externalParameters: 
+  - pwiz.msconvert
+
+filetracker:
+  - dontMd5InputFiles: [rawFiles]
+  - dontMd5OutputFiles: [rawFiles]

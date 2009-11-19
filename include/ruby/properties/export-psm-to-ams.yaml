@@ -1,0 +1,28 @@
+group: Proteomics/Identification/OMSSA/Miscellaneous
+
+title: Convert PSM lists to AMS
+
+description: >
+  Convert a PSM list to the AMS file format for use with 2DB.
+
+type: converter
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: omssaResults
+    label: AMS file
+    format: ams
+    filename: '#{basename}.ams'
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

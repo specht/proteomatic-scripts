@@ -1,0 +1,36 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Require MS2 identifications
+
+description: >
+  Require a unmodified MS2 peptide identification for every quantitation event within a certain retention time range.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+  - key: psmList
+    label: PSM list
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: quantitationEvents
+
+output:
+  - key: results
+    label: filtered results
+    format: csv
+    filename: ms2-coupled.csv
+    default: yes
+
+parameters:
+  - key: maxTimeDifference
+    type: float
+    default: 1.0
+    min: 0
+    step: 0.1
+    suffix: minutes
+    label: Maximum retention time difference

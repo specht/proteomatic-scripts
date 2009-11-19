@@ -1,0 +1,34 @@
+group: Proteomics/Identification/OMSSA/Miscellaneous
+
+title: upload AMS to 2DB
+
+description: >
+  Upload AMS files to 2 Data base.
+
+type: processor
+
+input:
+  - key: amsFile
+    max: 1
+    min: 1
+    label: AMS
+    formats: [ams]
+
+parameters:
+  - key: user
+    type: string
+    label: User name
+    default: ''
+  - key: password
+    type: string
+    label: Password
+    default: 'garnix'
+  - key: databaseTarget
+    label: database
+    type: string
+    default: "http://localhost/2db/tags/v1/"
+  - key: organism
+    label: Organism
+    type: enum
+    choices: [Chlamydomonas, 'something']
+    default: Chlamydomonas

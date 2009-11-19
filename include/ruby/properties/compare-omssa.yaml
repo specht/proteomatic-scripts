@@ -1,0 +1,35 @@
+group: Proteomics/Comparison
+
+title: Compare OMSSA PSM lists
+
+description: >
+  Compare cropped OMSSA peptide-spectral matches.
+
+type: processor
+
+input:
+  - key: psmFile
+    label: PSM list
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: psmFile
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: compare-omssa-report.html
+    default: yes
+  - key: csvReport
+    label: CSV report
+    format: csv
+    filename: compare-omssa-report.csv
+    default: yes
+
+parameters:
+  - key: useSafeProteins
+    label: List safe proteins only
+    description: Safe proteins have been identified by at least two distinct peptides or by at least one GPF peptide
+    type: flag
+    default: false

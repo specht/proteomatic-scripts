@@ -1,0 +1,24 @@
+group: Proteomics/Identification/OMSSA/3. Report
+
+title: Write YAML report
+
+description: >
+  Create a YAML report for peptide-spectral matching results.
+
+type: processor
+
+input:
+  - key: psmFile
+    label: PSM list
+    formats: [csv]
+    min: 1
+    max: 1
+
+defaultOutputDirectory: psmFile
+
+output:
+  - key: yamlReport
+    label: YAML report
+    format: yaml
+    filename: yaml-report.yaml
+    default: yes

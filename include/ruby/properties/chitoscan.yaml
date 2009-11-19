@@ -1,0 +1,47 @@
+group: Chitinator
+
+title: Scan spectral files
+
+description: >
+  This script scans one or more spectral files. 
+  All input files are joined and treated as one.
+
+type: processor
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+
+defaultOutputDirectory: spectra
+
+output:
+  - key: compositionFingerprint
+    label: composition fingerprint
+    format: csv
+    filename: composition-fingerprint.csv
+    default: yes
+  - key: ms2Products
+    label: MS2 products
+    format: csv
+    filename: ms2-products.csv
+    default: yes
+  - key: massRangeFingerprint
+    label: mass range fingerprint
+    format: csv
+    filename: mass-range-fingerprint.csv
+    default: no
+  - key: massCollisionFingerprint
+    label: mass collision fingerprint
+    format: csv
+    filename: mass-collision-fingerprint.csv
+    default: no
+
+externalParameters:
+  - chitinator.chitoscan
+
+needs:
+  - ext.chitinator
+
+filetracker:
+  - dontMd5InputFiles: [spectra]

@@ -1,0 +1,60 @@
+group: Chitinator
+
+title: Render composition fingerprint
+
+description: >
+  Render a composition fingerprint.
+
+type: converter
+
+input:
+  - key: csvFiles
+    label: composition fingerprint
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: csvFiles
+
+output:
+  - key: csvFiles
+    label: SVG files
+    format: svg
+    filename: '#{basename}.svg'
+
+parameters:
+  - key: normalize
+    label: Normalization
+    type: enum
+    default: 'sum'
+    choices: ['sum', 'maximum', 'none']
+  - key: normalizeWithinRings
+    label: Normalize within rings
+    type: enum
+    default: 'no'
+    choices: ['no', 'yes']
+  - key: gradient
+    label: Gradient
+    type: enum
+    default: 'burn'
+    choices: ['burn', 'grayscale', 'extremes']
+  - key: valueExponent
+    label: Value exponent
+    type: float
+    default: 20.0
+    decimals: 2
+  - key: radiusExponent
+    label: Radius exponent
+    type: float
+    default: 0.2
+    decimals: 2
+  - key: gridMaxDP
+    label: Grid max DP
+    type: int
+    default: 10
+    min: 0
+  - key: gridColor
+    label: Grid color
+    type: enum
+    choices: [{'#000000': 'black'}, {'#ffffff': 'white'}]
+    default: '#000000'
+    min: 0

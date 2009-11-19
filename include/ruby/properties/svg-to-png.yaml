@@ -1,0 +1,29 @@
+group: Chitinator
+
+title: SVG to PNG
+
+description: >
+  Convert SVG files to PNG.
+
+type: converter
+
+input:
+  - key: svgFiles
+    label: SVG file
+    formats: [svg]
+    min: 1
+
+defaultOutputDirectory: svgFiles
+
+output:
+  - key: svgFiles
+    label: PNG files
+    format: png
+    filename: '#{basename}.png'
+
+parameters:
+  - key: zoom
+    type: float
+    default: 1.0
+    decimals: 2
+    label: Zoom

@@ -1,0 +1,33 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Add protein information
+
+description: >
+  Tag peptide quantitation events with proteins by
+  matching peptides to entries in a protein database. Quantition events
+  from peptides that occur in multiple proteins are discarded, the same
+  happens with peptides that are not found in any protein sequence.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+  - key: geneModels
+    label: protein database
+    formats: [fasta]
+    min: 1
+
+defaultOutputDirectory: quantitationEvents
+
+output:
+  - key: results
+    label: tagged results
+    format: csv
+    filename: with-proteins.csv
+    default: yes
+
+needs:
+  - ext.ptb

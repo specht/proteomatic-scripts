@@ -1,0 +1,32 @@
+group: Proteomics/Comparison
+
+title: Compare PSM lists (you want some SimQuant with that?)
+
+description: >
+  "Compare cropped peptide-spectral matches. And SimQuant!"
+
+type: processor
+
+input:
+  - key: psmFile
+    label: PSM list
+    formats: [csv]
+    min: 1
+  - key: yamlFile
+    label: SimQuant YAML results
+    formats: [yaml]
+    min: 1
+
+defaultOutputDirectory: psmFile
+
+output:
+  - key: htmlReport
+    label: HTML report
+    format: html
+    filename: compare-omssa-simquant-report.html
+    default: yes
+  - key: csvReport
+    label: CSV report
+    format: csv
+    filename: compare-omssa-simquant-report.csv
+    default: yes
