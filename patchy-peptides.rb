@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/proteomatic'
-require 'include/ext/fastercsv'
+require 'include/ruby/proteomatic'
+require 'include/ruby/ext/fastercsv'
 require 'set'
 require 'yaml'
 require 'fileutils'
