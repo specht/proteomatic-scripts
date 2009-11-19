@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/externaltools'
-require 'include/formats'
-require 'include/misc'
-require 'include/parameters'
+require 'include/ruby/externaltools'
+require 'include/ruby/formats'
+require 'include/ruby/misc'
+require 'include/ruby/parameters'
 require 'drb'
 require 'fileutils'
 require 'set'
@@ -362,7 +362,7 @@ class ProteomaticScript
 			@mi_FileTrackerPort = fileTrackerHostAndPortList[1].to_i
 		end
 		
-		@ms_Version = File::read('include/version.rb').strip
+		@ms_Version = File::read('include/ruby/version.rb').strip
 		@ms_Version.freeze
 		
 		@mk_StartTime = Time.now

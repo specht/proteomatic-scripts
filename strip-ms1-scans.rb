@@ -1,4 +1,4 @@
-require 'include/proteomatic'
+require 'include/ruby/proteomatic'
 require 'fileutils'
 
 class StripMs1Scans < ProteomaticScript
