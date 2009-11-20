@@ -38,8 +38,6 @@ input:
 EOD;
 
 $yamlInfo = Spyc::YAMLLoad($yamlInfoString);
-var_dump($yamlInfo);
-exit(1);
 
 $argument = $argv[1];
 
