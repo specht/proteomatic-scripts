@@ -1,7 +1,8 @@
 <?php
-// a proteomatic-enabled script
 
-$yamlInfoString = <<<EOD
+require_once ('include/php/proteomatic.php');
+
+$yamlInfo = <<<EOD
 title: ClustalW2
 description: ClustalW2 for Proteomatic.
 group: Genomics
@@ -16,7 +17,7 @@ parameters:
     value: RP
     key: label
     label: Label
-    group: Parameters
+	group: Parameters
   - choices:
     - GCG: GCG
     - GDR: GDE
@@ -54,6 +55,21 @@ input:
     min: 1
 
 EOD;
+
+
+class Script extends ProteomaticScript
+{
+    protected function run()
+    {
+        echo "hello\n";
+		echo "outfileformat is ".$this->parameters['outfileformat']."\n";
+    }
+}
+
+$object = new Script();
+
+exit(1);
+
 
 //// Additional files needed to run this script
 require_once ('include/php/ext/spyc.php');
