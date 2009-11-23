@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/proteomatic'
-require 'include/externaltools'
-require 'include/formats'
+require 'include/ruby/proteomatic'
+require 'include/ruby/externaltools'
+require 'include/ruby/formats'
 require 'net/http'
 require 'net/ftp'
 require 'yaml'
@@ -39,6 +39,14 @@ class RunGpf < ProteomaticScript
 		
 		@input[:predictions].each do |ls_Path|
 			if (fileMatchesFormat(ls_Path, 'gpf-queries'))
+				File.open(ls_Path, 'r') do |lk_File|
+					lk_File.each do |ls_Line|
+						ls_Line.strip!
+						next if ls_Line.empty?
+						handlePeptide(ls_Line)
+					end
+				end
+			elsif (fileMatchesFormat(ls_Path, 'txt'))
 				File.open(ls_Path, 'r') do |lk_File|
 					lk_File.each do |ls_Line|
 						ls_Line.strip!
