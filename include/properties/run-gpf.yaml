@@ -15,7 +15,7 @@ input:
     max: 1
   - key: predictions
     label: GPF queries
-    formats: [fasta, gpf-queries]
+    formats: [fasta, gpf-queries, txt]
     min: 1
 
 defaultOutputDirectory: predictions
