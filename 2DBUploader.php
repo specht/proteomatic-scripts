@@ -139,10 +139,10 @@ Connection: keep-alive
 Content-Disposition: form-data; name="file"; filename="#{FILE_NAME}"
 Content-Type: application/octet-stream
 
+
 REQUEST;
 
 $httppostB = <<<REQUEST
-
 
 -----------------------------eaqrp1w4wpp1-1ximw0fz8t2mq1j2e2vq3yxnv1
 Content-Disposition: form-data; name="username"
