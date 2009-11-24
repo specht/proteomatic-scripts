@@ -397,11 +397,11 @@ class ProteomaticScript
 			lk_Server = TCPServer.new('', @mi_DaemonPort);
 			puts "#{@ms_Title} daemon listening on port #{@mi_DaemonPort}."
 			while (lk_Session = lk_Server.accept)
-				Thread.new(lk_Session) do |lk_Session|
+				Thread.new(lk_Session) do |lk_ThisSession|
 					begin
-						handleTcpRequest(lk_Session)
+						handleTcpRequest(lk_ThisSession)
 					ensure
-						lk_Session.close
+						lk_ThisSession.close
 					end
 				end
 			end
@@ -883,7 +883,7 @@ class ProteomaticScript
 		lk_OutputFiles = Hash.new
 		if @mk_ScriptProperties.include?('output')
 			@mk_ScriptProperties['output'].each do |lk_OutputFile|
-				if (@m_ScriptType == 'converter' && (!lk_OutFiles.empty?))
+				if (@ms_ScriptType == 'converter' && (!lk_OutFiles.empty?))
 					puts 'Internal error: Only one output file group allowed for converter scripts.'
 					exit 1
 				end
