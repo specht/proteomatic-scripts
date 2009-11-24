@@ -883,7 +883,7 @@ class ProteomaticScript
 		lk_OutputFiles = Hash.new
 		if @mk_ScriptProperties.include?('output')
 			@mk_ScriptProperties['output'].each do |lk_OutputFile|
-				if (@ms_ScriptType == 'converter' && (!lk_OutFiles.empty?))
+				if (@ms_ScriptType == 'converter' && (!lk_OutputFiles.empty?))
 					puts 'Internal error: Only one output file group allowed for converter scripts.'
 					exit 1
 				end
