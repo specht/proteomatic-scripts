@@ -46,6 +46,14 @@ class RunGpf < ProteomaticScript
 						handlePeptide(ls_Line)
 					end
 				end
+			elsif (fileMatchesFormat(ls_Path, 'txt'))
+				File.open(ls_Path, 'r') do |lk_File|
+					lk_File.each do |ls_Line|
+						ls_Line.strip!
+						next if ls_Line.empty?
+						handlePeptide(ls_Line)
+					end
+				end
 			else
 				File.open(ls_Path, 'r') do |lk_File|
 					lf_Mass = nil
