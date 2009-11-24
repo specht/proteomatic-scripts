@@ -1129,7 +1129,7 @@ class ProteomaticScript
                         ls_Basename = lk_FilenameSplit[0]
                         ls_Extension = ''
                         ls_Extension = lk_FilenameSplit[1, lk_FilenameSplit.size - 1].join('.') if lk_FilenameSplit.size > 1
-						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename']
+						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename'].dup
                         ls_OutFilename.gsub!('#{basename}', ls_Basename)
                         ls_OutFilename.gsub!('#{extension}', ls_Extension)
                         ls_OutFilename.gsub!('#{filename}', ls_Filename)
