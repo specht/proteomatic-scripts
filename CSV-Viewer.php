@@ -1,7 +1,4 @@
 <?php
-
-require_once 'include/php/ext/spyc.php';
-
 // a proteomatic-enabled script
 
 $yamlInfoString = <<<EOD
@@ -37,34 +34,68 @@ input:
 
 EOD;
 
+//// Additional files needed to run this script
+require_once ('include/php/ext/spyc.php');
+require_once ('include/php/ext/parsecsv.php');
+
 $yamlInfo = Spyc::YAMLLoad($yamlInfoString);
-var_dump($yamlInfo);
-exit(1);
+if(isset($argv[1]))
+	$argument = $argv[1];
+else
+	$argument = "";
+if(isset($argv[2]))
+	$short = $argv[2];
+else
+	$short = "";
+	
 
-$argument = $argv[1];
-
-if ($argument == '---yamlInfo')
+if ($argument == '---yamlInfo' && $short == '')
 {
     echo "---yamlInfo\n";
+	echo "---\n";
 	echo $yamlInfoString;
 	exit(0);
 }
 
-// random comment
-//var_dump($argv);
+if ($argument == '---yamlInfo' && $short == '--short')
+{
+    echo "---yamlInfo\n";
+	echo "---\n";
+	echo "title: ".$yamlInfo['title']."\n";
+	echo "description: ".$yamlInfo['description']."\n";
+	echo "group: ".$yamlInfo['group']."\n";
+	exit(0);
+}
 
-require_once('lib/parsecsv.lib.php');
+function parameterArray($parameters)
+{
+	$parameter[] = array();
+	for($i=1; $i<count($parameters); $i++)
+	{
+		if(is_file($parameters[$i]))
+			$parameter['files'][] = $parameters[$i];
+		else{
+			$parameter['parameters'][$parameters[$i]] = $parameters[$i+1];
+			$i++;
+		}
+	}
+return $parameter;
+}
+
+/// Get Parameters and files
+$parameters = parameterArray($argv);
+
 $csv = new parseCSV();
-for($i=5; $i<$argc; $i++){
-	if(!is_file($argv[$i]))
-		exit(1);
-	$csv->auto($argv[$i]);
-	$inputfilename = basename($argv[$i]);
-	$outfile = fopen($argv[4]."/".$argv[2].$inputfilename."-csv-viewer.html", "w");
-	$content .="
+foreach($parameters['files'] as $file){
+	$csv->auto($file);
+	$dir = $parameters['parameters']['-outputDirectory'];
+	if($parameters['parameters']['-outputDirectory'] == "")
+		$dir = dirname($file);
+	$outfile = fopen($dir."/".$parameters['parameters']['-outputPrefix']."html-table.html", "w");
+	$content ="
 	<html>
 	<head>
-	<title>".$inputfilename." | CSV-Viewer</title>
+	<title>".basename($file)." | CSV-Viewer</title>
 	<style type=\"text/css\" media=\"screen\">
 		body table {font-family:arial; font-size:12px;}
 		table { background-color: #BBB; }
@@ -93,9 +124,8 @@ for($i=5; $i<$argc; $i++){
 	$content .="</html>\n";
 	fwrite($outfile, $content);
 	fclose($outfile);
-	print("\n".($i - 4)."/".($argc -5)." - html successfully generated for ".$inputfilename.".\n");
+	print("\nHTML table successfully generated from ".basename($file).".\n");
 	unset($content);
 }
 exit(0);
-
 ?>
