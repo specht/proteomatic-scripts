@@ -1124,17 +1124,15 @@ class ProteomaticScript
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
 						ls_Directory = ls_OutputDirectory if ls_OutputDirectory
-						ls_Basename = File::basename(ls_Path).dup
-						ls_Format = findFormatForFile(ls_Path)
-						ls_Extension = ''
-						formatInfo(ls_Format)['extensions'].each do |ls_Try|
-							if stringEndsWith(ls_Basename, ls_Try, false)
-								ls_Extension = ls_Try
-								break
-							end
-						end
-						ls_Basename.slice!(-ls_Extension.size, ls_Extension.size) if ls_Extension != ''
-						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename'].gsub('#{basename}', ls_Basename).gsub('#{extension}', ls_Extension)
+						ls_Filename = File::basename(ls_Path).dup
+                        lk_FilenameSplit = ls_Filename.split('.')
+                        ls_Basename = lk_FilenameSplit[0]
+                        ls_Extension = ''
+                        ls_Extension = lk_FilenameSplit[1, lk_FilenameSplit.size - 1].join('.') if lk_FilenameSplit.size > 1
+						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename']
+                        ls_OutFilename.gsub!('#{basename}', ls_Basename)
+                        ls_OutFilename.gsub!('#{extension}', ls_Extension)
+                        ls_OutFilename.gsub!('#{filename}', ls_Filename)
 						@param.keys.each do |ls_Param|
 							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', "#{@param[ls_Param]}")
 						end
