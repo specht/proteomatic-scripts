@@ -1052,7 +1052,7 @@ class ProteomaticScript
 		end
 		
 		unless lk_UnusedFiles.empty?
-			puts "Warning: The following files have been specified by were ignored:\n#{lk_UnusedFiles.join("\n")}"
+			puts "Warning: The following files have been specified but were ignored:\n#{lk_UnusedFiles.join("\n")}"
 		end
 
 		# check input files min/max conditions
