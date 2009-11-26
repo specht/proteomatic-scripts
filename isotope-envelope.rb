@@ -138,7 +138,7 @@ class IsotopeEnvelope < ProteomaticScript
             m1 = maxMass[isotope]
             average = (m0 + m1) * 0.5
             error = (m0 - average).abs() / average * 1000000.0
-            puts "A#{@param[:label] != 'none' ? '*' : ''}+#{isotope}: #{sprintf('%1.6f', histogram[isotope].to_f / max)} (#{sprintf('%1.2f', error)} ppm)"
+            puts "A#{@param[:label] != 'none' ? '*' : ''}#{sprintf('%+d', isotope)}: #{sprintf('%1.6f', histogram[isotope].to_f / max)} (#{sprintf('%1.2f', error)} ppm)"
         end
 	end
 end
