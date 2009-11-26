@@ -1,0 +1,31 @@
+group: Proteomics/Miscellaneous
+
+title: Simulate isotope envelope
+
+description: >
+  Simulate the isotope envelope of a peptide.
+
+type: processor
+
+parameters:
+  - key: peptide
+    label: Peptide
+    type: string
+    default: WLQYSEVIHAR
+  - key: count
+    label: Iterations
+    type: int
+    min: 1
+    default: 1000
+  - key: label
+    label: Label
+    type: enum
+    choices: [none, N15]
+  - key: labelingEfficiency
+    label: Effective labeling efficiency
+    type: float
+    suffix: '%'
+    min: 0.0
+    max: 100.0
+    default: 100.0
+    

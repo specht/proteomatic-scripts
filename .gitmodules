@@ -1,3 +1,6 @@
 [submodule "include/cli-tools-atlas"]
 	path = include/cli-tools-atlas
 	url = git@gpf.uni-muenster.de:cli-tools-atlas.git
+[submodule "include/proteomics-knowledge-base"]
+	path = include/proteomics-knowledge-base
+	url = git@gpf.uni-muenster.de:proteomics-knowledge-base.git
