@@ -625,7 +625,7 @@ class ProteomaticScript
 		end
 		if (@mk_ScriptProperties.has_key?('externalParameters'))
 			@mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-				puts("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+				puts("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
 			end
 		end
 	end
@@ -806,7 +806,7 @@ class ProteomaticScript
         unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
             if (@mk_ScriptProperties.has_key?('externalParameters'))
                 @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-                    lk_Properties = YAML::load_file("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+                    lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
                     lk_Properties['parameters'].each do |lk_Parameter| 
                         lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
                         @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
