@@ -26,11 +26,13 @@ class IsotopeEnvelope < ProteomaticScript
         @isotopes = Hash.new
 
         File::open('include/proteomics-knowledge-base/isotopes.csv', 'r') do |f|
+            firstIsotope = Hash.new
             header = mapCsvHeader(f.readline)
             f.each_line do |line|
                 lineArray = line.parse_csv()
                 element = lineArray[header['element']]
                 isotope = lineArray[header['isotope']].to_i
+                firstIsotope[element] ||= isotope
                 mass = lineArray[header['monoisotopicmass']].to_f
                 abundance = lineArray[header['naturalabundance']].to_f
                 if (@param[:label] == 'N15')
@@ -46,7 +48,10 @@ class IsotopeEnvelope < ProteomaticScript
                 lastAccumulatedAbundance = 0
                 lastAccumulatedAbundance = @isotopes[element].last[:accumulatedAbundance] unless @isotopes[element].empty?
                 @isotopes[element] ||= Array.new
-                @isotopes[element] << {:isotope => isotope, :mass => mass, :accumulatedAbundance => lastAccumulatedAbundance + abundance }
+                @isotopes[element] << 
+                    {:isotope => isotope, :mass => mass, 
+                     :accumulatedAbundance => lastAccumulatedAbundance + abundance,  
+                     :abundance => abundance, :relativeIsotope => isotope - firstIsotope[element]}
             end
         end
 
@@ -79,6 +84,16 @@ class IsotopeEnvelope < ProteomaticScript
     end
     
     
+    def pickAtomFast(element, random = true)
+        result = Hash.new
+        @isotopes[element].each do |isotope|
+            next unless random || isotope[:relativeIsotope] == 0
+            result[isotope[:relativeIsotope]] = isotope[:abundance]
+        end
+        return result
+    end
+    
+    
     def pickAtom(element, random = true)
         r = rand()
         i = 0
@@ -93,6 +108,27 @@ class IsotopeEnvelope < ProteomaticScript
     end
 
 
+    def pickPeptideFast(peptide, random = true)
+        result = Hash.new
+        atom = pickAtomFast('H', random)
+        atom.keys.each { |i| result[i] ||= 0.0; result[i] += atom[i] }
+        atom = pickAtomFast('H', random)
+        atom.keys.each { |i| result[i] ||= 0.0; result[i] += atom[i] }
+        atom = pickAtomFast('H', random)
+        atom.keys.each { |i| result[i] ||= 0.0; result[i] += atom[i] }
+        (0...peptide.size).each do |i|
+            aa = peptide[i, 1]
+            @aminoAcidComposition[aa].keys.each do |element|
+                @aminoAcidComposition[aa][element].times do
+                    atom = pickAtomFast(element, random)
+                    atom.keys.each { |i| result[i] ||= 0.0; result[i] += atom[i] }
+                end
+            end
+        end
+        return result
+    end
+    
+    
     def pickPeptide(peptide, random = true)
         mass = [0, 0.0]
         atom = pickAtom('H', random)
@@ -116,6 +152,9 @@ class IsotopeEnvelope < ProteomaticScript
     
 	def run()
         loadData()
+        
+#         puts pickPeptideFast(@param[:peptide]).to_yaml
+#         exit
 
         lowest = pickPeptide(@param[:peptide], false)
         histogram = Hash.new
