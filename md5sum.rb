@@ -26,7 +26,7 @@ class Md5Sum < ProteomaticScript
         files = @input[:files].sort do |a, b|
             File::basename(a) <=> File::basename(b)
         end
-        print "Digesting #{files.size} files..."
+        print "Digesting #{files.size} file#{files.size > 1 ? 's' : ''}..."
         files.each do |path|
             File.open(path, 'r') do |lk_File|
                 while !lk_File.eof?
