@@ -1,0 +1,23 @@
+group: Miscellaneous
+
+title: Check MD5 sums
+
+description: >
+  This script determines the MD5 sum of a set of input files. All input files
+  are sorted by their basename and concatenated for the MD5 creation.
+
+type: processor
+
+input:
+  - key: files
+    label: Input
+    min: 1
+
+parameters:
+  - key: assertMd5
+    type: string
+    default: ''
+    description: >
+      If you expect a certain MD5 sum, enter it here. If the determined checksum
+      is different, the script will exit with an error.
+      

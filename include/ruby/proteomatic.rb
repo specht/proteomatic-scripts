@@ -849,19 +849,25 @@ class ProteomaticScript
 					exit 1
 				end
 				unless lk_InputGroup['formats'].class == Array
-					puts "Internal error: 'formats' must be an array."
-					exit 1
+                    if @mk_ScriptProperties['input'].size > 1
+                        puts "Internal error: 'formats' must be defined if there is more than one input file group."
+                        exit 1
+                    else
+                        lk_InputGroup['formats'] = ['']
+                    end
 				end
 				lk_InputGroups[lk_InputGroup['key']] = lk_InputGroup
 				lk_InputGroupOrder.push(lk_InputGroup['key'])
-				lk_InputGroup['formats'].each do |ls_Format|
-					assertFormat(ls_Format)
-					if lk_InputFormats.has_key?(ls_Format)
-						lk_AmbiguousFormats.add(ls_Format)
-						lk_InputFormats.delete(ls_Format)
-					end
-					lk_InputFormats[ls_Format] = lk_InputGroup['key'] unless lk_AmbiguousFormats.include?(ls_Format)
-				end
+                if lk_InputGroup['formats']
+                    lk_InputGroup['formats'].each do |ls_Format|
+                        assertFormat(ls_Format)
+                        if lk_InputFormats.has_key?(ls_Format)
+                            lk_AmbiguousFormats.add(ls_Format)
+                            lk_InputFormats.delete(ls_Format)
+                        end
+                        lk_InputFormats[ls_Format] = lk_InputGroup['key'] unless lk_AmbiguousFormats.include?(ls_Format)
+                    end
+                end
 			end
 		end
 		@mk_Input = Hash.new
@@ -1057,7 +1063,10 @@ class ProteomaticScript
 
 		# check input files min/max conditions
 		@mk_Input['groups'].each do |ls_Group, lk_Group|
-			ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('|')}"
+            ls_Format = nil
+            if @mk_Input['groups'][ls_Group]['formats']
+                ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('|')}"
+            end
 			li_Min = lk_Group['min']
 			if li_Min && (!@input.has_key?(ls_Group.intern) || @input[ls_Group.intern].size < li_Min)
 				lk_Errors.push("At least #{li_Min} #{lk_Group['label']} file#{li_Min == 1 ? " (#{ls_Format}) is" : "s #{ls_Format} are"} required.")
