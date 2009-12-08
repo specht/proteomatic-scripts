@@ -17,6 +17,7 @@ parameters:
   - key: assertMd5
     type: string
     default: ''
+    label: Assert MD5
     description: >
       If you expect a certain MD5 sum, enter it here. If the determined checksum
       is different, the script will exit with an error.
