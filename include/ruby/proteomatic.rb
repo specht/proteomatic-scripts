@@ -1112,6 +1112,15 @@ class ProteomaticScript
 			puts ls_Prefix
 			exit 0
 		end
+        
+        # make sure that the output prefix does not contain / or \
+        if @param[:outputPrefix]
+            if @param[:outputPrefix].include?('/') || @param[:outputPrefix].include?('\\')
+                puts "Error: The output prefix must not contain slashes (/) or backslashes (\\)."
+                puts "The output prefix you specified is: #{@param[:outputPrefix]}"
+                exit 1
+            end
+        end
 
 		if ls_OutputDirectory == nil && !@mk_Output.empty?
 			lk_Errors.push("Unable to determine output directory.")
