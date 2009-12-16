@@ -47,23 +47,21 @@ parameters:
     type: string
     default: ''
     label: Exclude amino acids
-    description: "If you have reason to believe that proline containing peptides will mess up your quantitation, enter 'P' here."
+    description: "If you have reason to believe that certain amino acids will lead to problems during quantitation, please enter them here in single letter code. All peptides containing one of these amino acids will be ignored."
   - key: label
     label: Label
-    type: enum
-    default: RP
-    choices: [{R: 'heavy arginine'}, {RP: 'heavy arginine and proline'}, {N15: 'N15'}, 'RPKCN']
+    type: string
+    default: "15N (0.99)"
+    description: Describe the label here.
+    examples: 
+      - "15N (0.99)"
+      - "R 13C"
+      - "RK 13C 15N"
   - key: scanType
     label: Scans to analyze
     type: enum
     choices: [{sim: SIM scans only}, {all: All MS1 scans}, {full: Full scans only}]
     default: 'all'
-  - key: isotopeCount
-    label: Isotope count
-    type: int
-    default: 3
-    min: 1
-    max: 10
   - key: minCharge
     label: Minimum charge
     type: int
@@ -80,32 +78,14 @@ parameters:
     default: 2.0
     min: 0.0
     step: 0.1
-  - key: includeMassAccuracy
-    label: Include mass accuracy
+  - key: massAccuracy
+    label: Mass accuracy
     type: float
     suffix: ppm
     default: 5.0
     min: 0.0
     step: 0.1
     description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
-  - key: excludeMassAccuracy
-    label: Exclude mass accuracy
-    type: float
-    suffix: ppm
-    default: 30.0
-    min: 0.0
-    step: 0.1
-    description: This mass accuracy is used when peaks are tested for absence.
-  - key: checkLightForbiddenPeaks
-    label: Check light forbidden peaks
-    type: flag
-    default: yes
-    description: Check whether light forbidden peaks are absent
-  - key: checkHeavyForbiddenPeaks
-    label: Check heavy forbidden peaks
-    type: flag
-    default: no
-    description: Check whether heavy forbidden peaks are absent
   - key: searchAllInAll
     label: Search for all peptides in all spectra files
     type: flag

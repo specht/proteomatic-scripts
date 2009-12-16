@@ -144,7 +144,7 @@ class QTrace < ProteomaticScript
 			xhtmlOutputOptions = ' '
 			xhtmlOutputOptions = "--xhtmlOutputTarget \"#{ls_XhtmlPath}\" " if @output[:xhtmlReport]
 			
-			ls_Command = "\"#{ExternalTools::binaryPath('qtrace.qtrace')}\" --label #{@param[:label]} --scanType #{@param[:scanType]} --isotopeCount #{@param[:isotopeCount]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:includeMassAccuracy]} --excludeMassAccuracy #{@param[:excludeMassAccuracy]} --checkLightForbiddenPeaks #{@param[:checkLightForbiddenPeaks]} --checkHeavyForbiddenPeaks #{@param[:checkHeavyForbiddenPeaks]} #{csvOutputOptions} #{xhtmlOutputOptions} --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\""
+			ls_Command = "\"#{ExternalTools::binaryPath('qtrace.qtrace')}\" --label \"#{@param[:label]}\" --scanType #{@param[:scanType]} --minCharge #{@param[:minCharge]} --maxCharge #{@param[:maxCharge]} --minSnr #{@param[:minSnr]} --massAccuracy #{@param[:massAccuracy]} #{csvOutputOptions} #{xhtmlOutputOptions} --spectraFiles \"#{ls_SpectraFile}\" --peptideFiles \"#{ls_PeptidesPath}\""
 			runCommand(ls_Command, true)
 			
 			if @output[:qtraceCsv]
