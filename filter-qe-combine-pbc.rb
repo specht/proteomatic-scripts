@@ -25,6 +25,7 @@ require 'yaml'
 class CombinePbc < ProteomaticScript
 	def run()
         proteinHash = Hash.new
+        peptideHash = Hash.new
         pbcHash = Hash.new
         hasProteins = true
         @input[:quantitationEvents].each do |path|
@@ -51,6 +52,9 @@ class CombinePbc < ProteomaticScript
                         proteinHash[protein] ||= Set.new
                         proteinHash[protein] << pbcKey
                     end
+                    peptide = lineHash['peptide']
+                    peptideHash[peptide] ||= Set.new
+                    peptideHash[peptide] << pbcKey
                 end
             end
         end
@@ -155,6 +159,58 @@ class CombinePbc < ProteomaticScript
                         end
                     end
                     lk_Out.puts "\"#{protein}\",#{pbcCount},#{scanCount},#{ratioMean},#{ratioSD},#{ratioRSD}"
+                end
+            end
+        end
+        if @output[:peptideResults]
+            File::open(@output[:peptideResults], 'w') do |lk_Out|
+                lk_Out.puts "Peptide,PBC count,Scan count,Ratio mean,Ratio SD,Ratio RSD"
+                peptideHash.keys.sort.each do |peptide|
+                    scanCount = 0
+                    peptideHash[peptide].each do |pbcKey|
+                        scanCount += pbcHash[pbcKey][:scanCount]
+                    end
+                    pbcCount = peptideHash[peptide].size
+                    ratioMean = nil
+                    ratioSD = nil
+                    ratioRSD = nil
+                    if pbcCount == 1
+                        # if PBC count is 1, use the individual scan ratios
+                        ratioMean = pbcHash[peptideHash[peptide].to_a.first][:scanRatioMean]
+                        ratioSD = pbcHash[peptideHash[peptide].to_a.first][:scanRatioSD]
+                        ratioRSD = pbcHash[peptideHash[peptide].to_a.first][:scanRatioRSD]
+                    else
+                        # if PBC count is greater than 1, use PBC ratios
+                        ratios = Array.new
+                        hasSingleStateEvents = false
+                        hasBothStateEvents = false
+                        peptideHash[peptide].each do |pbcKey|
+                            x = pbcHash[pbcKey][:ratio]
+                            ratios << x
+                            hasSingleStateEvents = true if (x == 0.0) || (x == 1.0 / 0)
+                            hasBothStateEvents = true if (x != 0.0) && (x != 1.0 / 0)
+                        end
+                        # reject single state events if there are 'proper' ratios
+                        if (hasSingleStateEvents && hasBothStateEvents)
+                            ratios.reject! do |x|
+                                (x == 0.0) || (x == 1.0 / 0)
+                            end
+                            # update PBC count
+                            pbcCount = ratios.size
+                        end
+                        ratioMean, ratioSD = meanAndSd(ratios)
+                        ratioRSD = nil
+                        unless ratioMean == nil
+                            ratioRSD = ratioSD / ratioMean if ratioSD && ratioMean
+                        end
+                        if (pbcCount == 1)
+                            # if the PBC count has gone down to 1, use scan results
+                            ratioMean = pbcHash[peptideHash[peptide].to_a.first][:scanRatioMean]
+                            ratioSD = pbcHash[peptideHash[peptide].to_a.first][:scanRatioSD]
+                            ratioRSD = pbcHash[peptideHash[peptide].to_a.first][:scanRatioRSD]
+                        end
+                    end
+                    lk_Out.puts "\"#{peptide}\",#{pbcCount},#{scanCount},#{ratioMean},#{ratioSD},#{ratioRSD}"
                 end
             end
         end
