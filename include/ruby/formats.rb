@@ -20,7 +20,8 @@ require 'yaml'
 $gk_FormatCache = Hash.new
 
 def formatInfo(as_Format)
-	ls_FormatFile = "cli-tools-atlas/formats/#{as_Format}.yaml"
+    return {'extensions' => [''], 'description' => 'any' } if as_Format == ''
+	ls_FormatFile = "include/cli-tools-atlas/formats/#{as_Format}.yaml"
 	if (!File.exists?(ls_FormatFile))
 		puts "Internal error: Could not find format file for #{as_Format}"
 		exit 1

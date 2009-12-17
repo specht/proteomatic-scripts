@@ -52,7 +52,7 @@ parameters:
     label: Label
     type: enum
     default: RP
-    choices: [{R: 'heavy arginine'}, {RP: 'heavy arginine and proline'}, {N15: 'N15'}]
+    choices: [{R: 'heavy arginine'}, {RP: 'heavy arginine and proline'}, {N15: 'N15'}, 'RPKCN']
   - key: scanType
     label: Scans to analyze
     type: enum

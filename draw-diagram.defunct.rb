@@ -28,9 +28,12 @@ class DrawDiagram < ProteomaticScript
 	end
 	
 	def scaley(af_Y)
-		y = af_Y + 1.0
-		y = -1.0 / af_Y + 3.0 if (af_Y < 1.0)
-		return (y - $gf_MinY) / ($gf_MaxY - $gf_MinY) * $gi_Height + $gi_Top
+		#y = af_Y + 1.0
+		#y = -1.0 / af_Y + 3.0 if (af_Y < 1.0)
+        $gf_MinYLog ||= Math::log($gf_MinY)
+        $gf_MaxYLog ||= Math::log($gf_MaxY)
+        y = Math::log(af_Y)
+		return (y - $gf_MinYLog) / ($gf_MaxYLog - $gf_MinYLog) * $gi_Height + $gi_Top
 	end
 	
 	def run()
@@ -110,8 +113,8 @@ class DrawDiagram < ProteomaticScript
 			$gi_LeftBorder = 40
  			$gi_ImageWidth = 1200
  			$gi_ImageHeight = 660
-			$gf_MinY = 7.0
-			$gf_MaxY = -1.0
+			$gf_MinY = 6.0
+			$gf_MaxY = 0.2
 			$gi_TickWidth = 3.0
 
 # 			$gi_ImageWidth = 420
@@ -176,10 +179,10 @@ class DrawDiagram < ProteomaticScript
 				t[0] = lk_Item['mean'].to_f - lk_Item['sd'].to_f
 				t[1] = lk_Item['mean'].to_f
 				t[2] = lk_Item['mean'].to_f + lk_Item['sd'].to_f
-				if (t[1] > $gf_MinY - 1)
-					t[0] = $gf_MinY - 1
-					t[1] = $gf_MinY - 1
-					t[2] = $gf_MinY - 1
+				if (t[1] > $gf_MinY)
+					t[0] = $gf_MinY
+					t[1] = $gf_MinY
+					t[2] = $gf_MinY
 				end
 				#puts lk_Item.to_yaml if (t[2] > 7.0)
 					

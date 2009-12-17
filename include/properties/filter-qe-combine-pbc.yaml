@@ -24,6 +24,11 @@ output:
     format: csv
     filename: combined-proteins.csv
     default: yes
+  - key: peptideResults
+    label: peptide quantitation results
+    format: csv
+    filename: combined-peptides.csv
+    default: no
   - key: pbcResults
     label: PBC details
     format: csv

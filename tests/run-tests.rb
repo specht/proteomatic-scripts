@@ -31,8 +31,7 @@ lk_Scripts.sort.each do |ls_Path|
 	next if ls_Path.include?('.defunct.')
 	print "#{File::basename(ls_Path)}: "
 	testCommand(ls_Path, '--help')
-	testCommand(ls_Path, '---info')
-	testCommand(ls_Path, '---getParameters')
+	testCommand(ls_Path, '---yamlInfo')
 	testCommand(ls_Path, '--resolveDependencies')
 	puts 'ok.'
 end

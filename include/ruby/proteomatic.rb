@@ -397,11 +397,11 @@ class ProteomaticScript
 			lk_Server = TCPServer.new('', @mi_DaemonPort);
 			puts "#{@ms_Title} daemon listening on port #{@mi_DaemonPort}."
 			while (lk_Session = lk_Server.accept)
-				Thread.new(lk_Session) do |lk_Session|
+				Thread.new(lk_Session) do |lk_ThisSession|
 					begin
-						handleTcpRequest(lk_Session)
+						handleTcpRequest(lk_ThisSession)
 					ensure
-						lk_Session.close
+						lk_ThisSession.close
 					end
 				end
 			end
@@ -625,7 +625,7 @@ class ProteomaticScript
 		end
 		if (@mk_ScriptProperties.has_key?('externalParameters'))
 			@mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-				puts("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+				puts("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
 			end
 		end
 	end
@@ -806,7 +806,7 @@ class ProteomaticScript
         unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
             if (@mk_ScriptProperties.has_key?('externalParameters'))
                 @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-                    lk_Properties = YAML::load_file("cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+                    lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
                     lk_Properties['parameters'].each do |lk_Parameter| 
                         lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
                         @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
@@ -849,19 +849,25 @@ class ProteomaticScript
 					exit 1
 				end
 				unless lk_InputGroup['formats'].class == Array
-					puts "Internal error: 'formats' must be an array."
-					exit 1
+                    if @mk_ScriptProperties['input'].size > 1
+                        puts "Internal error: 'formats' must be defined if there is more than one input file group."
+                        exit 1
+                    else
+                        lk_InputGroup['formats'] = ['']
+                    end
 				end
 				lk_InputGroups[lk_InputGroup['key']] = lk_InputGroup
 				lk_InputGroupOrder.push(lk_InputGroup['key'])
-				lk_InputGroup['formats'].each do |ls_Format|
-					assertFormat(ls_Format)
-					if lk_InputFormats.has_key?(ls_Format)
-						lk_AmbiguousFormats.add(ls_Format)
-						lk_InputFormats.delete(ls_Format)
-					end
-					lk_InputFormats[ls_Format] = lk_InputGroup['key'] unless lk_AmbiguousFormats.include?(ls_Format)
-				end
+                if lk_InputGroup['formats']
+                    lk_InputGroup['formats'].each do |ls_Format|
+                        assertFormat(ls_Format)
+                        if lk_InputFormats.has_key?(ls_Format)
+                            lk_AmbiguousFormats.add(ls_Format)
+                            lk_InputFormats.delete(ls_Format)
+                        end
+                        lk_InputFormats[ls_Format] = lk_InputGroup['key'] unless lk_AmbiguousFormats.include?(ls_Format)
+                    end
+                end
 			end
 		end
 		@mk_Input = Hash.new
@@ -883,7 +889,7 @@ class ProteomaticScript
 		lk_OutputFiles = Hash.new
 		if @mk_ScriptProperties.include?('output')
 			@mk_ScriptProperties['output'].each do |lk_OutputFile|
-				if (@m_ScriptType == 'converter' && (!lk_OutFiles.empty?))
+				if (@ms_ScriptType == 'converter' && (!lk_OutputFiles.empty?))
 					puts 'Internal error: Only one output file group allowed for converter scripts.'
 					exit 1
 				end
@@ -1052,12 +1058,15 @@ class ProteomaticScript
 		end
 		
 		unless lk_UnusedFiles.empty?
-			puts "Warning: The following files have been specified by were ignored:\n#{lk_UnusedFiles.join("\n")}"
+			puts "Warning: The following files have been specified but were ignored:\n#{lk_UnusedFiles.join("\n")}"
 		end
 
 		# check input files min/max conditions
 		@mk_Input['groups'].each do |ls_Group, lk_Group|
-			ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('|')}"
+            ls_Format = nil
+            if @mk_Input['groups'][ls_Group]['formats']
+                ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join('|')}"
+            end
 			li_Min = lk_Group['min']
 			if li_Min && (!@input.has_key?(ls_Group.intern) || @input[ls_Group.intern].size < li_Min)
 				lk_Errors.push("At least #{li_Min} #{lk_Group['label']} file#{li_Min == 1 ? " (#{ls_Format}) is" : "s #{ls_Format} are"} required.")
@@ -1103,6 +1112,15 @@ class ProteomaticScript
 			puts ls_Prefix
 			exit 0
 		end
+        
+        # make sure that the output prefix does not contain / or \
+        if @param[:outputPrefix]
+            if @param[:outputPrefix].include?('/') || @param[:outputPrefix].include?('\\')
+                puts "Error: The output prefix must not contain slashes (/) or backslashes (\\)."
+                puts "The output prefix you specified is: #{@param[:outputPrefix]}"
+                exit 1
+            end
+        end
 
 		if ls_OutputDirectory == nil && !@mk_Output.empty?
 			lk_Errors.push("Unable to determine output directory.")
@@ -1124,17 +1142,15 @@ class ProteomaticScript
 					@input[ls_OutputGroup.intern].each do |ls_Path|
 						ls_Directory = File::dirname(ls_Path)
 						ls_Directory = ls_OutputDirectory if ls_OutputDirectory
-						ls_Basename = File::basename(ls_Path).dup
-						ls_Format = findFormatForFile(ls_Path)
-						ls_Extension = ''
-						formatInfo(ls_Format)['extensions'].each do |ls_Try|
-							if stringEndsWith(ls_Basename, ls_Try, false)
-								ls_Extension = ls_Try
-								break
-							end
-						end
-						ls_Basename.slice!(-ls_Extension.size, ls_Extension.size) if ls_Extension != ''
-						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename'].gsub('#{basename}', ls_Basename).gsub('#{extension}', ls_Extension)
+						ls_Filename = File::basename(ls_Path).dup
+                        lk_FilenameSplit = ls_Filename.split('.')
+                        ls_Basename = lk_FilenameSplit[0]
+                        ls_Extension = ''
+                        ls_Extension = lk_FilenameSplit[1, lk_FilenameSplit.size - 1].join('.') if lk_FilenameSplit.size > 1
+						ls_OutFilename = @mk_Output[ls_OutputGroup]['filename'].dup
+                        ls_OutFilename.gsub!('#{basename}', ls_Basename)
+                        ls_OutFilename.gsub!('#{extension}', ls_Extension)
+                        ls_OutFilename.gsub!('#{filename}', ls_Filename)
 						@param.keys.each do |ls_Param|
 							ls_OutFilename.gsub!('#{' + ls_Param.to_s + '}', "#{@param[ls_Param]}")
 						end

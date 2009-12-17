@@ -205,7 +205,7 @@ class Parameters
 		ls_Result = ''
 		ls_Result += "!!!begin parameter\n"
 		@mk_Parameters[as_Key].each do |ls_Key, ls_Value|
-		    if (ls_Key == 'choices')
+            if (ls_Key == 'choices')
 				lk_Choices = ls_Value
 				ls_Result += "!!!begin values\n"
 				lk_Choices.each do |lk_Choice|
@@ -218,7 +218,7 @@ class Parameters
 				ls_Result += "!!!end values\n"
 			else
 				ls_Result += "#{ls_Key}\n#{ls_Value}\n"
-			end
+            end
 		end
 		ls_Result += "!!!end parameter\n"
 		return ls_Result
@@ -231,7 +231,6 @@ class Parameters
                 lk_Choices = ls_Value
                 result['choices'] = Array.new
                 lk_Choices.each do |lk_Choice|
-                    lk_Choice
                     if lk_Choice.class == Hash
                         result['choices'] << { lk_Choice.keys.first => lk_Choice[lk_Choice.keys.first] }
                     else
@@ -353,7 +352,7 @@ class Parameters
 			if (lk_Parameter['enabled'])
 				lk_Parameter['enabled'].each do |lk_Expression|
 					lk_Expression.each do |ls_Expression|
-						@mk_Parameters.keys.each do |ls_Key|
+						@mk_Parameters.keys.each do |ls_ThisKey|
 							ls_Expression.strip!
 						end
 					end
