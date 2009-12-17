@@ -96,9 +96,11 @@ class GroupProteins < ProteomaticScript
         peptidesForProtein.keys.each do |proteinA|
             peptidesForProtein.keys.each do |proteinB|
                 next if proteinA <= proteinB
-                percentage = sprintf('%1.1f', currentCount.to_f * 100.0 / totalCount) if currentCount % 1000 == 0
-                print "\rAnalyzing protein pairs... #{percentage}% done." if percentage != oldPercentage
-                oldPercentage = percentage
+                if currentCount % 1000 == 0
+                    percentage = sprintf('%1.1f', currentCount.to_f * 100.0 / totalCount)
+                    print "\rAnalyzing protein pairs... #{percentage}% done." if percentage != oldPercentage
+                    oldPercentage = percentage
+                end
                 currentCount += 1
                 peptidesA = peptidesForProtein[proteinA]
                 peptidesB = peptidesForProtein[proteinB]
