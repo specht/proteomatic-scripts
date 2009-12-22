@@ -70,7 +70,7 @@ class ExternalTools
 			return
 		end
 		as_ResultFilePath = File::join('ext', ls_Package, @@ms_Platform, ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
-		puts "Installing #{ak_PackageDescription['title']}..."
+		puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
 		ls_Uri = ak_PackageDescription['download'][@@ms_Platform]
 		lk_Uri = URI::parse(ls_Uri)
 		ls_OutFile = File::basename(lk_Uri.path)
@@ -118,7 +118,7 @@ class ExternalTools
 			puts "This directory has to exist after installation: #{as_ResultFilePath}"
 			exit 1
 		end
-		puts "#{ak_PackageDescription['title']} successfully installed."
+		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
 	def self.binaryPath(as_Tool)

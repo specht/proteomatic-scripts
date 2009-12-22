@@ -21,3 +21,6 @@ output:
      format: yaml
      filename: grouped-proteins.yaml
      default: yes
+
+needs:
+  - ext.ptb
