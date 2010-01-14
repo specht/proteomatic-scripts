@@ -4,7 +4,10 @@ title: Pick most abundant bands
 
 description: >
   This script determines the most abundant bands for every peptide or protein and rejects
-  quantitation events that come from other bands.
+  quantitation events that come from other bands (plus/minus a user-defined value).
+  Protein information is exclusively taken from the quantitation events, from the
+  PSM list files only peptide spectral counts are read, which can be promoted to
+  protein spectral counts if there is a protein column in the quantitation events file.
 
 type: processor
 
