@@ -10,7 +10,7 @@ type: processor
 
 input:
   - key: files
-    label: Input
+    label: input
     min: 1
 
 parameters:
