@@ -45,6 +45,11 @@ class ExtractCsvColumn < ProteomaticScript
         items.sort! if @param[:sort]
         items.uniq! if @param[:uniq]
         puts "Number of entries: #{items.size}."
+        if @output[:out]
+            File::open(@output[:out], 'w') do |f|
+                f.puts items.join("\n")
+            end
+        end
 	end
 end
 
