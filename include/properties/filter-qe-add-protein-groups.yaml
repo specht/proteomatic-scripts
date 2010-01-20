@@ -1,0 +1,33 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Add protein groups information
+
+description: >
+  Tag peptide quantitation events with protein groups. Quantitation events
+  from peptides that occur in multiple protein groups are discarded, the same
+  happens with peptides that are not found in any protein group.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+  - key: proteinGroups
+    label: protein groups
+    formats: [yaml]
+    min: 1
+    max: 1
+
+defaultOutputDirectory: quantitationEvents
+
+output:
+  - key: results
+    label: tagged results
+    format: csv
+    filename: with-protein-groups.csv
+    default: yes
+
+needs:
+  - ext.ptb
