@@ -39,7 +39,7 @@ parameters:
     description: Specify whether the most abundant band should be picked on the peptide or protein level.
   - key: neighborBandCount
     type: int
-    default: 0
+    default: 1
     min: 0
     label: Number of neighbor bands to include
   - key: excludeBands
@@ -47,3 +47,7 @@ parameters:
     default: ''
     label: Exclude bands
     description: If certain band numbers should not be picked as the most abundant bands, specify the appropriate numbers here, separated by a comma.
+  - key: bandIndex
+    type: string
+    default: ''
+    label: Band ID

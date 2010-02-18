@@ -144,18 +144,34 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 					(0...lk_Parts.size).each { |i| lk_AllParts[i][lk_Parts[i]] = ls_Spot }
 				end
 			end
-			lk_AllParts.reject! { |x| x.size == 1 }
+            lk_ItemsWithMultipleValues = Array.new
+            (0...lk_AllParts.size).each do |i|
+                lk_ItemsWithMultipleValues << i if lk_AllParts[i].size != 1
+            end
 			# now only one part should be left, and this should be a number, too!
-			if (lk_AllParts.size != 1)
-				puts "Error: The band numbers could not be determined because there's more than one variable number in the spot names."
-				puts "Global pattern: #{ls_AllPattern}"
-				puts lk_AllParts.collect { |x| x.keys.join(', ') }.join(' / ')
-				exit 1
-			end
-			lk_AllParts.first.each_pair do |ls_BandNumber, ls_SpotName|
-				li_BandNumber = ls_BandNumber.to_i
-				lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
-			end
+            if @param[:bandIndex].strip.empty?
+                if (lk_ItemsWithMultipleValues.size != 1)
+                    puts "Error: The band numbers could not be determined because there's more than one variable number in the spot names."
+                    puts "In order to remedy this problem, please supply the correct band ID that identifies the band number as a parameter and re-run the script." 
+                    lk_ItemsWithMultipleValues.each do |i|
+                        puts
+                        puts "ID: #{i} (choose this if you see band numbers below)"
+                        puts lk_AllParts[i].keys.sort.join(', ')
+                    end
+                    exit 1
+                end
+                lk_AllParts.reject! { |x| x.size == 1 }
+                lk_AllParts.first.each_pair do |ls_BandNumber, ls_SpotName|
+                    li_BandNumber = ls_BandNumber.to_i
+                    lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
+                end
+            else
+                # a band ID was defined, use it
+                lk_AllParts[@param[:bandIndex].to_i].each_pair do |ls_BandNumber, ls_SpotName|
+                    li_BandNumber = ls_BandNumber.to_i
+                    lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
+                end
+            end
 			
  			lk_Results[:spectralCounts][:peptides].each_pair do |ls_Item, lk_SpectralCounts|
 				ls_FixedItem = ls_Item.dup
