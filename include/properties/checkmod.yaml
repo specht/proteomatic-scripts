@@ -1,0 +1,24 @@
+group: Proteomics/Miscellaneous
+
+title: Check modification masses
+
+description: >
+  Check modification masses
+
+type: processor
+
+parameters:
+  - key: peptide
+    type: string
+    example: SAMPLER
+    label: Peptide
+  - key: phosphoSiteCount
+    type: int
+    min: 0
+    label: Number of phosphorylation sites
+    default: 1
+  - key: charge
+    type: int
+    min: 1
+    label: Charge
+    default: 2
