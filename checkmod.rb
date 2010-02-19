@@ -139,18 +139,30 @@ class CheckMod < ProteomaticScript
                 i += 1
                 score = calculateScore(scans[id], modPeptide)
                 if score[:precursorIonAccuracy] <= @param[:precursorIonMassAccuracy]
-                    results << ["#{id} / #{modPeptide}", score]
+                    results << {:id => id, :modPeptide => modPeptide, :score => score[:score], :precursorIonAccuracy => score[:precursorIonAccuracy]}
                 end
             end
         end
+        print "\rMatching... 100% done."
         puts 
         
         results.sort! do |a, b|
-            b[1][:score] <=> a[1][:score]
+            if a[:id] == b[:id]
+                b[:score] <=> a[:score]
+            else
+                a[:id] <=> b[:id]
+            end
         end
+        oldId = nil
         results.each do |x|
-            puts "#{sprintf('%9.4f', x[1][:score])}, #{x[0]} (#{sprintf('%1.2f', x[1][:precursorIonAccuracy])} ppm)"
+            if x[:id] != oldId
+                puts
+                puts "Scan ##{x[:id]}:"
+                oldId = x[:id]
+            end
+            puts "#{sprintf('%9.4f', x[:score])}, #{x[:modPeptide]} (#{sprintf('%1.2f', x[:precursorIonAccuracy])} ppm)"
         end
+        puts
         
         FileUtils::rm_rf(@ms_TempPath)
     end		
