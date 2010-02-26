@@ -93,7 +93,7 @@ class RunGpf < ProteomaticScript
             ls_CsvPathSwitch = " --csvResultsPath \"#{@output[:csvResults]}\" "
         end
 
-        ls_Command = "#{ExternalTools::binaryPath('gpf.gpfbatch')} #{ls_GpfOptions} --yamlResultsPath \"#{ls_ResultFile}\" #{ls_CsvPathSwitch} #{ls_GenomePath} #{ls_QueryFile}"
+        ls_Command = "#{ExternalTools::binaryPath('gpf.gpfbatch')} #{ls_GpfOptions} --yamlResultsPath \"#{ls_ResultFile}\" #{ls_CsvPathSwitch} \"#{ls_GenomePath}\" \"#{ls_QueryFile}\""
 		runCommand(ls_Command)
 		
 		FileUtils::cp(ls_ResultFile, @output[:yamlResults]) if @output[:yamlResults]
