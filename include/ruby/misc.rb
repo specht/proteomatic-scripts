@@ -185,6 +185,11 @@ class String
 end # class String
 
 
+def stripCsvHeader(header)
+    header.dup.strip.downcase.gsub(/[\s\-\/]/, '')
+end
+
+
 # split header, downcase and remove these: whitespace - /
 # returns a hash of downcased-stripped-header -> index
 def mapCsvHeader(as_Header, ak_Options = {})
@@ -193,7 +198,7 @@ def mapCsvHeader(as_Header, ak_Options = {})
 	lk_HeaderMap = Hash.new
 	(0...lk_Header.size).each do |i|
 		next unless lk_Header[i]
-		ls_Key = lk_Header[i].dup.strip.downcase.gsub(/[\s\-\/]/, '')
+		ls_Key = stripCsvHeader(lk_Header[i])
 		lk_StrippedHeaderMap[ls_Key] = lk_Header[i]
 		lk_HeaderMap[ls_Key] = i
 	end

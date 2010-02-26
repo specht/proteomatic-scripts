@@ -1,0 +1,37 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Normalize protein levels
+
+description: >
+  This script multiplies all heavy amounts in a 
+  <acronym title='quantitation event'>QE</acronym> list with a user-defined 
+  factor to accomodate for protein loading differences. <br />
+  <i>Example:</i> If you observe a ratio of 0.85 for a protein which should be 1.0,
+  simply enter 0.85 into the 'Normalization factor' field. This will change
+  all amounts in such a way that the protein's ratio will increase from 0.85
+  to 1.0, and all other ratios will increase accordingly.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: quantitationEvents
+
+output:
+  - key: results
+    label: normalized results
+    format: csv
+    filename: normalized.csv
+    default: yes
+
+parameters:
+  - key: factor
+    type: float
+    default: 1.0
+    step: 0.1
+    decimals: 4
+    label: Normalization factor

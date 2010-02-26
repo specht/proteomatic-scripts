@@ -1,0 +1,56 @@
+group: Proteomics/Miscellaneous
+
+title: Check modification masses
+
+description: >
+  Check modification masses
+
+type: processor
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [mgf, xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+    min: 1
+
+# defaultOutputDirectory: spectra
+# 
+# output:
+#   - key: results
+#     label: Scores
+#     format: xhtml
+#     filename: checkmod.xhtml
+#     default: yes
+        
+parameters:
+  - key: peptides
+    type: string
+    examples: 
+      - LALKVSAVSLSEEEIK
+    label: Peptides
+  - key: ids
+    type: string
+    label: Scan IDs
+  - key: precursorIonMassAccuracy
+    type: float
+    default: 10
+    min: 0
+    decimals: 2
+    suffix: ppm
+  - key: productIonMassAccuracy
+    type: float
+    default: 700
+    min: 0
+    decimals: 2
+    suffix: ppm
+  - key: noiseFilter
+    type: float
+    min: 0.0
+    max: 100.0
+    suffix: '%'
+    default: 5.0
+    decimals: 1
+    label: Discard peaks lower than
+
+needs:
+  - ext.ptb
