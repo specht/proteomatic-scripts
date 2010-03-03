@@ -1,0 +1,27 @@
+group: Proteomics/Identification/OMSSA/2. Filter PSM
+
+title: Determine protein groups
+
+description: >
+  Determine groups of proteins that share common peptides. This way,
+  groups of proteins, or protein families, can be identified.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: proteinGroups
+    label: grouped proteins
+    format: yaml
+    filename: grouped-proteins.yaml
+    default: yes
+
+needs:
+  - ext.ptb
