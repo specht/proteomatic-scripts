@@ -50,7 +50,8 @@ class QTraceEstimateLabelingEfficiency < ProteomaticScript
         # pick most abundant band for each peptide
         searchPeptidesInBands = Hash.new
         searchPeptides.each do |peptide|
-            sortedSpots = results[:peptideHash][peptide][:spots].sort do |a, b|
+            STDOUT.flush
+            sortedSpots = results[:spectralCounts][:peptides][peptide].keys.reject { |x| x == :total }.sort do |a, b|
                 results[:spectralCounts][:peptides][peptide][b] <=> results[:spectralCounts][:peptides][peptide][a]
             end
             bestSpot = sortedSpots.first
@@ -71,7 +72,19 @@ class QTraceEstimateLabelingEfficiency < ProteomaticScript
         
         puts "Searching for #{searchPeptides.size} peptides in #{searchPeptidesInBands.size} bands:"
         searchPeptidesInBands.each do |band, peptides|
-            puts "#{band}: #{peptides.keys.collect { |p| p + ' (RT ' + sprintf('%1.1f', peptides[p]) + ')' }.join(', ')}"
+            paths = @input[:spectraFiles].select { |x| x.downcase.include?(band.downcase) }
+            if paths.size > 1
+                puts "Warning: Unable to handle #{peptides.keys.join(', ')} in #{band} because multiple spectra files are matching:"
+                puts paths.join("\n")
+            elsif paths.size == 0
+                puts "Warning: Unable to handle #{peptides.keys.join(', ')} in #{band} because none of the provided spectra files are matching."
+            else
+                path = paths.first
+                peptides.each_pair do |p, rt|
+                    command = "\"#{ExternalTools::binaryPath('qtrace.qtrace-estimate')}\" --quiet \"#{path}\" \"#{p}\" #{rt}"
+                    system(command)
+                end
+            end
         end
 	end
 end
