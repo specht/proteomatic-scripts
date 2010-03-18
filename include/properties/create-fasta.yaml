@@ -1,0 +1,30 @@
+group: Proteomics/Protein databases
+
+title: Create FASTA database
+
+description: >
+  This script creates a FASTA database from input text files.
+
+type: processor
+
+input:
+  - key: sequences
+    label: sequences
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: sequences
+
+output:
+  - key: fasta
+    label: FASTA database
+    format: fasta
+    filename: out.fasta
+    default: yes
+
+parameters:
+  - key: prefix
+    type: string
+    default: ''
+    label: Prefix
+    examples: ['__putative__', '__putative_gpf__']
