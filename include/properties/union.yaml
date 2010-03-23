@@ -1,0 +1,24 @@
+group: Miscellaneous/Sets
+
+title: Union
+
+description: >
+  This script creates the union of several sets.
+
+type: processor
+
+input:
+  - key: entries
+    label: entries
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: entries
+
+output:
+  - key: union
+    label: union
+    format: txt
+    filename: union.txt
+    default: no
+

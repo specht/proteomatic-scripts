@@ -1,0 +1,44 @@
+group: Proteomics/Quantitation/qTrace/0. Preprocessing
+
+title: Estimate labeling efficiency
+
+description: >
+  Estimate labeling efficiency of the measured samples. This script picks a couple
+  of very abundant peptides from a PSM list and performs a rough quantitation of
+  these peptides, followed by an accurate estimate of the labeling efficiency.
+
+type: processor
+
+input:
+  - key: spectraFiles
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+    min: 1
+  - key: psmFile
+    label: PSM list
+    min: 1
+    max: 1
+    formats: [csv]
+
+defaultOutputDirectory: psmFile
+
+output:
+  - key: xhtmlReport
+    label: XHTML results
+    format: xhtml
+    filename: estimated-labeling-efficiency.xhtml
+    default: yes
+
+parameters:
+  - key: peptideCount
+    label: Peptide count
+    type: int
+    min: 1
+    default: 3
+    description: Specify how many peptides should be checked for the estimation
+
+needs:
+  - ext.qtrace
+
+filetracker:
+  - dontMd5InputFiles: [spectraFiles]

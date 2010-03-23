@@ -79,20 +79,51 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 			ls_Scope = lb_HaveProteinInAllFiles ? 'protein' : 'peptide'
 			puts "Auto-selecting #{ls_Scope} scope for most abundant band determination."
 		end
-		# scope is defined now!
-		ls_ScopeOmssa = ls_Scope == 'peptide' ? :peptides : :proteins
+		# scope is either 'peptide' or 'protein' now!
 		
+        # if scope is 'protein', get peptide => protein info from QE files
+        # ...and check consistency on the way!
+        lk_PeptideToProtein = Hash.new
+        if (ls_Scope == 'protein')
+            print 'Reading peptide => protein assignments from QE files...'
+            @input[:quantitationEvents].each do |ls_InPath|
+                File::open(ls_InPath, 'r') do |lk_In|
+                    ls_Header = lk_In.readline
+                    lk_Header = mapCsvHeader(ls_Header)
+                    unless lk_Header.include?('protein')
+                        puts "Error: There is no protein column in #{ls_InPath}."
+                        exit
+                    end
+                    lk_In.each_line do |ls_Line|
+                        lk_Line = ls_Line.parse_csv()
+                        ls_Protein = lk_Line[lk_Header['protein']]
+                        ls_Peptide = lk_Line[lk_Header['peptide']]
+                        if lk_PeptideToProtein.include?(ls_Peptide)
+                            if lk_PeptideToProtein[ls_Peptide] != ls_Protein
+                                puts "Error: The peptide => protein assignments are not consistent in #{ls_InPath}."
+                                puts "The offending pair was #{ls_Peptide} => #{ls_Protein}."
+                                puts "In a previous quantitation event, the peptide was assigned to another protein."
+                                exit
+                            end
+                        end
+                        lk_PeptideToProtein[ls_Peptide] = ls_Protein
+                    end
+                end
+            end
+            puts
+        end
 		lk_BestBandForItem = Hash.new
 		lk_BandNumberForSpotName = Hash.new
 		lk_BandToRun = Hash.new
+        print 'Reading PSM lists, determining best bands...'
 		@input[:psmList].each do |ls_PsmPath|
 			ls_RunName = File::basename(ls_PsmPath).sub('.csv', '')
 			lk_BestBandForItem[ls_RunName] = Hash.new
 			lk_Spots = Set.new
-			print "Loading #{File::basename(ls_PsmPath)}..."
+			#print "Loading #{File::basename(ls_PsmPath)}..."
 			lk_Results = loadPsm(ls_PsmPath, :silent => true)
-			puts ''
-			lk_Results[:spectralCounts][ls_ScopeOmssa].values.each do |lk_BandHash|
+			#puts ''
+			lk_Results[:spectralCounts][:peptides].values.each do |lk_BandHash|
 				lk_Spots += Set.new(lk_BandHash.keys.reject { |x| x.class != String })
 			end
 			lk_Spots.each { |ls_Spot| lk_BandToRun[ls_Spot] = ls_RunName }
@@ -113,21 +144,41 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 					(0...lk_Parts.size).each { |i| lk_AllParts[i][lk_Parts[i]] = ls_Spot }
 				end
 			end
-			lk_AllParts.reject! { |x| x.size == 1 }
+            lk_ItemsWithMultipleValues = Array.new
+            (0...lk_AllParts.size).each do |i|
+                lk_ItemsWithMultipleValues << i if lk_AllParts[i].size != 1
+            end
 			# now only one part should be left, and this should be a number, too!
-			if (lk_AllParts.size != 1)
-				puts "Error: The band numbers could not be determined because there's more than one variable number in the spot names."
-				puts "Global pattern: #{ls_AllPattern}"
-				puts lk_AllParts.collect { |x| x.keys.join(', ') }.join(' / ')
-				exit 1
-			end
-			lk_AllParts.first.each_pair do |ls_BandNumber, ls_SpotName|
-				li_BandNumber = ls_BandNumber.to_i
-				lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
-			end
+            if @param[:bandIndex].strip.empty?
+                if (lk_ItemsWithMultipleValues.size != 1)
+                    puts "Error: The band numbers could not be determined because there's more than one variable number in the spot names."
+                    puts "In order to remedy this problem, please supply the correct band ID that identifies the band number as a parameter and re-run the script." 
+                    lk_ItemsWithMultipleValues.each do |i|
+                        puts
+                        puts "ID: #{i} (choose this if you see band numbers below)"
+                        puts lk_AllParts[i].keys.sort.join(', ')
+                    end
+                    exit 1
+                end
+                lk_AllParts.reject! { |x| x.size == 1 }
+                lk_AllParts.first.each_pair do |ls_BandNumber, ls_SpotName|
+                    li_BandNumber = ls_BandNumber.to_i
+                    lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
+                end
+            else
+                # a band ID was defined, use it
+                lk_AllParts[@param[:bandIndex].to_i].each_pair do |ls_BandNumber, ls_SpotName|
+                    li_BandNumber = ls_BandNumber.to_i
+                    lk_BandNumberForSpotName[ls_SpotName] = li_BandNumber
+                end
+            end
 			
- 			lk_Results[:spectralCounts][ls_ScopeOmssa].each_pair do |ls_Item, lk_SpectralCounts|
+ 			lk_Results[:spectralCounts][:peptides].each_pair do |ls_Item, lk_SpectralCounts|
 				ls_FixedItem = ls_Item.dup
+                
+                # promote to protein if protein scope!
+                ls_FixedItem = lk_PeptideToProtein[ls_FixedItem] if (ls_Scope == 'protein')
+                
 				# maybe remove leading fasta filename thing... like nr-Chlre3.fasta;
 				
 				# select most appropriate bands for each item
@@ -165,6 +216,7 @@ class FilterQuantitationEventsByBand < ProteomaticScript
 				lk_BestBandForItem[ls_RunName][ls_FixedItem] = li_BestBand
 			end
 		end
+        puts
 		if @output[:results]
 			File::open(@output[:results], 'w') do |lk_Out|
 				print 'Writing filtered results...'

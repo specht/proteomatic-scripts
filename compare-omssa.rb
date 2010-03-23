@@ -121,28 +121,28 @@ class CompareOmssa < ProteomaticScript
 		
 		if @output[:csvReport]
 			File.open(@output[:csvReport], 'w') do |lk_Out|
-				ls_PlaceHolder = ';' * lk_RunKeys.size
-				lk_Out.puts "Protein;Spectra count#{ls_PlaceHolder}std. dev.;Distinct peptide count#{ls_PlaceHolder}std. dev."
-				lk_Out.puts ";#{lk_RunKeys.join(';') };;#{lk_RunKeys.join(';') };"
+				ls_PlaceHolder = ',' * lk_RunKeys.size
+				lk_Out.puts "Protein,Spectral count#{ls_PlaceHolder}SD,Distinct peptide count#{ls_PlaceHolder}SD"
+				lk_Out.puts ",#{lk_RunKeys.join(',') },,#{lk_RunKeys.join(',') },"
 				lk_Proteins.each do |ls_Protein|
-					lk_Out.print "\"#{ls_Protein}\";"
+					lk_Out.print "\"#{ls_Protein}\","
 					
 					lk_Values = Array.new
 					ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
 						li_Count = lk_RunResults[ls_Key][:spectralCounts][:proteins][ls_Protein][:total] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
-						"#{li_Count};"
+						"#{li_Count},"
 					end.join('')
 					lk_Out.print ls_SpectralCountString
-					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))};"
+					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))},"
 					
 					lk_Values = Array.new
 					ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
 						li_Count = 0
 						li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
 						lk_Values.push(li_Count)
-						"#{li_Count};"
+						"#{li_Count},"
 					end.join('')
 					lk_Out.print ls_DistinctPeptidesCountString
 					lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))}"

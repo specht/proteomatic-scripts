@@ -82,11 +82,13 @@ def bytesToString(ai_Size)
 	if ai_Size < 1024
 		return "#{ai_Size} bytes"
 	elsif ai_Size < 1024 * 1024
-		return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0)} KB"
-	elsif ai_Size < 1024 * 1024 * 1024
-		return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0 / 1024.0)} MB"
+		return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0)} KiB"
+    elsif ai_Size < 1024 * 1024 * 1024
+        return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0 / 1024.0)} MiB"
+    elsif ai_Size < 1024 * 1024 * 1024 * 1024
+        return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0 / 1024.0 / 1024.0)} GiB"
 	end
-	return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0 / 1024.0 / 1024.0)} GB"
+	return "#{sprintf('%1.2f', ai_Size.to_f / 1024.0 / 1024.0 / 1024.0 / 1024.0)} TiB"
 end
 
 
@@ -185,6 +187,11 @@ class String
 end # class String
 
 
+def stripCsvHeader(header)
+    header.dup.strip.downcase.gsub(/[\s\-\/]/, '')
+end
+
+
 # split header, downcase and remove these: whitespace - /
 # returns a hash of downcased-stripped-header -> index
 def mapCsvHeader(as_Header, ak_Options = {})
@@ -193,7 +200,7 @@ def mapCsvHeader(as_Header, ak_Options = {})
 	lk_HeaderMap = Hash.new
 	(0...lk_Header.size).each do |i|
 		next unless lk_Header[i]
-		ls_Key = lk_Header[i].dup.strip.downcase.gsub(/[\s\-\/]/, '')
+		ls_Key = stripCsvHeader(lk_Header[i])
 		lk_StrippedHeaderMap[ls_Key] = lk_Header[i]
 		lk_HeaderMap[ls_Key] = i
 	end

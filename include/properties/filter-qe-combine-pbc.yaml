@@ -1,6 +1,6 @@
 group: Proteomics/Quantitation/qTrace/2. Filter
 
-title: Combine PBC combinations
+title: Determine ratios
 
 description: >
   Combine individual protein-tagged peptide quantitation events into 
@@ -20,12 +20,17 @@ defaultOutputDirectory: quantitationEvents
 
 output:
   - key: proteinResults
-    label: protein quantitation results
+    label: protein ratios
     format: csv
-    filename: combined-proteins.csv
+    filename: protein-ratios.csv
     default: yes
+  - key: peptideResults
+    label: peptide ratios
+    format: csv
+    filename: peptide-ratios.csv
+    default: no
   - key: pbcResults
     label: PBC details
     format: csv
-    filename: combined-pbc-details.csv
+    filename: pbc-details.csv
     default: no

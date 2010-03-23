@@ -36,6 +36,13 @@ parameters:
     type: int
     default: 2000
     min: 1
+  - key: threadCount
+    group: Tweaks
+    label: Search threads
+    type: int
+    default: 0
+    min: 0
+    description: Number of search threads to use. 0 means autodetect.
 
 externalParameters:
   - omssa.omssacl

@@ -511,13 +511,22 @@ def loadPsm(as_Path, ak_Options = {})
 			lk_SpectralCounts[:proteins][ls_Protein][:total] += 1
 			lk_SpectralCounts[:proteins][ls_Protein][ls_Spot] ||= 0
 			lk_SpectralCounts[:proteins][ls_Protein][ls_Spot] += 1
-			lk_SpectralCounts[:peptides][ls_Peptide] ||= Hash.new
-			lk_SpectralCounts[:peptides][ls_Peptide][:total] ||= 0
-			lk_SpectralCounts[:peptides][ls_Peptide][:total] += 1
-			lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] ||= 0
-			lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] += 1
 		end
 	end
+    lk_PeptideHash.keys.each do |ls_Peptide|
+        lk_PeptideHash[ls_Peptide][:scans].each do |ls_Scan|
+            lk_ScanParts = ls_Scan.split('.')
+            # remove trailing .dta if it's there
+            lk_ScanParts.slice!(-1, 1) if (lk_ScanParts.last == 'dta')
+            # determine spot name
+            ls_Spot = lk_ScanParts.slice(0, lk_ScanParts.size - 3).join('.')
+            lk_SpectralCounts[:peptides][ls_Peptide] ||= Hash.new
+            lk_SpectralCounts[:peptides][ls_Peptide][:total] ||= 0
+            lk_SpectralCounts[:peptides][ls_Peptide][:total] += 1
+            lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] ||= 0
+            lk_SpectralCounts[:peptides][ls_Peptide][ls_Spot] += 1
+        end
+    end
 	
 	lk_SafeProteins = Set.new(lk_Proteins.keys.select do |ls_Protein|
 		li_DistinctPeptideCount = lk_Proteins[ls_Protein].size

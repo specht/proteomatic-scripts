@@ -1,0 +1,24 @@
+group: Miscellaneous/Sets
+
+title: Intersection
+
+description: >
+  This script creates the intersection of several sets.
+
+type: processor
+
+input:
+  - key: entries
+    label: entries
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: entries
+
+output:
+  - key: intersection
+    label: intersection
+    format: txt
+    filename: intersection.txt
+    default: no
+

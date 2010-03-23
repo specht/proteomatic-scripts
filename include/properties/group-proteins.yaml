@@ -1,0 +1,26 @@
+group: Proteomics/Identification/OMSSA/Miscellaneous
+
+title: Group proteins
+
+description: >
+  Group proteins that share common peptides into protein groups.
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+ 
+output:
+   - key: groupedProteins
+     label: grouped proteins
+     format: yaml
+     filename: grouped-proteins.yaml
+     default: yes
+
+needs:
+  - ext.ptb
