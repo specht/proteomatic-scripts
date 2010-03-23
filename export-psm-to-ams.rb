@@ -39,7 +39,7 @@ class ExportPsmToAms < ProteomaticScript
 			File.open(ls_OutPath, 'w') do |lk_Out|
 				lk_NeededSpots = Set.new
 				lk_NeededScans = Set.new
-				lk_FoundToSoftware = {:models => 'OMSSA', :gpf => 'GPF-OMSSA'}
+				lk_FoundToSoftware = {:models => 'OMSSA', :gpf => 'GPF-OMSSA', :sixframes => 'SIXFRAMES-OMSSA'}
 				lk_SpotToSpectraFile = Hash.new
 				@input[:spectra].each { |ls_Path| lk_SpotToSpectraFile[File::basename(ls_Path).split('.').first] = ls_Path } if @input[:spectra]
 				

@@ -1,6 +1,6 @@
 group: Proteomics/Quantitation/qTrace/1. Run
 
-title: qTrace
+title: Run qTrace
 
 description: >
    Perform petide quantitation on MS1 full or SIM scans. All peptides that

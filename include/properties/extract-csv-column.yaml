@@ -1,0 +1,43 @@
+group: Miscellaneous
+
+title: Extract CSV column
+
+description: >
+  This script extracts all entries from a user-defined CSV column in the
+  given CSV input files. Entries may be sorted, duplicates can be removed,
+  and the results can be written to a text file.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: out
+    label: entries
+    format: txt
+    filename: entries.txt
+    default: no
+
+parameters:
+  - key: column
+    label: Column
+    default: 'peptide'
+    type: string
+  - key: upcase
+    label: Upcase entries
+    type: flag
+    default: false
+  - key: sort
+    label: Sort entries
+    type: flag
+    default: false
+  - key: uniq
+    label: Remove duplicates
+    type: flag
+    default: false

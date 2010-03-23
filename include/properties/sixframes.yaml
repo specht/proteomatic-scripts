@@ -1,0 +1,43 @@
+group: Proteomics/Protein databases
+
+title: Create six frame translation
+
+type: processor
+
+description: >
+  This script creates a six frame translation from a set of genomic FASTA databases.
+
+input:
+  - key: input
+    label: database
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - input
+
+defaultOutputDirectory: input
+
+output:
+  - key: outputDatabase
+    label: six frame translation
+    format: fasta
+    filename: sixframes.fasta
+    default: yes
+
+parameters:
+  - key: frames
+    type: csvString
+    display: row
+    choices: ['1', '2', '3', '4', '5', '6']
+    default: '1,2,3,4,5,6'
+    label: Frames
+    description: Specify which frames should be translated.
+  - key: format
+    type: string
+    default: ORF_%1_%2_frame%3
+    label: Format
+    description: Specify the ID line format, where %1 is basename, %2 is scaffold and %3 is the frame number
+
+needs:
+  - ext.ptb

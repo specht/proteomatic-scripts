@@ -39,6 +39,7 @@ class RunOmssa < ProteomaticScript
 
 		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
 		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
+        ls_Command += " -nt #{@param[:threadCount]}"
 		runCommand(ls_Command)
 		
 		# inject filename/id because when running a DTA, it seems to be missing
