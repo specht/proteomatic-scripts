@@ -1,0 +1,23 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Require both sister peptides
+
+description: >
+  Keep all quantitation events in which both sister peptides have been quantified.
+
+type: processor
+
+input:
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: quantitationEvents
+
+output:
+  - key: results
+    label: filtered results
+    format: csv
+    filename: both-states.csv
+    default: yes
