@@ -53,6 +53,7 @@ parameters:
     label: Amount estimation
     type: enum
     choices: [{'yes': 'isotope envelope fitting'}, {'no': 'fixed isotope peak count' }]
+    default: 'yes'
   - key: scanType
     label: Scans to analyze
     type: enum
@@ -94,7 +95,7 @@ parameters:
   - key: checkForbiddenPeak
     group: Peak picking
     type: enum
-    default: yes
+    default: 'yes'
     choices: ['yes', 'no']
     label: Check forbidden peak
   - key: absenceMassAccuracyFactor
