@@ -37,3 +37,14 @@ output:
     format: csv
     filename: protein-level-comparison.csv
     default: no
+
+parameters:
+  - key: sequestFormat
+    type: enum
+    choices: [{srf: 'SRF exported'}, {tpp: 'TPP'}]
+    default: srf
+    label: SEQUEST format
+  - key: useProteinIds
+    type: flag
+    default: no
+    label: Strip proteins at first whitespace
