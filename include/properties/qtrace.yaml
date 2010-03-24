@@ -38,47 +38,52 @@ output:
     default: no
 
 parameters:
+  - key: label
+    label: Label
+    type: string
+    default: "15N"
+    description: >
+        Describe the label here. Isotopes may be prepended with amino acids they correspond to,
+        and probabilities may be specified in parantheses.
+    examples: 
+      - "15N (0.99)"
+      - "R 13C"
+      - "RK 13C 15N"
+  - key: useIsotopeEnvelopes
+    label: Amount estimation
+    type: enum
+    choices: [{'yes': 'isotope envelope fitting'}, {'no': 'fixed isotope peak count' }]
+  - key: scanType
+    label: Scans to analyze
+    type: enum
+    choices: [{all: All MS1 scans}, {full: Full scans only}, {sim: SIM scans only}]
+    default: 'all'
   - key: peptides
     type: string
     label: Peptides
     description: Multiple peptides can be separated by spaces or commas.
     default: ''
-  - key: excludeAminoAcids
-    type: string
-    default: ''
-    label: Exclude amino acids
-    description: "If you have reason to believe that certain amino acids will lead to problems during quantitation, please enter them here in single letter code. All peptides containing one of these amino acids will be ignored."
-  - key: label
-    label: Label
-    type: string
-    default: "15N (0.99)"
-    description: Describe the label here.
-    examples: 
-      - "15N (0.99)"
-      - "R 13C"
-      - "RK 13C 15N"
-  - key: scanType
-    label: Scans to analyze
-    type: enum
-    choices: [{sim: SIM scans only}, {all: All MS1 scans}, {full: Full scans only}]
-    default: 'all'
   - key: minCharge
+    group: Peak picking
     label: Minimum charge
     type: int
     default: 2
     min: 1
   - key: maxCharge
+    group: Peak picking
     label: Maximum charge
     type: int
     default: 3
     min: 1
   - key: minSnr
+    group: Peak picking
     label: Minimum SNR
     type: float
     default: 2.0
     min: 0.0
     step: 0.1
   - key: massAccuracy
+    group: Peak picking
     label: Mass accuracy
     type: float
     suffix: ppm
@@ -86,11 +91,70 @@ parameters:
     min: 0.0
     step: 0.1
     description: Specify how accurately the Gauss fitted peaks must match to the target m/z values of the peptides. That is, enter the mass accuracy of your MS here.
+  - key: checkForbiddenPeak
+    group: Peak picking
+    type: enum
+    default: yes
+    choices: ['yes', 'no']
+    label: Check forbidden peak
+  - key: absenceMassAccuracyFactor
+    group: Peak picking
+    label: Absence mass accuracy factor
+    type: float
+    default: 2.0
+    min: 1.0
+    decimals: 2
+  - key: requireAbundance
+    group: Isotope envelope fitting
+    label: Require peaks down to
+    type: float
+    default: 40.0
+    min: 0.0
+    max: 100.0
+    suffix: '%'
+    decimals: 1
+  - key: considerAbundance
+    group: Isotope envelope fitting
+    label: Consider peaks down to
+    type: float
+    default: 1.0
+    min: 0.0
+    max: 100.0
+    suffix: '%'
+    decimals: 1
+  - key: maxFitError
+    group: Isotope envelope fitting
+    label: Max fit error
+    type: float
+    default: 20.0
+    min: 0.0
+    max: 100.0
+    suffix: '%'
+    decimals: 1
+  - key: isotopePeaks
+    group: Fixed isotope peak count
+    label: Number of isotope peaks
+    type: int
+    default: 3
+    min: 1
   - key: searchAllInAll
+    group: Tweaks
     label: Search for all peptides in all spectra files
     type: flag
     default: false
     description: Try to quantify all peptides in all spectra files, even if peptides have not been identified in some spectra files.
+  - key: excludeAminoAcids
+    group: Tweaks
+    type: string
+    default: ''
+    label: Exclude amino acids
+    description: "If you have reason to believe that certain amino acids will lead to problems during quantitation, please enter them here in single letter code. All peptides containing one of these amino acids will be ignored."
+  - key: logScale
+    label: XHTML report intensity axis
+    group: Tweaks
+    type: enum
+    default: 'no'
+    choices: [{'no': 'linear'}, {'yes': 'logarithmic'}]
 
 needs:
   - ext.qtrace
