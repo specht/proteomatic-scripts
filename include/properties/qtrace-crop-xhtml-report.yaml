@@ -3,11 +3,13 @@ group: Proteomics/Quantitation/qTrace/2. Filter
 title: Crop XHTML report
 
 description: >
-  This script extract quantitation events (QE) of interest from a qTrace XHTML report. 
+  This script extract quantitation events (QE) of interest from a qTrace XHTML report. <br />
   Specify which QE you are interested in by entering the appropriate values below. 
   Multiple values can be entered, for example you can specify 'WLQYSEVIHAR LYDEELQAIAK'
   in the peptide field and '2' in the charge field to extract all doubly charged quantitation
-  events of either peptide.
+  events of either peptide. <br />
+  If a QE file is passed to this script, only quantitation events from this list will pass
+  the filter, in addition to the additional parameters specified.
 
 type: converter
 
@@ -16,6 +18,9 @@ input:
     label: XHTML report
     formats: [xhtml]
     min: 1
+  - key: quantitationEvents
+    label: quantitation events
+    formats: [csv]
 
 defaultOutputDirectory: xhtmlFiles
 

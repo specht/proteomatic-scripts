@@ -22,6 +22,25 @@ class QTraceCropXhtmlReport < ProteomaticScript
         end
         allQeCount = 0
         copiedQeCount = 0
+        
+        quantitationEventKeys = Set.new
+        useQeFilter = false
+        
+        @input[:quantitationEvents].each do |path|
+            useQeFilter = true
+            File::open(path, 'r') do |f|
+                header = mapCsvHeader(f.readline)
+                f.each_line do |line|
+                    lineArray = line.parse_csv()
+                    peptide = lineArray[header['peptide']]
+                    charge = lineArray[header['charge']].to_i
+                    band = lineArray[header['filename']]
+                    scanId = lineArray[header['scanid']]
+                    quantitationEventKeys << "PEPTIDE #{peptide} CHARGE #{charge} BAND #{band} SCAN #{scanId}"
+                end
+            end
+        end
+        
 		@output.each do |inPath, outPath|
             File::open(outPath, 'w') do |fo|
                 File::open(inPath, 'r') do |fi|
@@ -43,6 +62,13 @@ class QTraceCropXhtmlReport < ProteomaticScript
                                     copyLine = false 
                                     break
                                 end
+                            end
+                            if useQeFilter
+                                key = line.dup
+                                key.sub!('<!-- BEGIN', '')
+                                key.sub!('-->', '')
+                                key.strip!
+                                copyLine = false unless quantitationEventKeys.include?(key)
                             end
                             copiedQeCount +=1 if copyLine
                         end
