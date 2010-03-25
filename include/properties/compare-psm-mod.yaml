@@ -46,5 +46,5 @@ parameters:
     label: SEQUEST format
   - key: useProteinIds
     type: flag
-    default: no
+    default: yes
     label: Strip proteins at first whitespace

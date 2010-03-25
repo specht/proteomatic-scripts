@@ -155,7 +155,7 @@ class ComparePsmMod < ProteomaticScript
                     end
                     lk_File.each_line do |ls_Line|
                         li_ScanId += 1
-                        ls_ScanId = li_ScanId.to_s
+                        ls_ScanId = ls_Id + li_ScanId.to_s
                         lk_Line = ls_Line.parse_csv
                         next if (!lk_Line[header['peptide']]) || (lk_Line[header['peptide']].strip.empty?)
                         
@@ -189,7 +189,7 @@ class ComparePsmMod < ProteomaticScript
 			lk_ProteinCountForId[ls_Id] = lk_ThisProteins.size
 			puts "#{lk_ThisProteins.size} proteins."
 		end
-
+        
         ambiguousDescriptions = Set.new
         fullProteinForProteinId.each_pair do |key, entries|
             newEntries = entries.dup
