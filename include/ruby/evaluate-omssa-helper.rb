@@ -190,6 +190,7 @@ end
 
 def loadPsm(as_Path, ak_Options = {})
 	ak_Options[:putativePrefix] ||= '__putative__'
+    allDefLines = Set.new
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507.1058.1058.2.dta:
 	#  :e: 3.88761e-07
@@ -282,6 +283,7 @@ def loadPsm(as_Path, ak_Options = {})
 			ls_Peptide = ls_OriginalPeptide.upcase
 			lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 			ls_DefLine = lk_Line[lk_HeaderMap['defline']].strip
+            allDefLines << ls_DefLine
 			lk_Mods = Array.new
 			ls_Mods = lk_Line[lk_HeaderMap['mods']]
 			lk_Mods = ls_Mods.split(',').collect { |x| x.strip } unless (!ls_Mods) || ls_Mods.empty?
@@ -554,6 +556,7 @@ def loadPsm(as_Path, ak_Options = {})
 	lk_Result[:spectralCounts] = lk_SpectralCounts
 	lk_Result[:safeProteins] = lk_SafeProteins
 	lk_Result[:peptideInProtein] = lk_PeptideInProtein
+    lk_Result[:allDefLines] = allDefLines.to_a
 	
 	return lk_Result
 end

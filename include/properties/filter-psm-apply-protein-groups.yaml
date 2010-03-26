@@ -1,0 +1,28 @@
+group: Proteomics/Identification/OMSSA/2. Filter PSM
+
+title: Apply protein groups
+
+description: >
+  This script applies grouped proteins to a list of peptide-spectral matches (PSM).
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: proteinGroups
+    label: Protein groups
+    min: 1
+    max: 1
+    formats: [yaml]
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: results
+    label: filtered results
+    format: csv
+    filename: with-protein-groups.csv
+    default: yes

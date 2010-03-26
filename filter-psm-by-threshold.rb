@@ -44,10 +44,10 @@ class FilterPsmByThreshold < ProteomaticScript
 
 		lk_Result = Hash.new
 		
-		# If we stumble across a PSM with target_ or decoy_ in front, obviously the results
+		# If we stumble across a PSM with __td__target_ or __td__decoy_ in front, obviously the results
 		# are to be treated with a fixed threshold because the FPR approach didn't work out
 		# well, because the result list was too small. In that case, we only give out a 
-		# warning once and just strip the leading target_ or decoy_
+		# warning once and just strip the leading __td__target_ or __td__decoy_
 		lb_GaveWarningAboutTargetDecoy = false
 		
 		ld_ScoreThreshold = @param[:scoreThreshold].to_f
@@ -64,13 +64,13 @@ class FilterPsmByThreshold < ProteomaticScript
 							lk_Line = ls_Line.parse_csv()
 							lf_E = BigDecimal.new(lk_Line[lk_HeaderMap['evalue']])
 							ls_DefLine = lk_Line[lk_HeaderMap['defline']]
-							if (ls_DefLine.index('target_') == 0) || (ls_DefLine.index('decoy_') == 0)
+							if (ls_DefLine.index('__td__target_') == 0) || (ls_DefLine.index('__td__decoy_') == 0)
 								unless lb_GaveWarningAboutTargetDecoy
 									puts "Warning: The PSM lists you provided contain target/decoy results, which usually should be evaluated with a FPR filter. However, if the FPR approach didn't work out well because of to few results, you can still use a fixed threshold."
 									lb_GaveWarningAboutTargetDecoy = true
 								end
-								next if (ls_DefLine.index('decoy_')) == 0
-								ls_DefLine.delete!('target_') 
+								next if (ls_DefLine.index('__td__decoy_')) == 0
+								ls_DefLine.delete!('__td__target_') 
 							end
 							# is the score too bad? skip it!
 							if (@param[:scoreThresholdType] == 'min')
@@ -79,7 +79,7 @@ class FilterPsmByThreshold < ProteomaticScript
 								next if lf_E > ld_ScoreThreshold
 							end
 							
-							lk_Out.print ls_Line.sub('target_', '').strip
+							lk_Out.print ls_Line.sub('__td__target_', '').strip
 							lk_Out.print ", #{@param[:scoreThresholdType]}, #{ld_ScoreThreshold}"
 							lk_Out.puts
 						end

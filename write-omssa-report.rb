@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2007-2010 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -23,7 +23,35 @@ require 'set'
 require 'yaml'
 
 class WriteOmssaReport < ProteomaticScript
+    
+    def formatProtein(protein)
+        if protein[0, 9] == '__group__'
+            entries = protein.sub('__group__', '').split("\01")
+            return "<b>protein group</b> (#{entries.size} proteins)<br /><ul>" + entries.collect do |x| 
+                y = ''
+                if @hasProteinGroups
+                    y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProtein[x].size > 1
+                end
+                '<li>' + x + y + '</li>'
+            end.join("\n") + '</ul>'
+        else
+            y = ''
+            if @hasProteinGroups
+                unless @proteinGroupsForProtein.include?(protein)
+                    puts "AAAAAAHH"
+                    puts protein
+                    exit
+                end
+                y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProtein[protein].size > 1
+            end
+            return protein + y
+        end
+    end
+    
 	def run()
+        
+        @proteinGroupsForProtein = Hash.new
+        @hasProteinGroups = false
 		# merge OMSSA results
 		lk_Result = loadPsm(@input[:psmFile].first, {:putativePrefix => @param[:putativePrefix]})
 		
@@ -36,6 +64,34 @@ class WriteOmssaReport < ProteomaticScript
 		lk_ScoreThresholds = lk_Result[:scoreThresholds]
 		lk_ActualFpr = lk_Result[:actualFpr]
 		lk_SpectralCounts = lk_Result[:spectralCounts]
+        allDefLines = lk_Result[:allDefLines]
+        
+        allDefLines.each do |protein|
+            if protein[0, 9] == '__group__'
+                @hasProteinGroups = true
+                break
+            end
+        end
+        
+        if @hasProteinGroups
+            allDefLines.each do |protein|
+                if protein[0, 9] == '__group__'
+                    entries = protein.sub('__group__', '').split("\01")
+                    entries.each do |entry|
+                        @proteinGroupsForProtein[entry] ||= Set.new
+                        @proteinGroupsForProtein[entry] << protein
+                    end
+                else
+                    @proteinGroupsForProtein[protein] ||= Set.new
+                    @proteinGroupsForProtein[protein] << protein
+                end
+            end
+        end
+        
+        # if we have protein groups, denote for every protein whether it is unique
+        # unique means that when you see this protein, it does not appear in other
+        # protein groups or as a single protein
+        # denote by <b><i>(not unique)</i></b>
 		
 		lk_ProteinsBySpectralCount = lk_Proteins.keys.sort { |a, b| lk_SpectralCounts[:proteins][b][:total] <=> lk_SpectralCounts[:proteins][a][:total]}
 		lk_AmbiguousPeptides = (lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).to_a.sort! do |x, y|
@@ -49,7 +105,7 @@ class WriteOmssaReport < ProteomaticScript
 		puts "Model peptides that identify a protein: #{lk_ProteinIdentifyingModelPeptides.size}"
 		puts "Model peptides that appear in more than one protein: #{(lk_ModelPeptides - lk_ProteinIdentifyingModelPeptides).size}."
 		puts "Proteins identified: #{lk_Proteins.size}."
-		
+        
 		if @output[:htmlReport]
 			File.open(@output[:htmlReport], 'w') do |lk_Out|
 				lk_Spots = Hash.new()
@@ -140,6 +196,24 @@ class WriteOmssaReport < ProteomaticScript
 				else
 					lk_Out.puts "<p>Information about the statistical significance of the results is unavailable.</p>"
 				end
+                if @hasProteinGroups
+                    lk_Out.puts '<h3>Protein groups</h3>'
+                    lk_Out.puts "These results contain protein groups."
+                    notUniqueProteins = Array.new
+                    @proteinGroupsForProtein.each_pair do |protein, entries|
+                        notUniqueProteins << protein if entries.size > 1
+                    end
+                    unless notUniqueProteins.empty?
+                        lk_Out.puts "There are #{notUniqueProteins.size} proteins that appear in multiple protein groups and/or as a single protein, these proteins have been marked as <b><i>(not unique)</i></b>.<br />"
+                        lk_Out.puts "<ul>"
+                        notUniqueProteins.each do |protein|
+                            lk_Out.puts "<li>#{formatProtein(protein)}</li>"
+                        end
+                        lk_Out.puts "</ul>"
+                    else
+                        lk_Out.puts "Still, all proteins are unique, regardless of whether they are grouped or not, and can be regarded as unique identifications."
+                    end
+                end
 				
 				if @param[:writeIdentifiedProteinsBySpectralCount]
 					lk_Out.puts "<h2 id='header-identified-proteins-by-spectral-count'>Identified proteins by spectral count</h2>"
@@ -168,7 +242,7 @@ class WriteOmssaReport < ProteomaticScript
 						ls_FoundInSpots = lk_FoundInSpots.join(', ')
 						li_ToggleCounter += 1
 						ls_ToggleClass = "proteins-by-spectral-count-#{li_ToggleCounter}"
-						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein].size}'>#{ls_Protein.sub('target_', '')} "
+						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein].size}'>#{formatProtein(ls_Protein)} "
 						lk_Out.print "<i>(<span class='toggle' onclick='toggle(\"#{ls_ToggleClass}\", \"inline\")'>found in:</span><span class='#{ls_ToggleClass}' style='display: none;'> #{ls_FoundInSpots}</span>)</i>" if lk_SpotKeys.size > 1
 						lk_Out.print "</td>"
 						lk_Out.print "<td rowspan='#{lk_Proteins[ls_Protein].size}'>#{lk_SpectralCounts[:proteins][ls_Protein][:total]}</td>"
@@ -227,7 +301,7 @@ class WriteOmssaReport < ProteomaticScript
 						lk_SpotProteinsSorted.each do |ls_Protein|
 							lb_Open1 = true
 							lk_Out.print "<tr>" unless lb_Open0
-							lk_Out.print "<td rowspan='#{lk_SpotProteins[ls_Protein][:peptides].size}'>#{ls_Protein.sub('target_', '')}</td>"
+							lk_Out.print "<td rowspan='#{lk_SpotProteins[ls_Protein][:peptides].size}'>#{formatProtein(ls_Protein)}</td>"
 							lk_Out.print "<td rowspan='#{lk_SpotProteins[ls_Protein][:peptides].size}'>#{lk_SpotProteins[ls_Protein][:count]}</td>"
 							lk_PeptidesSorted = lk_SpotProteins[ls_Protein][:peptides].keys.sort { |x, y| lk_SpotProteins[ls_Protein][:peptides][y] <=> lk_SpotProteins[ls_Protein][:peptides][x]}
 							lk_PeptidesSorted.each do |ls_Peptide|
@@ -250,7 +324,7 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts '<table>'
 					lk_Out.puts '<tr><th>Protein</th><th>Distinct peptide count</th><th>Peptides</th></tr>'
 					lk_ProteinsByDistinctPeptideCount.each do |ls_Protein|
-						lk_Out.puts "<tr><td>#{ls_Protein}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.join(', ')}</td></tr>"
+						lk_Out.puts "<tr><td>#{formatProtein(ls_Protein)}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.join(', ')}</td></tr>"
 					end
 					lk_Out.puts '</table>'
 				end
@@ -288,7 +362,7 @@ class WriteOmssaReport < ProteomaticScript
 						lk_AmbiguousPeptides.each do |ls_Peptide|
 							li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 							ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
-							lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td rowspan='#{li_ScanCount}'><ul>#{lk_PeptideHash[ls_Peptide][:proteins].keys.collect { |x| "<li>#{x}</li>" }.join(' ')}</ul></td><td>#{lk_PeptideHash[ls_Peptide][:scans].first}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans].first][:e])}</td></tr>"
+							lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td rowspan='#{li_ScanCount}'><ul>#{lk_PeptideHash[ls_Peptide][:proteins].keys.collect { |x| "<li>#{formatProtein(x)}</li>" }.join(' ')}</ul></td><td>#{lk_PeptideHash[ls_Peptide][:scans].first}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans].first][:e])}</td></tr>"
 							(1...li_ScanCount).each do |i|
 								lk_Out.puts "<tr><td>#{lk_PeptideHash[ls_Peptide][:scans][i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans][i]][:e])}</td></tr>"
 							end
@@ -376,7 +450,7 @@ class WriteOmssaReport < ProteomaticScript
 						lk_ScanInfo = lk_PeptideHash[ls_Peptide][:scans].sort do |a, b|
 							String::natcmp(a, b)
 						end
-						lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td rowspan='#{li_ScanCount}'><ul>#{lk_PeptideHash[ls_Peptide][:proteins].keys.collect { |x| "<li>#{x}</li>" }.join(' ')}</ul></td><td>#{lk_ScanInfo.first}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo.first][:e])}</td></tr>"
+						lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'><span#{ls_CellStyle}>#{ls_Peptide}</span> #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td rowspan='#{li_ScanCount}'><ul>#{lk_PeptideHash[ls_Peptide][:proteins].keys.collect { |x| "<li>#{formatProtein(x)}</li>" }.join(' ')}</ul></td><td>#{lk_ScanInfo.first}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo.first][:e])}</td></tr>"
 						(1...li_ScanCount).each do |i|
 							lk_Out.puts "<tr><td>#{lk_ScanInfo[i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo[i]][:e])}</td></tr>"
 						end
