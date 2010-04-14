@@ -181,14 +181,18 @@ class WriteOmssaReport < ProteomaticScript
 					else
 						lk_Out.puts "The score thresholds have been determined individually for each spot."
 					end
-					lk_Out.puts "</p>"
+                    lk_Out.puts "</p>"
 					lk_Out.puts '<table>'
+                    lk_Out.puts '<thead>'
 					lk_Out.puts '<tr><th>Spot</th><th>E-value threshold</th><th>Actual FPR</th></tr>'
+                    lk_Out.puts '</thead>'
+                    lk_Out.puts '<tbody>'
 					lk_ScoreThresholds.keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
 						lb_Good = false
 						lb_Good = true if lk_ActualFpr[ls_Spot] && lk_ActualFpr[ls_Spot] <= lk_Result[:targetFpr]
 						lk_Out.puts "<tr style='background-color: #{lb_Good ? '#bbddbb' : '#eebbbb'};'><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
 					end
+                    lk_Out.puts '</tbody>'
 					lk_Out.puts '</table>'
 				elsif (lk_Result[:scoreThresholdType] == 'min' || lk_Result[:scoreThresholdType] == 'max')
 					lk_Out.puts "<p>The results presented in this report have been filtered with a fixed score threshold of #{sprintf('%1.2e', lk_Result[:scoreThresholds].values.first)}."
@@ -224,7 +228,10 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts "</p>"
 					
 					lk_Out.puts '<table>'
+                    lk_Out.puts '<thead>'
 					lk_Out.puts "<tr><th>Protein</th><th>Protein spectral count</th><th>Peptides</th><th>Peptide spectral count</th></tr>"
+                    lk_Out.puts '</thead>'
+                    lk_Out.puts '<tbody>'
 					lk_Out.print '<tr>'
 					
 					lb_Open0 = true
@@ -257,6 +264,7 @@ class WriteOmssaReport < ProteomaticScript
 							lb_Open1 = false
 						end
 					end
+                    lk_Out.puts '</tbody>'
 					lk_Out.puts '</table>'
 				end
 				
@@ -268,7 +276,10 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts "</p>"
 					
 					lk_Out.puts '<table>'
+                    lk_Out.puts '<thead>'
 					lk_Out.puts '<tr><th>Protein</th><th>Protein spectral count</th><th>Peptides</th><th>Peptide spectral count</th></tr>'
+                    lk_Out.puts '</thead>'
+                    lk_Out.puts '<tbody>'
 					lk_SpotKeys.each do |ls_Spot|
 				#WLQYSEVIHAR:
 				#  scans: [MT_HydACPAN_1_300407.100.100.2, ...]
@@ -313,6 +324,7 @@ class WriteOmssaReport < ProteomaticScript
 							end
 						end
 					end
+                    lk_Out.puts '</tbody>'
 					lk_Out.puts '</table>'
 				end
 				
@@ -322,10 +334,14 @@ class WriteOmssaReport < ProteomaticScript
 					
 					lk_ProteinsByDistinctPeptideCount = lk_Proteins.keys.sort { |a, b| lk_Proteins[b].size <=> lk_Proteins[a].size}
 					lk_Out.puts '<table>'
+                    lk_Out.puts '<thead>'
 					lk_Out.puts '<tr><th>Protein</th><th>Distinct peptide count</th><th>Peptides</th></tr>'
+                    lk_Out.puts '</thead>'
+                    lk_Out.puts '<tbody>'
 					lk_ProteinsByDistinctPeptideCount.each do |ls_Protein|
 						lk_Out.puts "<tr><td>#{formatProtein(ls_Protein)}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.join(', ')}</td></tr>"
 					end
+                    lk_Out.puts '</tbody>'
 					lk_Out.puts '</table>'
 				end
 				
@@ -338,7 +354,10 @@ class WriteOmssaReport < ProteomaticScript
 							lk_PeptideHash[x][:scans].size == lk_PeptideHash[y][:scans].size ? x <=> y : lk_PeptideHash[y][:scans].size <=> lk_PeptideHash[x][:scans].size
 						end
 						lk_Out.puts '<table>'
+                        lk_Out.puts '<thead>'
 						lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Scan</th><th>E-value</th></tr>'
+                        lk_Out.puts '</thead>'
+                        lk_Out.puts '<tbody>'
 						lk_GpfOnlyPeptides.each do |ls_Peptide|
 							li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 							lk_Out.puts "<tr><td rowspan='#{li_ScanCount}'>#{li_ScanCount}</td><td rowspan='#{li_ScanCount}'>#{ls_Peptide} #{(!lk_PeptideHash[ls_Peptide][:mods].empty?) ? '<a href=\'#modified-peptide-' + ls_Peptide + '\' class=\'toggle\'>[mods]</span>' : ''}</td><td>#{lk_PeptideHash[ls_Peptide][:scans].first}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans].first][:e])}</td></tr>"
@@ -346,6 +365,7 @@ class WriteOmssaReport < ProteomaticScript
 								lk_Out.puts "<tr><td>#{lk_PeptideHash[ls_Peptide][:scans][i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans][i]][:e])}</td></tr>"
 							end
 						end
+                        lk_Out.puts '</tbody>'
 						lk_Out.puts '</table>'
 					end
 				end
@@ -358,7 +378,10 @@ class WriteOmssaReport < ProteomaticScript
 						lk_Out.puts "Peptides that have additionally been found by de novo prediction and GPF searching are <span class=\'gpf-confirm\'>highlighted</span>." unless lk_GpfPeptides.empty?
 						lk_Out.puts "</p>"
 						lk_Out.puts '<table>'
+                        lk_Out.puts '<thead>'
 						lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Proteins</th><th>Scan</th><th>E-value</th></tr>'
+                        lk_Out.puts '</thead>'
+                        lk_Out.puts '<tbody>'
 						lk_AmbiguousPeptides.each do |ls_Peptide|
 							li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 							ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
@@ -367,6 +390,7 @@ class WriteOmssaReport < ProteomaticScript
 								lk_Out.puts "<tr><td>#{lk_PeptideHash[ls_Peptide][:scans][i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_PeptideHash[ls_Peptide][:scans][i]][:e])}</td></tr>"
 							end
 						end
+                        lk_Out.puts '</tbody>'
 						lk_Out.puts '</table>'
 					end
 				end
@@ -407,7 +431,10 @@ class WriteOmssaReport < ProteomaticScript
 									unless lb_FoundAny
 										lk_Out.puts '<p>These peptides have been found with modifications.</p>'
 										lk_Out.puts '<table>'
+                                        lk_Out.puts '<thead>'
 										lk_Out.puts '<tr><th>Peptide</th><th>Modified peptide</th><th>Description</th><th>Scan</th></tr>'
+                                        lk_Out.puts '</thead>'
+                                        lk_Out.puts '<tbody>'
 										lb_FoundAny = true
 									end
 									lk_Out.puts "<tr>"
@@ -430,6 +457,7 @@ class WriteOmssaReport < ProteomaticScript
 						end
 					end
 					if lb_FoundAny
+                        lk_Out.puts '</tbody>'
 						lk_Out.puts '</table>'
 					else
 						lk_Out.puts '<p>No modified peptides have been found.</p>'
@@ -443,7 +471,10 @@ class WriteOmssaReport < ProteomaticScript
 					lk_Out.puts "Peptides that have additionally been found by de novo prediction and GPF searching are <span class=\'gpf-confirm\'>highlighted</span>." unless lk_GpfPeptides.empty?
 					lk_Out.puts "</p>"
 					lk_Out.puts '<table>'
+                    lk_Out.puts '<thead>'
 					lk_Out.puts '<tr><th>Scan count</th><th>Peptide</th><th>Proteins</th><th>Scan</th><th>E-value</th></tr>'
+                    lk_Out.puts '</thead>'
+                    lk_Out.puts '<tbody>'
 					lk_PeptideHash.keys.sort { |a, b| lk_PeptideHash[b][:scans].size <=> lk_PeptideHash[a][:scans].size }.each do |ls_Peptide|
 						li_ScanCount = lk_PeptideHash[ls_Peptide][:scans].size
 						ls_CellStyle = lk_PeptideHash[ls_Peptide][:found][:gpf]? ' class=\'gpf-confirm\'' : ''
@@ -455,6 +486,7 @@ class WriteOmssaReport < ProteomaticScript
 							lk_Out.puts "<tr><td>#{lk_ScanInfo[i]}</td><td>#{sprintf('%e', lk_ScanHash[lk_ScanInfo[i]][:e])}</td></tr>"
 						end
 					end
+                    lk_Out.puts '</tbody>'
 					lk_Out.puts '</table>'
 				end
 				

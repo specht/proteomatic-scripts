@@ -44,6 +44,10 @@ parameters:
     choices: [{srf: 'SRF exported'}, {tpp: 'TPP'}]
     default: srf
     label: SEQUEST format
+  - key: substituteLongNames
+    label: Substitute long names with numbers
+    type: flag
+    default: no
   - key: useProteinIds
     type: flag
     default: yes

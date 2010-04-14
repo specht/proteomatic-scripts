@@ -55,9 +55,12 @@ class MatchPeptides < ProteomaticScript
             f.puts "</head>"
             f.puts "<body>"
             f.puts "<table>"
+            f.puts "<thead>"
             f.puts "<tr>"
             f.puts "<th>Peptide</th>#{inputKeys.collect { |x| '<th>' + x + '</th>' }.join('')}"
             f.puts "</tr>"
+            f.puts "</thead>"
+            f.puts "<tbody>"
             peptides.to_a.sort.each do |peptide|
                 f.puts "<tr style='vertical-align: top;'>"
                 f.puts "<td>#{peptide}</td>"
@@ -70,6 +73,7 @@ class MatchPeptides < ProteomaticScript
                 end
                 f.puts "</tr>"
             end
+            f.puts "</tbody>"
             f.puts "</table>"
             f.puts "</body>"
             f.puts "</html>"

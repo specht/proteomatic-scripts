@@ -307,10 +307,14 @@ class ComparePsmMod < ProteomaticScript
 				f.puts "</head>"
 				f.puts "<body>"
 				f.puts "<table>"
+                f.puts "<thead>"
 				f.puts "<tr><th class='number'>No.</th><th>Run</th><th>Proteins identified</th></tr>"
+                f.puts "</thead>"
+                f.puts "<tbody>"
 				(0...lk_Ids.size).each do |i|
 					f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinCountForId[lk_Ids[i]]}</td></tr>"
 				end
+                f.puts "</tbody>"
 				f.puts "</table>"
 				f.puts "<p>Total proteins: #{lk_AllResults.size}</p>"
 				f.puts "<p>"
@@ -319,9 +323,16 @@ class ComparePsmMod < ProteomaticScript
 				f.puts "<span onclick=\"toggle('modcell', 'cell')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle modification counts</span> &nbsp;"
 				f.puts "</p>"
 				f.puts "<table>"
+                f.puts "<thead>"
 				f.puts "<tr>"
-				f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\'>' + x + '</th><th class=\'modcell\'>mod</th>' }.join('')}"
+                if @param[:substituteLongNames]
+                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + x + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                else
+                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + lk_Ids[lk_IdNumbers.index(x)] + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                end
 				f.puts "</tr>"
+                f.puts "</thead>"
+                f.puts "<tbody>"
 				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
 					f.puts "<tr class='protein'>"
 					f.puts "<td>#{fullProteinForProteinId[ls_Protein].to_a.first}</td>"
@@ -344,7 +355,7 @@ class ComparePsmMod < ProteomaticScript
 						li_Count = '&ndash;' if li_Count == 0
 						li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
 						li_ModifiedPeptideCount = '&ndash;' if li_ModifiedPeptideCount == 0
-						f.print "<td class=\'number\'>#{li_Count}</td><td class='modcell'>#{li_ModifiedPeptideCount}</td>"
+						f.print "<td class=\'number\' width=\'32\'>#{li_Count}</td><td class='modcell' width=\'32\'>#{li_ModifiedPeptideCount}</td>"
 					end
 					f.puts "</tr>"
 					lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
@@ -365,6 +376,7 @@ class ComparePsmMod < ProteomaticScript
 						f.puts "</tr>"
 					end
 				end
+                f.puts "</tbody>"
 				f.puts "</table>"
 				f.puts "<p>This HTML document uses a <a href='http://www.shawnolson.net/a/503/altering-css-class-attributes-with-javascript.html'>JavaScript snippet</a> by Shawn Olson.</p>"
 				f.puts "</body>"

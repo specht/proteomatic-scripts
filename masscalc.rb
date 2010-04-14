@@ -91,7 +91,10 @@ class MassCalc < ProteomaticScript
 				lk_Out.puts '<body>'
 				lk_Out.puts '<h1>Peptide masses</h1>'
 				lk_Out.puts "<table>"
+                lk_Out.puts "<thead>"
 				lk_Out.puts "<tr><th>Peptide</th><th>MH<sup>+2</sup> (mono)</th><th>MH<sup>+3</sup> (mono)</th><th>Y fragment ions</th></tr>"
+                lk_Out.puts "</thead>"
+                lk_Out.puts "<tbody>"
 				lk_Peptides.each do |ls_Peptide|
 					lk_Out.puts "<tr>"
 					lk_Out.puts "<td>#{ls_Peptide}</td>"
@@ -101,6 +104,7 @@ class MassCalc < ProteomaticScript
 					lk_Out.print "<td>#{lk_PeptideHash[ls_Peptide]['yions']}</td>"
 					lk_Out.puts "</tr>"
 				end
+                lk_Out.puts "</tbody>"
 				lk_Out.puts '</table></body></html>'
 			end
 		end

@@ -83,8 +83,11 @@ class CompareOmssa < ProteomaticScript
 				lk_Out.puts '<h1>OMSSA Comparison Report</h1>'
 			
 				lk_Out.puts '<table>'
+                lk_Out.puts '<thead>'
 				lk_Out.puts "<tr><th rowspan='2'>Protein</th><th colspan='#{lk_RunKeys.size}'>Spectra count</th><th rowspan='2'>std. dev.</th><th colspan='#{lk_RunKeys.size}'>Distinct peptide count</th><th rowspan='2'>std. dev.</th></tr>"
 				lk_Out.puts "<tr>#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }</tr>"
+                lk_Out.puts '</thead>'
+                lk_Out.puts '<tbody>'
 				lk_Proteins.each do |ls_Protein|
 					lk_Out.print "<tr><td>#{ls_Protein}</td>"
 					
@@ -111,6 +114,7 @@ class CompareOmssa < ProteomaticScript
 					lk_Out.print "</tr>"
 					lk_Out.puts
 				end
+                lk_Out.puts '</tbody>'
 				lk_Out.puts '</table>'
 				
 				
