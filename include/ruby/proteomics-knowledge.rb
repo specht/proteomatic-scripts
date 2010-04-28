@@ -20,7 +20,7 @@ require 'yaml'
 
 $proteomicsKnowledge = Hash.new
 
-File::open('../proteomics-knowledge-base/amino-acids.csv', 'r') do |f|
+File::open('include/proteomics-knowledge-base/amino-acids.csv', 'r') do |f|
     header = mapCsvHeader(f.readline)
     $proteomicsKnowledge[:aminoacids] = Hash.new
     f.each_line do |line|
@@ -35,7 +35,7 @@ File::open('../proteomics-knowledge-base/amino-acids.csv', 'r') do |f|
     end
 end
 
-File::open('../proteomics-knowledge-base/isotopes.csv', 'r') do |f|
+File::open('include/proteomics-knowledge-base/isotopes.csv', 'r') do |f|
     header = mapCsvHeader(f.readline)
     $proteomicsKnowledge[:isotopes] = Hash.new
     f.each_line do |line|
