@@ -21,3 +21,11 @@ parameters:
     default: 138.0680796 (DSS)
     examples: 
     - 138.0680796 (DSS)
+  - key: minCharge
+    label: Minimum charge
+    type: int
+    default: 2
+  - key: maxCharge
+    label: Maximum charge
+    type: int
+    default: 3
