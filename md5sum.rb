@@ -28,7 +28,7 @@ class Md5Sum < ProteomaticScript
         end
         print "Digesting #{files.size} file#{files.size > 1 ? 's' : ''}..."
         files.each do |path|
-            File.open(path, 'r') do |lk_File|
+            File.open(path, 'rb') do |lk_File|
                 while !lk_File.eof?
                     ls_Chunk = lk_File.read(8 * 1024 * 1024) # read 8M
                     lk_Digest << ls_Chunk

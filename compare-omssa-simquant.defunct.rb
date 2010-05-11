@@ -153,7 +153,10 @@ class CompareOmssaSimQuant < ProteomaticScript
 				lk_Out.puts '<h1>OMSSA Comparison Report</h1>'
 			
 				lk_Out.puts '<table>'
+                lk_Out.puts '<thead>'
 				lk_Out.puts "<tr><th></th><th>Protein/Peptide</th>#{lk_RunKeys.collect { |x| '<th>' + x + '</th>'}.join('') }</tr>"
+                lk_Out.puts '</thead>'
+                lk_Out.puts '<tbody>'
 				# collect proteins from all runs
 				lk_AllProteinsSet = Set.new
 				lk_RunKeys.each { |ls_Key| lk_AllProteinsSet.merge(lk_RunResults[ls_Key][:proteins].keys) }
@@ -366,6 +369,7 @@ class CompareOmssaSimQuant < ProteomaticScript
 						lk_Out.puts "</tr>"
 					end
 				end
+                lk_Out.puts '</tbody>'
 				lk_Out.puts '</table>'
 				
 				

@@ -1213,7 +1213,7 @@ class ProteomaticScript
 		lk_Info['mtime'] = File::mtime(as_Path)
 		if ab_Md5
 			lk_Digest = Digest::MD5.new()
-			File.open(as_Path, 'r') do |lk_File|
+			File.open(as_Path, 'rb') do |lk_File|
 				while !lk_File.eof?
 					ls_Chunk = lk_File.read(8 * 1024 * 1024) # read 8M
 					lk_Digest << ls_Chunk

@@ -188,7 +188,7 @@ end # class String
 
 
 def stripCsvHeader(header)
-    header.dup.strip.downcase.gsub(/[\s\-\/]/, '')
+    header.dup.strip.downcase.gsub(/[\s\-\/#]/, '')
 end
 
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Michael Specht
+# Copyright (c) 2009-2010 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -40,6 +40,7 @@ class ComparePsmMod < ProteomaticScript
 		lk_Files = @input[:sequestResults] + @input[:omssaResults]
 		lk_Ids = lk_Files.collect { |x| File::basename(x).sub('.csv', '') }.sort
 		lk_ProteinCountForId = Hash.new
+        fullProteinForProteinId = Hash.new
 
 		# lk_AllResults:
 		#   protein 1:
@@ -47,7 +48,7 @@ class ComparePsmMod < ProteomaticScript
 		#       id1: 5
 		#       id2: 8
 		lk_AllResults = Hash.new
-		
+        
 		# parse OMSSA CSV files
 		@input[:omssaResults].each do |ls_Path|
 			print "#{File::basename(ls_Path)}: "
@@ -58,8 +59,12 @@ class ComparePsmMod < ProteomaticScript
 			# lk_Results[:peptideHash] => {'peptide' => {:scans => [scans...]}}
 			lk_ProteinCountForId[ls_Id] = lk_Results[:proteins].size
 			puts "#{lk_Results[:proteins].size} proteins."
-			lk_Results[:proteins].keys.each do |ls_Protein|
-				lk_Results[:proteins][ls_Protein].each do |ls_Peptide|
+			lk_Results[:proteins].keys.each do |ls_OriginalProtein|
+                ls_Protein = ls_OriginalProtein.dup
+                ls_Protein = ls_Protein.split(/\s/).first if @param[:useProteinIds]
+                fullProteinForProteinId[ls_Protein] ||= Set.new
+                fullProteinForProteinId[ls_Protein] << ls_OriginalProtein
+				lk_Results[:proteins][ls_OriginalProtein].each do |ls_Peptide|
 					lk_Results[:peptideHash][ls_Peptide][:scans].each do |ls_Scan|
 						# initialize ls_ModPeptide with clean unmodified peptide
 						ls_ModPeptide = ls_Peptide
@@ -78,56 +83,135 @@ class ComparePsmMod < ProteomaticScript
 
 		lk_ScanHash = Hash.new
 		# parse SEQUEST CSV files, collect all unambiguous scans
-		@input[:sequestResults].each do |ls_Path|
+        @input[:sequestResults].each do |ls_Path|
 			print "#{File::basename(ls_Path)}: "
-			lk_ThisProteins = Set.new
-			ls_Id = File::basename(ls_Path).sub('.csv', '')
-			ls_Protein = nil
-			lk_ForbiddenScanIds = Set.new
-			File::open(ls_Path, 'r') do |lk_File|
-				lk_File.each_line do |ls_Line|
-					lk_Line = ls_Line.parse_csv
-					if (lk_Line[0] && (!lk_Line[0].empty?))
-						# here comes a protein
-						ls_Protein = lk_Line[1].strip
-						lk_ThisProteins << ls_Protein
-						next
-					end
-					if (ls_Protein && lk_Line[2])
-						# here comes a peptide
-						ls_ScanId = File::basename(ls_Path) + '.' + lk_Line[1]
-						next if lk_ForbiddenScanIds.include?(ls_ScanId)
-						if lk_Line[2].split('.').size != 3
-							puts "Error: Expecting K.PEPTIDER.A style peptides in SEQUEST results."
-							exit 1
-						end
-						ls_Peptide = lk_Line[2].split('.')[1].strip
-						ls_CleanPeptide = ls_Peptide.gsub(/[^A-Za-z]/, '')
-						if lk_ScanHash.include?(ls_ScanId)
-							# scan already there
-							if (lk_ScanHash[ls_ScanId][:cleanPeptide] != ls_CleanPeptide)
-								#puts "ignoring ambiguous match in #{File::basename(ls_Path)}, scan id #{ls_ScanId.split('/').last}, #{lk_ScanHash[ls_ScanId][:cleanPeptide]} / #{ls_CleanPeptide}"
-								lk_ForbiddenScanIds.add(ls_ScanId)
-								lk_ScanHash.delete(ls_ScanId)
-							end
-						end
-						unless lk_ForbiddenScanIds.include?(ls_ScanId)
-							lk_ScanHash[ls_ScanId] ||= {:cleanPeptide => ls_CleanPeptide, :protein => ls_Protein, :mods => Set.new, :id => ls_Id }
-							ls_ModPeptide = ls_Peptide.dup
-							while (ls_ModPeptide =~ /[^A-Za-z]/)
-								index = ls_ModPeptide.index(/[^A-Za-z]/)
-								ls_ModPeptide[index - 1, 1] = ls_ModPeptide[index - 1, 1].downcase
-								ls_ModPeptide.sub!(/[^A-Za-z]/, '')
-							end
-							lk_ScanHash[ls_ScanId][:mods].add(ls_ModPeptide)
-						end
-					end
-				end
-			end
+            if @param[:sequestFormat] == 'srf'
+                # SRF exported format
+                lk_ThisProteins = Set.new
+                ls_Id = File::basename(ls_Path).sub('.csv', '')
+                ls_Protein = nil
+                lk_ForbiddenScanIds = Set.new
+                File::open(ls_Path, 'r') do |lk_File|
+                    lk_File.each_line do |ls_Line|
+                        lk_Line = ls_Line.parse_csv
+                        if (lk_Line[0] && (!lk_Line[0].empty?))
+                            # here comes a protein
+                            ls_Protein = lk_Line[1].strip
+                            ls_OriginalProtein = ls_Protein.dup
+                            ls_Protein = ls_Protein.split(/\s/).first if @param[:useProteinIds]
+                            fullProteinForProteinId[ls_Protein] ||= Set.new
+                            fullProteinForProteinId[ls_Protein] << ls_OriginalProtein
+                            lk_ThisProteins << ls_Protein
+                            next
+                        end
+                        if (ls_Protein && lk_Line[2])
+                            # here comes a peptide
+                            ls_ScanId = File::basename(ls_Path) + '.' + lk_Line[1]
+                            next if lk_ForbiddenScanIds.include?(ls_ScanId)
+                            if lk_Line[2].split('.').size != 3
+                                puts "Error: Expecting K.PEPTIDER.A style peptides in SEQUEST results."
+                                exit 1
+                            end
+                            ls_Peptide = lk_Line[2].split('.')[1].strip
+                            ls_CleanPeptide = ls_Peptide.gsub(/[^A-Za-z]/, '')
+                            if ls_Peptide.include?('HPVKVTIGSQDLAASHSITQHVEVIEPHAR')
+                                puts ls_Peptide
+                                puts ls_CleanPeptide
+                            end
+                            if lk_ScanHash.include?(ls_ScanId)
+                                # scan already there
+                                if (lk_ScanHash[ls_ScanId][:cleanPeptide] != ls_CleanPeptide)
+                                    #puts "ignoring ambiguous match in #{File::basename(ls_Path)}, scan id #{ls_ScanId.split('/').last}, #{lk_ScanHash[ls_ScanId][:cleanPeptide]} / #{ls_CleanPeptide}"
+                                    lk_ForbiddenScanIds.add(ls_ScanId)
+                                    lk_ScanHash.delete(ls_ScanId)
+                                end
+                            end
+                            unless lk_ForbiddenScanIds.include?(ls_ScanId)
+                                lk_ScanHash[ls_ScanId] ||= {:cleanPeptide => ls_CleanPeptide, :protein => ls_Protein, :mods => Set.new, :id => ls_Id }
+                                ls_ModPeptide = ls_Peptide.dup
+                                while (ls_ModPeptide =~ /[^A-Za-z]/)
+                                    index = ls_ModPeptide.index(/[^A-Za-z]/)
+                                    ls_ModPeptide[index - 1, 1] = ls_ModPeptide[index - 1, 1].downcase
+                                    ls_ModPeptide.sub!(/[^A-Za-z]/, '')
+                                end
+                                lk_ScanHash[ls_ScanId][:mods].add(ls_ModPeptide)
+                            end
+                        end
+                    end
+                end
+            else
+                # TPP format
+                lk_ThisProteins = Set.new
+                ls_Id = File::basename(ls_Path).sub('.csv', '')
+                ls_Protein = nil
+                File::open(ls_Path, 'r') do |lk_File|
+                    # fake scan id
+                    li_ScanId = 1000000
+                    header = mapCsvHeader(lk_File.readline)
+                    unless header.include?('peptide') && header.include?('protein')
+                        puts "Error: Not all expected columns were found in #{ls_Path}."
+                        puts "Expected columns are 'peptide' and 'protein'."
+                        exit(1)
+                    end
+                    lk_File.each_line do |ls_Line|
+                        li_ScanId += 1
+                        ls_ScanId = ls_Id + li_ScanId.to_s
+                        lk_Line = ls_Line.parse_csv
+                        next if (!lk_Line[header['peptide']]) || (lk_Line[header['peptide']].strip.empty?)
+                        
+                        # here comes a peptide
+                        peptide = lk_Line[header['peptide']].strip
+                        if peptide.split('.').size != 3
+                            puts "Error: Expecting K.PEPTIDER.A style peptides in SEQUEST results."
+                            exit 1
+                        end
+                        ls_Peptide = peptide.split('.')[1].strip
+                        
+                        ls_CleanPeptide = ls_Peptide.gsub(/[^A-Za-z]/, '')
+                        ls_Protein = lk_Line[header['protein']]
+                        ls_OriginalProtein = ls_Protein.dup
+                        ls_Protein = ls_Protein.split(/\s/).first if @param[:useProteinIds]
+                        fullProteinForProteinId[ls_Protein] ||= Set.new
+                        fullProteinForProteinId[ls_Protein] << ls_OriginalProtein
+                        lk_ThisProteins << ls_Protein
+                        
+                        lk_ScanHash[ls_ScanId] ||= {:cleanPeptide => ls_CleanPeptide, :protein => ls_Protein, :mods => Set.new, :id => ls_Id }
+                        ls_ModPeptide = ls_Peptide.dup
+                        while (ls_ModPeptide =~ /[^A-Za-z]/)
+                            index = ls_ModPeptide.index(/[^A-Za-z]/)
+                            ls_ModPeptide[index - 1, 1] = ls_ModPeptide[index - 1, 1].downcase
+                            ls_ModPeptide.sub!(/[^A-Za-z]/, '')
+                        end
+                        lk_ScanHash[ls_ScanId][:mods].add(ls_ModPeptide)
+                    end
+                end
+            end
 			lk_ProteinCountForId[ls_Id] = lk_ThisProteins.size
 			puts "#{lk_ThisProteins.size} proteins."
 		end
-		
+        
+        ambiguousDescriptions = Set.new
+        fullProteinForProteinId.each_pair do |key, entries|
+            newEntries = entries.dup
+            longestEntry = newEntries.sort { |a, b| b.size <=> a.size }.first
+            newEntries.reject! do |x|
+                (x != longestEntry) && (longestEntry[0, x.size] == x)
+            end
+            fullProteinForProteinId[key] = newEntries
+            ambiguousDescriptions << key if newEntries.size > 1
+        end
+        
+        unless ambiguousDescriptions.empty?
+            puts "Warning: Something may be wrong here, because there are multiple full protein descriptions for some proteins."
+            puts "This applies to #{ambiguousDescriptions.size} proteins."
+            ambiguousDescriptions.to_a.sort.each do |key|
+                puts "#{key}"
+                fullProteinForProteinId[key].each do |full|
+                    puts "    #{full}"
+                end
+            end
+        end
+        
 		# merge SEQUEST results into lk_AllResults
 		lk_ScanHash.each do |ls_ScanId, lk_Scan|
 			ls_Protein = lk_Scan[:protein]
@@ -186,7 +270,7 @@ class ComparePsmMod < ProteomaticScript
 			File::open(@output[:proteinReport], 'w') do |f|
 				f.puts "Protein,#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}"
 				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
-					f.print "\"#{ls_Protein}\","
+					f.print "\"#{fullProteinForProteinId[ls_Protein].to_a.first}\","
 					lk_IdSums = Hash.new
 					lk_IdModSums = Hash.new
 					lk_Ids.each do |x| 
@@ -223,10 +307,14 @@ class ComparePsmMod < ProteomaticScript
 				f.puts "</head>"
 				f.puts "<body>"
 				f.puts "<table>"
+                f.puts "<thead>"
 				f.puts "<tr><th class='number'>No.</th><th>Run</th><th>Proteins identified</th></tr>"
+                f.puts "</thead>"
+                f.puts "<tbody>"
 				(0...lk_Ids.size).each do |i|
 					f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinCountForId[lk_Ids[i]]}</td></tr>"
 				end
+                f.puts "</tbody>"
 				f.puts "</table>"
 				f.puts "<p>Total proteins: #{lk_AllResults.size}</p>"
 				f.puts "<p>"
@@ -235,12 +323,19 @@ class ComparePsmMod < ProteomaticScript
 				f.puts "<span onclick=\"toggle('modcell', 'cell')\" style='cursor: pointer; background-color: #ddd; border: 1px solid #888; padding: 0.2em;'>Toggle modification counts</span> &nbsp;"
 				f.puts "</p>"
 				f.puts "<table>"
+                f.puts "<thead>"
 				f.puts "<tr>"
-				f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\'>' + x + '</th><th class=\'modcell\'>mod</th>' }.join('')}"
+                if @param[:substituteLongNames]
+                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + x + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                else
+                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + lk_Ids[lk_IdNumbers.index(x)] + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                end
 				f.puts "</tr>"
+                f.puts "</thead>"
+                f.puts "<tbody>"
 				lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
 					f.puts "<tr class='protein'>"
-					f.puts "<td>#{ls_Protein}</td>"
+					f.puts "<td>#{fullProteinForProteinId[ls_Protein].to_a.first}</td>"
 					lk_IdSums = Hash.new
 					lk_IdModSums = Hash.new
 					lk_Ids.each do |x| 
@@ -260,7 +355,7 @@ class ComparePsmMod < ProteomaticScript
 						li_Count = '&ndash;' if li_Count == 0
 						li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
 						li_ModifiedPeptideCount = '&ndash;' if li_ModifiedPeptideCount == 0
-						f.print "<td class=\'number\'>#{li_Count}</td><td class='modcell'>#{li_ModifiedPeptideCount}</td>"
+						f.print "<td class=\'number\' width=\'32\'>#{li_Count}</td><td class='modcell' width=\'32\'>#{li_ModifiedPeptideCount}</td>"
 					end
 					f.puts "</tr>"
 					lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
@@ -281,6 +376,7 @@ class ComparePsmMod < ProteomaticScript
 						f.puts "</tr>"
 					end
 				end
+                f.puts "</tbody>"
 				f.puts "</table>"
 				f.puts "<p>This HTML document uses a <a href='http://www.shawnolson.net/a/503/altering-css-class-attributes-with-javascript.html'>JavaScript snippet</a> by Shawn Olson.</p>"
 				f.puts "</body>"

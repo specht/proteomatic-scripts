@@ -1,0 +1,31 @@
+group: Proteomics/Crosslinking
+
+title: Calculate fragment masses
+
+description: >
+  Calculate fragment masses of two crosslinked peptides.
+
+type: processor
+
+parameters:
+  - key: peptideA
+    type: string
+    label: Peptide A
+  - key: peptideB
+    type: string
+    label: Peptide B
+  - key: crossLinkerMassShift
+    label: Crosslinker mass shift
+    description: Enter the mass shift here, optionally followed by a space and some descriptive text.
+    type: string
+    default: 138.0680796 (DSS)
+    examples: 
+    - 138.0680796 (DSS)
+  - key: minCharge
+    label: Minimum charge
+    type: int
+    default: 2
+  - key: maxCharge
+    label: Maximum charge
+    type: int
+    default: 3

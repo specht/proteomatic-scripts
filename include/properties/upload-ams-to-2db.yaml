@@ -1,6 +1,6 @@
 group: Proteomics/Identification/OMSSA/Miscellaneous
 
-title: upload AMS to 2DB
+title: Upload AMS to 2DB
 
 description: >
   Upload AMS files to 2 Data base.
@@ -22,7 +22,7 @@ parameters:
   - key: password
     type: string
     label: Password
-    default: 'garnix'
+    default: ''
   - key: databaseTarget
     label: database
     type: string

@@ -1,0 +1,29 @@
+group: Proteomics/Protein databases
+
+title: Match peptides to FASTA databases
+
+description: Match peptides to FASTA databases.
+
+type: processor
+
+input:
+  - key: databases
+    label: FASTA database
+    formats: [fasta]
+    min: 1
+  - key: peptides
+    label: Peptides
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: peptides
+
+output:
+  - key: results
+    label: results
+    format: html
+    filename: matched-peptides.html
+    default: yes
+
+needs:
+  - ext.ptb

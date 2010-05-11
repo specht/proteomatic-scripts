@@ -1,0 +1,31 @@
+group: Miscellaneous
+
+title: Highlight items
+
+description: >
+  Highlight items in an HTML file.
+
+type: converter
+
+input:
+  - key: input
+    label: HTML
+    formats: [html, xhtml]
+  - key: items
+    label: items
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: input
+
+output:
+  - key: input
+    label: highlighted files
+    format: html
+    filename: '#{basename}-highlighted.#{extension}'
+
+parameters:
+  - key: caseSensitive
+    type: flag
+    default: no
+    label: be case-sensitive
