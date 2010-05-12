@@ -138,6 +138,8 @@ class QTrace < ProteomaticScript
 				lk_Out.puts(lk_ThisPeptides.to_a.sort.join("\n"))
 			end
 
+            next if lk_ThisPeptides.empty?
+
 			csvOutputOptions = '--csvOutput no '
 			csvOutputOptions = "--csvOutput yes --csvOutputPath \"#{ls_CsvPath}\" " if @output[:qtraceCsv]
 			
