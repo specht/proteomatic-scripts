@@ -50,6 +50,33 @@ class DrawDiagram < ProteomaticScript
 					lk_Item[x] = lk_Line[lk_Header[x]]
 					lk_Item[x] ||= ''
 				end
+                proteinLabel = lk_Item['protein'].dup
+                items = []
+                if proteinLabel[0, 9] == '__group__'
+                    items = proteinLabel[9, proteinLabel.size - 9].split("\1")
+                else
+                    items = [proteinLabel]
+                end 
+                items.collect! do |x|
+                    x.upcase!
+                    if x.match(/\{.+\}/)
+                        x = $~.to_a.first
+                        x = x[1, x.size - 2].strip
+                    end
+                    if x.index('JGI|CHLRE3|') == 0
+                        x = 'JGI v3.1: ' + x.split('|')[2]
+                    elsif x.index('NCBI|BK000554.2|') == 0
+                        x = 'NCBI vBK000554.2: ' + x.split('|')[3]
+                    elsif x.include?('LHCBM3')
+                        x = 'LhcbM3'.upcase
+                    elsif x.include?('LI818R-1')
+                        x = 'LhcSR1'.upcase
+                    elsif x.include?('LIL,')
+                        x = 'LIL'
+                    end
+                    x
+                end
+                lk_Item['label'] = items.sort.uniq.join("/")
 				lk_Items << lk_Item
 				lk_OriginalLines[lk_Item['protein']] = ls_Line
 			end
@@ -61,23 +88,23 @@ class DrawDiagram < ProteomaticScript
 		end
 		
  		lk_Items.sort! do |a, b|
-			a['peptidebandcount'].to_i != b['peptidebandcount'].to_i ?
-				(a['peptidebandcount'].to_i == 1 || b['peptidebandcount'].to_i == 1) ?
-					b['peptidebandcount'].to_i <=> a['peptidebandcount'].to_i :
-					a['mean'].to_f <=> b['mean'].to_f:
-				a['mean'].to_f <=> b['mean'].to_f
+			a['pbccount'].to_i != b['pbccount'].to_i ?
+				(a['pbccount'].to_i == 1 || b['pbccount'].to_i == 1) ?
+					b['pbccount'].to_i <=> a['pbccount'].to_i :
+					a['ratiomean'].to_f <=> b['ratiomean'].to_f:
+				a['ratiomean'].to_f <=> b['ratiomean'].to_f
 					
  		end
 		
 		# max rel std dev is 0.6
-		relstddevcutoff = 0.6
-		puts lk_Items.size
+		relstddevcutoff = 0.3
+# 		puts lk_Items.size
 		lk_Items.reject! { |x| x['rsd'].to_f > relstddevcutoff }
-		puts lk_Items.size
+# 		puts lk_Items.size
 
 		# min scan count is 2
 		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
-		puts lk_Items.size
+# 		puts lk_Items.size
 
 # 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
 # 			lk_Out.puts "Protein,scan count,peptide/band/charge count,mean,stddev"
@@ -100,7 +127,7 @@ class DrawDiagram < ProteomaticScript
 # 		end
 		
 		# this is for PBC 1 / PBC 2 or more
- 		lk_Items.reject! { |x| x['peptidebandchargecount'].to_i < 2 }
+ 		lk_Items.reject! { |x| x['pbccount'].to_i < 2 }
 		
 # 		lk_Items.each do |lk_Item|
 # 			puts lk_OriginalLines[lk_Item['protein']]
@@ -110,11 +137,11 @@ class DrawDiagram < ProteomaticScript
 			$gi_ItemCount = lk_Items.size
 
 			$gi_Border = 16
-			$gi_LeftBorder = 40
+			$gi_LeftBorder = 50
  			$gi_ImageWidth = 1200
- 			$gi_ImageHeight = 660
-			$gf_MinY = 6.0
-			$gf_MaxY = 0.2
+ 			$gi_ImageHeight = 540
+			$gf_MinY = 4.0
+			$gf_MaxY = 0.5
 			$gi_TickWidth = 3.0
 
 # 			$gi_ImageWidth = 420
@@ -125,7 +152,7 @@ class DrawDiagram < ProteomaticScript
 			$gi_Left = $gi_LeftBorder
 			$gi_Top = $gi_Border
 			$gi_Width = $gi_ImageWidth - $gi_LeftBorder - $gi_Border
-			$gi_Height = $gi_ImageHeight - $gi_Border * 2
+			$gi_Height = $gi_ImageHeight - $gi_Border * 2 - 160.0
 
 			lk_Out.puts '<?xml version="1.0" encoding="utf-8"?>'
 			lk_Out.puts '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
@@ -134,18 +161,30 @@ class DrawDiagram < ProteomaticScript
 			lk_Out.puts "<rect x='0' y='0' width='#{$gi_ImageWidth}' height='#{$gi_ImageHeight}' fill='#fff' stroke='none' />"
 			
 			lk_Out.puts "<rect x='#{$gi_Left}' y='#{$gi_Top}' width='#{$gi_Width}' height='#{$gi_Height}' fill='#eeeeec' stroke='#888a85' stroke-width='0.5px'/>"
-			
-			(1..11).each do |y|
+
+            y = 1
+            step = 0.2
+            while y < 4.01
 				sy = scaley(y)
 				ls_Color = '#babdb6'
-				ls_Color = '#555753' if y == 1	
+				ls_Color = '#888a85' if (y - y.round).abs() < 0.01
+                ls_Color = '#555753' if y == 1
 				lk_Out.puts "<line x1='#{$gi_Left}' y1='#{sy}' x2='#{$gi_Left + $gi_Width}' y2='#{sy}' stroke='#{ls_Color}' stroke-width='1px'/>"
-				lk_Out.puts "<text x='#{$gi_Left - 4}' y='#{sy + 4}' style='font-family: Verdana; font-size: 10pt; text-anchor: end;'>#{y}</text>"
+				lk_Out.puts "<text x='#{$gi_Left - 4}' y='#{sy + 4}' style='font-family: Verdana; font-size: 8pt; text-anchor: end;'>#{y}</text>"
+                step = 0.5 if (y >= 2.99)
+                y += step
 			end
-			(2..4).each do |y|
+            y = 1
+            step = 0.2
+            while y < 2.01
+                ls_Color = '#babdb6'
+                ls_Color = '#888a85' if (y - y.round).abs() < 0.01
 				sy = scaley(1.0 / y.to_f)
-				lk_Out.puts "<line x1='#{$gi_Left}' y1='#{sy}' x2='#{$gi_Left + $gi_Width}' y2='#{sy}' stroke='#babdb6' stroke-width='1px'/>"
-				lk_Out.puts "<text x='#{$gi_Left - 4}' y='#{sy + 4}' style='font-family: Verdana; font-size: 10pt; text-anchor: end;'>1/#{y}</text>"
+                if y != 1
+                    lk_Out.puts "<line x1='#{$gi_Left}' y1='#{sy}' x2='#{$gi_Left + $gi_Width}' y2='#{sy}' stroke='#{ls_Color}' stroke-width='1px'/>"
+                    lk_Out.puts "<text x='#{$gi_Left - 4}' y='#{sy + 4}' style='font-family: Verdana; font-size: 8pt; text-anchor: end;'>1/#{y}</text>"
+                end
+                y += step
 			end
 			
 =begin		
@@ -159,7 +198,7 @@ class DrawDiagram < ProteomaticScript
 				lk_Item = lk_Items[i]
 				#ls_Color = lk_GroupColorsFG[lk_GroupKeys[lk_Item['localization']] % lk_GroupColorsFG.size]
 				ls_Color = '#888a85'
-				ls_Color = '#000' if lk_Item['localization'].upcase == 'CP'
+# 				ls_Color = '#000' if lk_Item['localization'].upcase == 'CP'
 # 				li_Count = lk_Item['count'].to_i
 # 				if li_Count > 100
 # 					ls_Color = '#000'
@@ -169,16 +208,16 @@ class DrawDiagram < ProteomaticScript
 # 					ls_Color = '#888'
 # 				end
 				ls_Color = '#000'
-				ls_Color = '#888a85' if lk_Item['peptidebandcount'].to_i == 1
+				ls_Color = '#888a85' if lk_Item['pbcCount'].to_i == 1
 				ls_Style = ''
 				#ls_Style = 'stroke-dasharray: 2, 2;' if lk_Item['marker'].include?('unknown')
 				#ls_Color = '#4e9a06;' if lk_Item['localization'].upcase == 'CP-PS' 
 				x = scalex(i)
 				t = Hash.new
 				
-				t[0] = lk_Item['mean'].to_f - lk_Item['sd'].to_f
-				t[1] = lk_Item['mean'].to_f
-				t[2] = lk_Item['mean'].to_f + lk_Item['sd'].to_f
+				t[0] = lk_Item['ratiomean'].to_f - lk_Item['ratiosd'].to_f
+				t[1] = lk_Item['ratiomean'].to_f
+				t[2] = lk_Item['ratiomean'].to_f + lk_Item['ratiosd'].to_f
 				if (t[1] > $gf_MinY)
 					t[0] = $gf_MinY
 					t[1] = $gf_MinY
@@ -206,10 +245,42 @@ class DrawDiagram < ProteomaticScript
 						fill = '#ffffff'
 						stroke = ls_Color
 					end
-					lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='1.8' stroke='#{stroke}' fill='#{fill}'/>"
+#                     r = 1.8 * Math::log(lk_Item['scancount'].to_f) / 3.0
+                    r = Math::log(lk_Item['scancount'].to_f) * 0.7
+                    lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='#{r}' stroke='#{stroke}' fill='#{fill}'/>"
 					#lk_Out.puts "<circle cx='#{x}' cy='#{y}' r='2.0' stroke='none' fill='#000'/>"
  				end
+                [0].each do |k|
+                    #y = scaley(lk_Item["p#{k}"].to_f)
+                    y = scaley(t[k])
+#                   if lk_Item['marker'].include?('unknown')
+#                       stroke = ls_Color
+#                       fill = '#eeeeec'
+#                   end
+                    stroke = 'none'
+                    fill = ls_Color
+                    if lk_Item['method'] == 'AMT'
+                        fill = '#ffffff'
+                        stroke = ls_Color
+                    end
+                    lk_Out.puts "<g transform='translate(#{x + 4.0},#{$gi_Height + 25.0}) rotate(-60)'><text x='0' y='0' style='font-family: Verdana; font-size: 8pt; text-anchor: end;'>#{lk_Item['label']}</text></g>"
+#                     lk_Out.puts "<g transform='translate(#{x},#{y})'><text x='0' y='14' style='font-family: Verdana; font-size: 7pt; text-anchor: middle;'>#{lk_Item['scancount']}</text></g>"
+                end
 			end
+            lk_Out.puts "<g transform='translate(57.0, -48.0)'>"
+            lk_Out.puts "<rect fill='#ffffff' fill-opacity='0.8' stroke='#888a85' x='0' y='70' width='100' height='120' />"
+            lk_Out.puts "<text x='8.0' y='90' style='font-family: Verdana; font-size: 8pt; text-anchor: start; font-weight: bold;'>Scan counts</text>"
+            [5, 20, 250, 1000].each_with_index do |c, i|
+                r = Math::log(c.to_f) * 0.7
+                stroke = 'none'
+                fill = '#000000'
+                lk_Out.puts "<circle cx='#{15.0}' cy='#{107 + i * 20.0}' r='#{r}' stroke='#{stroke}' fill='#{fill}'/>"
+                lk_Out.puts "<text x='25.0' y='#{100 + i * 20.0 + 12.0}' style='font-family: Verdana; font-size: 8pt; text-anchor: start;'>#{c} scans</text>"
+            end
+            lk_Out.puts "</g>"
+            lk_Out.puts "<g transform='rotate(-90)'>"
+            lk_Out.puts "<text x='-13.0' y='20.0' style='font-family: Verdana; font-size: 8pt; text-anchor: end; font-weight: bold;'>Protein ratio</text>"
+            lk_Out.puts "</g>"
 			
 			
 			lk_Out.puts '</svg>'
