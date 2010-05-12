@@ -130,15 +130,18 @@ class QTrace < ProteomaticScript
 			ls_XhtmlPath = File::join(ls_TempPath, ls_Spot + '-out.xhtml')
 			ls_PeptidesPath = File::join(ls_TempPath, ls_Spot + '-peptides.txt')
 
+            lb_FoundNoPeptides = false
+            
 			# write all target peptides into one file
 			File::open(ls_PeptidesPath, 'w') do |lk_Out|
 				lk_ThisPeptides = Set.new
 				lk_ThisPeptides += lk_Peptides[ls_Spot] if lk_Peptides[ls_Spot]
 				lk_ThisPeptides += Set.new(lk_PeptidesForAll) if lk_PeptidesForAll
+                lb_FoundNoPeptides = lk_ThisPeptides.empty?
 				lk_Out.puts(lk_ThisPeptides.to_a.sort.join("\n"))
 			end
 
-            next if lk_ThisPeptides.empty?
+            next if lb_FoundNoPeptides
 
 			csvOutputOptions = '--csvOutput no '
 			csvOutputOptions = "--csvOutput yes --csvOutputPath \"#{ls_CsvPath}\" " if @output[:qtraceCsv]
