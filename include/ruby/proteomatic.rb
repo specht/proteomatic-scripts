@@ -362,6 +362,14 @@ class ProteomaticScript
 			@mi_FileTrackerPort = fileTrackerHostAndPortList[1].to_i
 		end
 		
+        # see if there's a parameter in ARGV that defines where external tools 
+        # should be located
+        if ARGV.include?('--extToolsPath')
+            path = ARGV[ARGV.index('--extToolsPath') + 1]
+            ARGV.slice!(ARGV.index('--extToolsPath'), 2)
+            ExternalTools::setExtToolsPath(path)
+        end
+        
 		@ms_Version = File::read('include/ruby/version.rb').strip
 		@ms_Version.freeze
 		
