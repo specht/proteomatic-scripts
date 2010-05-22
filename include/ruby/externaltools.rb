@@ -45,7 +45,7 @@ class ExternalTools
 				system("bzip2 -dc #{as_Path} | tar xf -")
 				return
 			else
-				ls_Command = "#{binaryPath('7zip.7zip')} x #{as_Path}"
+				ls_Command = "#{binaryPath('7zip.7zip', @@ms_RootPath)} x #{as_Path}"
 				%x{#{ls_Command}}
 				unless $? == 0
 					puts 'Error: There was an error while executing 7zip.'
@@ -54,7 +54,7 @@ class ExternalTools
 				return
 			end
 		elsif (@@ms_Platform == 'win32')
-			ls_Command = "#{binaryPath('7zip.7zip')} x #{as_Path}"
+			ls_Command = "#{binaryPath('7zip.7zip', @@ms_RootPath)} x #{as_Path}"
 			
 			%x{#{ls_Command}}
 			unless $? == 0
@@ -126,11 +126,13 @@ class ExternalTools
 		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
-	def self.binaryPath(as_Tool)
+	def self.binaryPath(as_Tool, as_OverrideExtToolsPath = nil)
+        ls_UseExtToolsPath = as_OverrideExtToolsPath
+        ls_UseExtToolsPath ||= @@ms_ExtToolsPath
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
-		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
+		ls_Path = File::join(ls_UseExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
 		install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) unless File::exists?(ls_Path)
 		return ls_Path
 	end
