@@ -10,5 +10,6 @@ type: processor
 parameters:
   - key: nucleotides
     type: string
+    textfield: yes
     label: DNA
     default: ''

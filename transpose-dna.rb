@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2007-2010 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -21,7 +21,7 @@ require 'include/ruby/proteomatic'
 class TransposeDna < ProteomaticScript
 	def run()
 		lk_Nucleotides = {'A' => 'T', 'C' => 'G', 'G' => 'C', 'T' => 'A'}
-		ls_Source = @param[:nucleotides].reverse.upcase
+		ls_Source = @param[:nucleotides].upcase.gsub(/[^CGAG]/, '').reverse.upcase
 		ls_Result = ''
 		(0...ls_Source.size).each do |i|
 			ls_Result += lk_Nucleotides[ls_Source[i, 1]]
