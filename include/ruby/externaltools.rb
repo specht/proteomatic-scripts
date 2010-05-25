@@ -26,7 +26,8 @@ require 'net/ftp'
 class ExternalTools
 	@@ms_Platform = determinePlatform()
 	@@ms_RootPath = Dir::pwd()
-    @@ms_ExtToolsPath = File::join(Dir::pwd(), 'ext')
+    @@ms_DefaultExtToolsPath = File::join(@@ms_RootPath, 'ext')
+    @@ms_ExtToolsPath = @@ms_RootPath.dup
     
     def self.setExtToolsPath(as_Path)
         @@ms_ExtToolsPath = as_Path
@@ -45,7 +46,7 @@ class ExternalTools
 				system("bzip2 -dc #{as_Path} | tar xf -")
 				return
 			else
-				ls_Command = "#{binaryPath('7zip.7zip', @@ms_RootPath)} x #{as_Path}"
+				ls_Command = "#{binaryPath('7zip.7zip', @@ms_DefaultExtToolsPath)} x #{as_Path}"
 				%x{#{ls_Command}}
 				unless $? == 0
 					puts 'Error: There was an error while executing 7zip.'
@@ -54,7 +55,7 @@ class ExternalTools
 				return
 			end
 		elsif (@@ms_Platform == 'win32')
-			ls_Command = "#{binaryPath('7zip.7zip', @@ms_RootPath)} x #{as_Path}"
+			ls_Command = "#{binaryPath('7zip.7zip', @@ms_DefaultExtToolsPath)} x #{as_Path}"
 			
 			%x{#{ls_Command}}
 			unless $? == 0
