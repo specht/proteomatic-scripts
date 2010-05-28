@@ -27,7 +27,7 @@ class ExternalTools
 	@@ms_Platform = determinePlatform()
 	@@ms_RootPath = Dir::pwd()
     @@ms_DefaultExtToolsPath = File::join(@@ms_RootPath, 'ext')
-    @@ms_ExtToolsPath = @@ms_RootPath.dup
+    @@ms_ExtToolsPath = @@ms_DefaultExtToolsPath.dup
     
     def self.setExtToolsPath(as_Path)
         @@ms_ExtToolsPath = as_Path
