@@ -114,7 +114,7 @@ class QTrace < ProteomaticScript
 		if @output[:qtraceCsv]
 			File.open(@output[:qtraceCsv], 'w') do |lk_Out|
 			end
-		end
+        end
 		
 		# create XHTML out file
 		if @output[:xhtmlReport]
@@ -122,7 +122,9 @@ class QTrace < ProteomaticScript
 			end
 		end
 		
-		lb_FirstRun = true
+        lb_FirstRun = true
+        lb_NeedXhtmlHeader = true
+        xhtmlFooter = ''
 		@input[:spectraFiles].each do |ls_SpectraFile|
 			lb_LastRun = (ls_SpectraFile == @input[:spectraFiles].last)
 			ls_Spot = File::basename(ls_SpectraFile).split('.').first
@@ -169,22 +171,31 @@ class QTrace < ProteomaticScript
 					File.open(ls_XhtmlPath, 'r') do |lk_In|
 						contents = lk_In.read
 						contentStart = contents.index('<!-- BEGIN PEPTIDE')
-						if lb_FirstRun
-							header = contents[0, contentStart]
-							lk_Out.puts header
-						end
-						contents = contents[contentStart, contents.size]
-						contentsEnd = contents.rindex('<!-- END PEPTIDE')
-						footer = contents[contentsEnd, contents.size]
-						contents = contents[0, contentsEnd]
-						lk_Out.puts contents
-						lk_Out.puts footer if lb_LastRun
+                        if contentStart
+                            if lb_NeedXhtmlHeader
+                                header = contents[0, contentStart]
+                                lk_Out.puts header
+                                lb_NeedXhtmlHeader = false
+                            end
+                            contents = contents[contentStart, contents.size]
+                            contentsEnd = contents.rindex('<!-- END PEPTIDE')
+                            footer = contents[contentsEnd, contents.size]
+                            contents = contents[0, contentsEnd]
+                            lk_Out.puts contents
+                            xhtmlFooter = footer
+                        end
 					end
 				end
 			end
-			
-			lb_FirstRun = false
+            lb_FirstRun = false
 		end
+        if @output[:xhtmlReport]
+            File.open(@output[:xhtmlReport], 'a') do |lk_Out|
+                unless lb_NeedXhtmlHeader
+                    lk_Out.puts(xhtmlFooter)
+                end
+            end
+        end
 	end
 end
 
