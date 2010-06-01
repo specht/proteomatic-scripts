@@ -1,6 +1,6 @@
 require 'socket'
 require 'filetrackerhub'
-require 'mysql'
+# require 'mysql'
 require 'thread'
 require 'monitor'
 require 'timeout'
@@ -15,12 +15,12 @@ end
 
 conn = nil
 
-begin
-	conn = openDatabaseConnection()
-rescue Mysql::Error => e
-	puts "Error: Unable to connect to database!"
-	exit(1)
-end
+# begin
+# 	conn = openDatabaseConnection()
+# rescue Mysql::Error => e
+# 	puts "Error: Unable to connect to database!"
+# 	exit(1)
+# end
 
 serverHost = 'localhost'
 serverPort = 5555
@@ -168,4 +168,4 @@ while (newSession = server.accept)
 	end
 end
 
-conn.close
+# conn.close
