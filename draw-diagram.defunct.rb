@@ -103,7 +103,10 @@ class DrawDiagram < ProteomaticScript
 # 		puts lk_Items.size
 
 		# min scan count is 2
-		lk_Items.reject! { |x| x['scancount'].to_i < 2 }
+		lk_Items.reject! { |x| x['scancount'].to_i < 5 }
+
+        # min scan count is 2
+        lk_Items.reject! { |x| x['pbccount'].to_i < 2 }
 # 		puts lk_Items.size
 
 # 		File.open(@output[:diagram] + '.csv', 'w') do |lk_Out|
@@ -193,7 +196,7 @@ class DrawDiagram < ProteomaticScript
 				lk_Out.puts "<text x='#{scalex((lk_GroupStart[i].to_f + lk_GroupEnd[i].to_f) * 0.5)}' y='#{$gi_Top + $gi_Height - 6.0}' style='font-weight: bold; text-anchor: middle; font-family: Verdana; font-size: 10pt;'>#{lk_Groups[i]}</text>"
 			end
 =end
-
+            puts lk_Items.size
 			(0...lk_Items.size).each do |i|
 				lk_Item = lk_Items[i]
 				#ls_Color = lk_GroupColorsFG[lk_GroupKeys[lk_Item['localization']] % lk_GroupColorsFG.size]
