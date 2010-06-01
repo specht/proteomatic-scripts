@@ -47,16 +47,53 @@ class ExternalTools
 				return
             elsif stringEndsWith(as_Path, '.zip', false)
                 system("unzip -qq \"#{as_Path}\"")
+                FileUtils::rm(as_Path)
 				return
 			end
 		elsif (@@ms_Platform == 'win32')
-			ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
-			%x{#{ls_Command}}
-			unless $? == 0
-				puts 'Error: There was an error while executing 7-Zip.'
-				exit 1
-			end
-			return
+            if stringEndsWith(as_Path, '.tar.gz', false)
+                ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
+                %x{#{ls_Command}}
+                unless $? == 0
+                    puts 'Error: There was an error while executing 7-Zip.'
+                    exit 1
+                end
+                as_Path = as_Path[0, as_Path.size - '.gz'.size]
+                ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
+                %x{#{ls_Command}}
+                unless $? == 0
+                    puts 'Error: There was an error while executing 7-Zip.'
+                    exit 1
+                end
+                FileUtils::rm(as_Path)
+                return
+            elsif stringEndsWith(as_Path, '.tar.bz2', false)
+                ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
+                %x{#{ls_Command}}
+                unless $? == 0
+                    puts 'Error: There was an error while executing 7-Zip.'
+                    exit 1
+                end
+                FileUtils::rm(as_Path)
+                as_Path = as_Path[0, as_Path.size - '.bz2'.size]
+                ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
+                %x{#{ls_Command}}
+                unless $? == 0
+                    puts 'Error: There was an error while executing 7-Zip.'
+                    exit 1
+                end
+                FileUtils::rm(as_Path)
+                return
+            elsif stringEndsWith(as_Path, '.zip', false)
+                ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
+                %x{#{ls_Command}}
+                unless $? == 0
+                    puts 'Error: There was an error while executing 7-Zip.'
+                    exit 1
+                end
+                FileUtils::rm(as_Path)
+                return
+            end
 		end
 		puts "Internal error: Unable to unpack #{as_Path} (file extension handling not implemented for this system)."
 		exit 1
