@@ -1,11 +1,5 @@
 unsent-filetracker-reports/
-ext/blast/
-ext/chitinator/
-ext/gpf/
-ext/omssa/
-ext/ptb/
-ext/pwiz/
-ext/qtrace/
+ext/
 tests/run-tests.temp.txt
 
 
