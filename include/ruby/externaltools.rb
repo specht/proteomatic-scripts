@@ -26,8 +26,8 @@ require 'net/ftp'
 class ExternalTools
 	@@ms_Platform = determinePlatform()
 	@@ms_RootPath = Dir::pwd()
-    @@ms_DefaultExtToolsPath = File::join(@@ms_RootPath, 'ext')
-    @@ms_ExtToolsPath = @@ms_DefaultExtToolsPath.dup
+    @@ms_ExtToolsPath = File::join(@@ms_RootPath, 'ext')
+    @@ms_Win7ZipHelperPath = File::join(@@ms_RootPath, 'helper', '7zip', '7za457', '7za.exe')
     
     def self.setExtToolsPath(as_Path)
         @@ms_ExtToolsPath = as_Path
@@ -37,29 +37,23 @@ class ExternalTools
 	end
 	
 	def self.unpack(as_Path)
-		# note: we are already in the correct directory, I guess.
+		# Note: we should already be in the correct directory.
 		if (@@ms_Platform == 'linux' || @@ms_Platform == 'macx')
 			if stringEndsWith(as_Path, '.tar.gz', false)
-				system("gzip -dc #{as_Path} | tar xf -")
+				system("gzip -dc \"#{as_Path}\" | tar xf -")
 				return
 			elsif stringEndsWith(as_Path, '.tar.bz2', false)
-				system("bzip2 -dc #{as_Path} | tar xf -")
+				system("bzip2 -dc \"#{as_Path}\" | tar xf -")
 				return
-			else
-				ls_Command = "#{binaryPath('7zip.7zip', @@ms_DefaultExtToolsPath)} x #{as_Path}"
-				%x{#{ls_Command}}
-				unless $? == 0
-					puts 'Error: There was an error while executing 7zip.'
-					exit 1
-				end
+            elsif stringEndsWith(as_Path, '.zip', false)
+                system("unzip -qq \"#{as_Path}\"")
 				return
 			end
 		elsif (@@ms_Platform == 'win32')
-			ls_Command = "#{binaryPath('7zip.7zip', @@ms_DefaultExtToolsPath)} x #{as_Path}"
-			
+			ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
 			%x{#{ls_Command}}
 			unless $? == 0
-				puts 'Error: There was an error while executing 7zip.'
+				puts 'Error: There was an error while executing 7-Zip.'
 				exit 1
 			end
 			return
@@ -127,13 +121,11 @@ class ExternalTools
 		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
-	def self.binaryPath(as_Tool, as_OverrideExtToolsPath = nil)
-        ls_UseExtToolsPath = as_OverrideExtToolsPath
-        ls_UseExtToolsPath ||= @@ms_ExtToolsPath
+	def self.binaryPath(as_Tool)
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
-		ls_Path = File::join(ls_UseExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
+		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
 		install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) unless File::exists?(ls_Path)
 		return ls_Path
 	end
