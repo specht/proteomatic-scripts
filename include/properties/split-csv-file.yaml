@@ -1,0 +1,58 @@
+group: Miscellaneous
+
+title: Split CSV file
+
+description: >
+  Split a CSV file in two parts, one containing all entries conforming
+  to defined constraints, the other containing all remaining entries.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: acceptedEntries
+    label: accepted entries
+    format: csv
+    filename: accepted.csv
+    default: yes
+  - key: rejectedEntries
+    label: rejected entries
+    format: csv
+    filename: rejected.csv
+    default: yes
+
+parameters:
+  - key: column
+    group: Condition
+    label: Column
+    default: 'peptide'
+    type: string
+  - key: operand
+    group: Condition
+    label: Operand
+    type: enum
+    choices:
+      - 'contains'
+      - {'equal': 'is equal to'}
+      - {'notEqual': 'is not equal to'}
+      - {'less': 'is less than'}
+      - {'lessOrEqual': 'is less than or equal to'}
+      - {'greater': 'is greater than'}
+      - {'greaterOrEqual': 'is greater than or equal to'}
+  - key: value
+    group: Condition
+    type: string
+    label: Value
+  - key: caseSensitive
+    group: Condition
+    type: enum
+    label: Be case sensitive
+    choices: ['yes', 'no']
+    default: 'yes'
