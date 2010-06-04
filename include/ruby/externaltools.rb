@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2007-2010 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -84,7 +84,8 @@ class ExternalTools
                 end
                 FileUtils::rm(as_Path)
                 return
-            elsif stringEndsWith(as_Path, '.zip', false)
+            else
+                # this might be ZIP or EXE
                 ls_Command = "\"#{@@ms_Win7ZipHelperPath}\" x \"#{as_Path}\""
                 %x{#{ls_Command}}
                 unless $? == 0
