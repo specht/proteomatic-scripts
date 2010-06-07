@@ -518,20 +518,6 @@ class ProteomaticScript
         info['title'] = @ms_Title
         info['description'] = @ms_Description
         info['group'] = @ms_Group
-        inputFormats = []
-        @mk_Input['groups'].values.each do |formatInfo|
-            formatInfo['formats'].each do |format|
-                inputFormats += formatInfo(format)['extensions']
-            end
-        end
-        inputFormats.sort!
-        inputFormats.uniq!
-        info['inputExtensions'] = inputFormats.join('|')
-        if ARGV.include?('--short')
-            ls_Result << info.to_yaml
-            return ls_Result
-        end
-            
         info['type'] = @ms_ScriptType
         if (@ms_ScriptType == 'converter')
             info['converterKey'] = @mk_Output.values.first['key']
@@ -598,6 +584,7 @@ class ProteomaticScript
             end
         end
         ls_Result << info.to_yaml
+
         return ls_Result
     end
     
