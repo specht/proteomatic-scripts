@@ -1168,6 +1168,10 @@ class ProteomaticScript
 					end
 					# remove input files for which the output file already exists
 					lk_ExistingFiles.each { |ls_Path| @input[ls_OutputGroup.intern].delete(ls_Path) }
+                    if @input[ls_OutputGroup.intern].empty?
+                        puts "No files remaining for conversion, exiting."
+                        exit 0
+                    end
 				end
 			end
 		end
