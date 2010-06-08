@@ -17,6 +17,8 @@
 
 require 'include/ruby/proteomatic'
 
+# this script transposes DNA, OMG!!
+
 
 class TransposeDna < ProteomaticScript
 	def run()
