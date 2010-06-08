@@ -104,11 +104,11 @@ end
 
 def determinePlatform()
 	case RUBY_PLATFORM.downcase
-	when /linux/
+	when /linux/ then
 		'linux'
-	when /darwin/
+	when /darwin/ then
 		'macx'
-	when /mswin/
+	when /mswin/ then
 		'win32'
 	else
 		puts "Internal error: #{RUBY_PLATFORM} platform not supported."

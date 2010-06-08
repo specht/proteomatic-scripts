@@ -64,20 +64,20 @@ class Parameters
 			ak_Parameter['choices'] = ExternalTools::getToolConfig(lk_Config['tool'])[lk_Config['key']]
 		end
 		case ak_Parameter['type']
-		when 'bool'
+		when 'bool' then
 			lk_FallbackDefaultValue = false
-		when 'int'
+		when 'int' then
 			lk_FallbackDefaultValue = 0
-		when 'float'
+		when 'float' then
 			lk_FallbackDefaultValue = 0.0
-		when 'string'
+		when 'string' then
 			lk_FallbackDefaultValue = ''
-		when 'enum'
+		when 'enum' then
 			lk_FallbackDefaultValue = ak_Parameter['choices'].first
 			lk_FallbackDefaultValue = lk_FallbackDefaultValue.keys.first if lk_FallbackDefaultValue.class == Hash
-		when 'flag'
+		when 'flag' then
 			lk_FallbackDefaultValue = false
-		when 'csvString'
+		when 'csvString' then
 			lk_FallbackDefaultValue = ''
 		end
 		ak_Parameter['default'] = lk_FallbackDefaultValue unless ak_Parameter.has_key?('default')
@@ -110,17 +110,17 @@ class Parameters
         lk_Parameter = @mk_Parameters[as_Key]
         ls_Value = '-'
 		case lk_Parameter['type']
-		when 'bool'
+		when 'bool' then
 			ls_Value = as_Value ? 'yes' : 'no'
-		when 'int'
+		when 'int' then
 			ls_Value = as_Value.to_s
             ls_Value += " #{lk_Parameter['suffix']}" if lk_Parameter.has_key?('suffix')
-		when 'float'
+		when 'float' then
 			ls_Value = as_Value.to_s
             ls_Value += " #{lk_Parameter['suffix']}" if lk_Parameter.has_key?('suffix')
-		when 'string'
+		when 'string' then
 			ls_Value = as_Value
-		when 'enum'
+		when 'enum' then
 			as_Value = as_Value.to_s unless as_Value.class == String
 			@mk_Parameters[as_Key]['choices'].each do |lk_Choice|
 				ls_Key = lk_Choice.class == Hash ? lk_Choice.keys.first : lk_Choice
@@ -129,9 +129,9 @@ class Parameters
 				lk_Choice = lk_Choice.values.first if lk_Choice.class == Hash
 				ls_Value = lk_Choice.to_s
 			end
-		when 'flag'
+		when 'flag' then
 			ls_Value = as_Value ? 'yes' : 'no'
-		when 'csvString'
+		when 'csvString' then
 			as_Value = as_Value.to_s unless as_Value.class == String
 			lk_Value = as_Value.split(',')
 			lk_Pretty = Array.new
@@ -165,11 +165,11 @@ class Parameters
 	
 	def set(as_Key, ak_Value)
 		case @mk_Parameters[as_Key]['type']
-		when 'float'
+		when 'float' then
 			@mk_Parameters[as_Key]['value'] = ak_Value.to_f
-		when 'int'
+		when 'int' then
 			@mk_Parameters[as_Key]['value'] = ak_Value.to_i
-		when 'flag'
+		when 'flag' then
 			if (ak_Value == true || ak_Value == 'true' || ak_Value == 'yes')
 				@mk_Parameters[as_Key]['value'] = true
 			elsif (ak_Value == false || ak_Value == 'false' || ak_Value == 'no')
@@ -178,7 +178,7 @@ class Parameters
 				puts "Internal error: Invalid value for parameter #{as_Key}: #{ak_Value}."
 				exit 1
 			end
-		when 'csvString'
+		when 'csvString' then
 			lk_Values = Set.new(ak_Value.split(','))
 			@mk_Parameters[as_Key]['choices'].each do |lk_Choice|
 				if (lk_Choice.class == Hash)
