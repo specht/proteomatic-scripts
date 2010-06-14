@@ -3,7 +3,7 @@ group: Proteomics/Spectra
 title: Strip mzML files
 
 description: >
-  This script strips certain scan from a mzML file, based on MS levels
+  Strip certain scan from a mzML file, based on MS levels
   or scan IDs. Scan IDs can be specified as a parameter or via text files
   or PSM list files.
 
