@@ -477,7 +477,12 @@ class ProteomaticScript
 				ls_Result += 'optional: ' if (ls_Range == '')
 				ls_Result += "#{@mk_Input['groups'][ls_Group]['label']} #{ls_FileLabel}"
 				ls_Result += "\n"
-				ls_Line = "format: #{@mk_Input['groups'][ls_Group]['formats'].collect { |x| info = formatInfo(x); "#{info['description']} (#{info['extensions'].join('|')})" }.join(', ')}"
+				ls_Line = "format: #{@mk_Input['groups'][ls_Group]['formats'].collect do |x|
+                    info = formatInfo(x)
+                    ext_ = info['extensions'].join('|')
+                    ext_ = " (#{ext_})" unless ext_.empty?
+                    "#{info['description']}#{ext_}"
+                end.join(', ')}"
 				ls_Result += indent(wordwrap(ls_Line), 2, true) + "\n"
 				ls_Result += "\n"
 			end
@@ -535,6 +540,7 @@ class ProteomaticScript
                 inputInfo['key'] = @mk_Input['groups'][ls_Group]['key']
                 inputInfo['label'] = @mk_Input['groups'][ls_Group]['label']
                 ls_Format = "#{@mk_Input['groups'][ls_Group]['formats'].collect { |x| formatInfo(x)['extensions'] }.flatten.uniq.sort.join(' | ')}"
+                ls_Format = 'any file' if ls_Format.empty?
                 ls_Range = ''
                 ls_Range += 'min' if @mk_Input['groups'][ls_Group]['min']
                 ls_Range += 'max' if @mk_Input['groups'][ls_Group]['max']
