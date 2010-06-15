@@ -304,7 +304,9 @@ class ProteomaticScript
 		end
 	end
 	
-	def initialize()
+	def initialize(as_DescriptionPath = nil)
+        
+        @mb_GetShortYamlInfoOnly = (as_DescriptionPath != nil)
 	
 		@mk_TempFiles = Array.new
 	
@@ -316,6 +318,11 @@ class ProteomaticScript
 				sleep 1.0
 			end
 		end
+        
+        @mk_ScriptProperties = nil
+        if (as_DescriptionPath)
+            @mk_ScriptProperties = YAML::load_file(as_DescriptionPath)
+        end
 		
 		@ms_Platform = determinePlatform()
 		@ms_Platform.freeze
@@ -376,16 +383,20 @@ class ProteomaticScript
 		@mk_StartTime = Time.now
 		
 		loadDescription()
-		
+        
 		if ARGV == ['--resolveDependencies']
 			resolveDependencies()
 			exit 0
 		end
 		
-		if (@mb_NeedsConfig && !@mb_HasConfig)
-			puts "Error: This script needs a configuration file. Please check the config directory for a template and instructions."
-			exit 1
-		end
+        @mb_ConfigOk = true
+        if (@mb_NeedsConfig && !@mb_HasConfig)
+            @mb_ConfigOk = false
+            unless as_DescriptionPath
+                puts "Error: This script needs a configuration file. Please check the config directory for a template and instructions."
+                exit 1
+            end
+        end
 		
 		if ARGV == ['--showFileDependencies']
 			showFileDependencies()
@@ -398,8 +409,10 @@ class ProteomaticScript
             puts e
             exit 1
         end
+        return if as_DescriptionPath
+        
 		handleArguments()
-		
+        
 		if @mb_Daemon
 			resolveDependencies()
 			lk_Server = TCPServer.new('', @mi_DaemonPort);
@@ -435,6 +448,10 @@ class ProteomaticScript
 			submitRunToFileTracker() if @ms_FileTrackerHost
 		end
 	end
+    
+    def configOk()
+        @mb_ConfigOk
+    end
 	
 	def help()
 		ls_Result = ''
@@ -524,12 +541,12 @@ class ProteomaticScript
         info['description'] = @ms_Description
         info['group'] = @ms_Group
         info['type'] = @ms_ScriptType
-        if (@ms_ScriptType == 'converter')
-            info['converterKey'] = @mk_Output.values.first['key']
-            info['converterLabel'] = @mk_Output.values.first['label']
-            info['converterFilename'] = @mk_Output.values.first['filename']
-        end
         unless ab_Short
+            if (@ms_ScriptType == 'converter')
+                info['converterKey'] = @mk_Output.values.first['key']
+                info['converterLabel'] = @mk_Output.values.first['label']
+                info['converterFilename'] = @mk_Output.values.first['filename']
+            end
             info['parameters'] = @mk_Parameters.yamlInfo()
         end
         
@@ -758,7 +775,7 @@ class ProteomaticScript
 	def loadDescription()
 		# load script parameters and external tools
 		@ms_ScriptName = File.basename($0).sub('.defunct.', '.').sub('.rb', '')
-		@mk_ScriptProperties = YAML::load_file("include/properties/#{@ms_ScriptName}.yaml")
+		@mk_ScriptProperties ||= YAML::load_file("include/properties/#{@ms_ScriptName}.yaml")
 		unless @mk_ScriptProperties.has_key?('title')
 			puts 'Internal error: Script has no title.'
 			exit 1
@@ -788,7 +805,24 @@ class ProteomaticScript
 		@mb_HasConfig = File::exists?(File::join('config', "#{@ms_ScriptName}.config.yaml"))
 	end
 	private :loadDescription
+    
+    def allDependencies()
+        result = Hash.new
+        if @mk_ScriptProperties.has_key?('needs')
+            @mk_ScriptProperties['needs'].each do |ls_ExtTool|
+                next unless ls_ExtTool[0, 4] == 'ext.'
+                result[ls_ExtTool] = ExternalTools::packageTitle(ls_ExtTool)
+            end
+        end
+        return result
+    end
 	
+    def unresolvedDependencies()
+        allDependencies.reject do |key, title|
+            ExternalTools::installed?(key)
+        end
+    end
+    
 	def setupParameters()
 		lk_Errors = Array.new
 		
@@ -818,27 +852,29 @@ class ProteomaticScript
 		
 		@mk_Parameters = Parameters.new
 
-		# add external tool parameters if desired
-        unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
-            if (@mk_ScriptProperties.has_key?('externalParameters'))
-                @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-                    lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
-                    lk_Properties['parameters'].each do |lk_Parameter| 
-                        lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
-                        @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
+        unless @mb_GetShortYamlInfoOnly
+            # add external tool parameters if desired
+            unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
+                if (@mk_ScriptProperties.has_key?('externalParameters'))
+                    @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
+                        lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+                        lk_Properties['parameters'].each do |lk_Parameter| 
+                            lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
+                            @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
+                        end
                     end
                 end
-            end
-		
-            # add script parameters
-            if @mk_ScriptProperties.include?('parameters')
-                @mk_ScriptProperties['parameters'].each do |lk_Parameter| 
-                    if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
-                        puts "Internal error: Parameter key must not start with 'input' or 'output'."
-                        puts lk_Parameter.to_yaml
-                        exit 1
+            
+                # add script parameters
+                if @mk_ScriptProperties.include?('parameters')
+                    @mk_ScriptProperties['parameters'].each do |lk_Parameter| 
+                        if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
+                            puts "Internal error: Parameter key must not start with 'input' or 'output'."
+                            puts lk_Parameter.to_yaml
+                            exit 1
+                        end
+                        @mk_Parameters.addParameter(lk_Parameter)
                     end
-                    @mk_Parameters.addParameter(lk_Parameter)
                 end
             end
         end
