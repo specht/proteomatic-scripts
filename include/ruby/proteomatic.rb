@@ -642,7 +642,7 @@ class ProteomaticScript
 	private :showFileDependencies
 
 	
-	def mergeFilenames(ak_Names)
+	def mergeFilenames(ak_Names, ab_ReturnBatchKeys = false)
 		return nil if ak_Names.empty?
 		lk_Names = ak_Names.dup
 
@@ -689,6 +689,9 @@ class ProteomaticScript
 		end
 
 		ls_MergedName = ''
+
+        lk_BatchKeys = []
+        ak_Names.each { |x| lk_BatchKeys << '' }
 
 		(0...ls_AllPattern.size).each do |i|
 			lk_Part = lk_AllParts[i].to_a
@@ -742,11 +745,14 @@ class ProteomaticScript
 					end
 				end
 				ls_MergedName << lk_Part.join(',')
+                lk_Part.each_with_index do |x, index|
+                    lk_BatchKeys[index] += x
+                end
 			end
 		end
+        return lk_BatchKeys if ab_ReturnBatchKeys
 		return ls_MergedName
 	end
-	private :mergeFilenames
 
 
 	def loadDescription()

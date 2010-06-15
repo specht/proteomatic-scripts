@@ -1,0 +1,55 @@
+group: Proteomics/Quantitation/qTrace/2. Filter
+
+title: Compare ratios
+
+description: >
+  Compare peptide or protein ratios of two or more quantiation result lists.
+
+type: processor
+
+input:
+  - key: ratios
+    label: quantitation ratios
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: ratios
+
+output:
+  - key: results
+    label: comparison
+    format: csv
+    filename: comparison.csv
+    default: yes
+
+parameters:
+  - key: scope
+    type: enum
+    choices: [automatic, peptide, protein]
+    default: automatic
+    label: Comparison scope
+  - key: keepOutliers
+    type: flag
+    default: no
+    label: Keep ratios that do not appear in every input file
+  - group: Columns
+    key: ratiomean
+    type: flag
+    default: true
+    label: Ratio mean
+  - group: Columns
+    key: ratiosd
+    type: flag
+    default: false
+    label: Ratio SD
+  - group: Columns
+    key: scancount
+    type: flag
+    default: false
+    label: Scan count
+  - group: Columns
+    key: pbccount
+    type: flag
+    default: false
+    label: PBC count
+
