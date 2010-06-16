@@ -3,6 +3,32 @@ require 'include/ruby/proteomatic'
 
 #extensions = ['.rb', '.php', '.py', '.pl']
 
+if ARGV.include?('--interactive')
+    while true
+        STDOUT.puts "NEXT PLEASE"
+        STDOUT.flush
+        script = STDIN.gets.strip
+        break if script.empty?
+        descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.rb', '')}.yaml"
+        unless File::exists?(descriptionPath)
+            descriptionPath = File::join(File::dirname(script), "include/properties/#{File::basename(script).sub('.defunct.', '.').sub('.rb', '')}.yaml")
+        end
+        begin
+            object = ProteomaticScript.new(descriptionPath)
+            if object.configOk()
+                yamlInfo = object.yamlInfo(true)
+                if yamlInfo[0, 11] == '---yamlInfo'
+                    STDOUT.puts yamlInfo
+                end
+            end
+        rescue
+            STDOUT.puts "Error: Unable to load script: #{script}"
+        end
+        STDOUT.flush
+    end
+    exit
+end
+
 allScripts = Array.new
 
 if (ARGV.empty?)
