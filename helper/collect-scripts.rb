@@ -2,11 +2,19 @@ require 'yaml'
 require 'include/ruby/proteomatic'
 
 #extensions = ['.rb', '.php', '.py', '.pl']
-extensions = ['.rb']
-allScripts = []
-extensions.each do |ext|
-    allScripts += Dir["*#{ext}"]
+
+allScripts = Array.new
+
+if (ARGV.empty?)
+    extensions = ['.rb']
+    allScripts = []
+    extensions.each do |ext|
+        allScripts += Dir["*#{ext}"]
+    end
+else
+    allScripts = ARGV
 end
+
 allScripts.reject { |x| x.include?('.defunct.') }
 allScripts.sort!
 
