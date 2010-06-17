@@ -1,0 +1,47 @@
+group: Proteomics/Localization
+
+title: Localize via spectral counts
+
+description: >
+  Localize proteins or peptides according to their spectral counts in
+  measurements coming from two different isolations, eg. chloroplast vs.
+  non-chloroplast. Items are localized by spectral count ratio if possible,
+  if no ratio can be determined because there are no identifications in
+  isolation B, the localization is determined via the spectral counts in 
+  isolation A.
+
+type: processor
+
+input:
+  - key: a
+    label: A isolation PSM list
+    formats: [csv]
+    min: 1
+  - key: b
+    label: B isolation PSM list
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: a
+
+output:
+  - key: results
+    label: localization results
+    format: csv
+    filename: localization-results.csv
+    default: yes
+
+parameters:
+  - key: scope
+    label: Scope
+    type: enum
+    choices: [{protein: "Protein level"}, {peptide: "Peptide level"}]
+    default: protein
+  - key: minRatio
+    type: float
+    default: 5.0
+    label: Minimal A/B ratio
+  - key: minAScanCount
+    type: int
+    default: 5
+    label: Minimal A scan count
