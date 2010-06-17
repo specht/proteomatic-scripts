@@ -1,3 +1,6 @@
+# GO TO THE CORRECT DIRECTORY, NO MATTER WHAT!
+Dir::chdir(File::join(Dir::pwd, File::dirname($0), '..'))
+
 require 'yaml'
 require 'include/ruby/proteomatic'
 
