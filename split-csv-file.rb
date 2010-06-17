@@ -31,8 +31,6 @@ class SplitCsvFile < ProteomaticScript
         column = stripCsvHeader(@param[:column])
         headerLine = nil
         allHeader = nil
-        value = @param[:value]
-        value.downcase! if @param[:caseSensitive] == 'no'
         @input[:in].each do |path|
             File::open(path, 'r') do |f|
                 headerLine = f.readline
@@ -51,41 +49,69 @@ class SplitCsvFile < ProteomaticScript
         
         acceptFile.puts headerLine if acceptFile
         rejectFile.puts headerLine if rejectFile
-                    
+        
+        possibleValues = Set.new
+        possibleValues << @param[:value]
+        @input[:values].each do |path|
+            possibleValues |= Set.new(File::read(path).split("\n").collect { |x| x.strip } )
+        end
+        possibleValues.reject! { |x| x.empty? }
+        if @param[:caseSensitive] == 'no'
+            possibleValues.collect! { |x| x.downcase }
+        end
+        
+        acceptCount = 0
+        rejectCount = 0
+        totalCount = 0
+        
         @input[:in].each do |path|
             File::open(path, 'r') do |f|
                 f.readline
                 f.each_line do |line|
+                    totalCount += 1
+                    print "\rReading #{totalCount} entries..." if (totalCount % 200) == 0
                     lineArray = line.parse_csv()
                     item = lineArray[allHeader[column]]
                     item.downcase! if @param[:caseSensitive] == 'no'
                     
-                    accept = nil
-                    if @param[:operand] == 'contains'
-                        accept = item.include?(@param[:value])
-                    elsif @param[:operand] == 'equal'
-                        accept = (item == @param[:value])
-                    elsif @param[:operand] == 'notEqual'
-                        accept != (item == @param[:value])
-                    elsif @param[:operand] == 'less'
-                        accept != (item.to_f < @param[:value].to_f)
-                    elsif @param[:operand] == 'lessOrEqual'
-                        accept != (item.to_f <= @param[:value].to_f)
-                    elsif @param[:operand] == 'greater'
-                        accept != (item.to_f > @param[:value].to_f)
-                    elsif @param[:operand] == 'greaterOrEqual'
-                        accept != (item.to_f >= @param[:value].to_f)
+                    allAccept = false
+                    possibleValues.each do |value|
+                        thisAccept = nil
+                        if @param[:operand] == 'contains'
+                            thisAccept = item.include?(value)
+                        elsif @param[:operand] == 'equal'
+                            thisAccept = (item == value)
+                        elsif @param[:operand] == 'notEqual'
+                            thisAccept = (item != value)
+                        elsif @param[:operand] == 'less'
+                            thisAccept = (item.to_f < value.to_f)
+                        elsif @param[:operand] == 'lessOrEqual'
+                            thisAccept = (item.to_f <= value.to_f)
+                        elsif @param[:operand] == 'greater'
+                            thisAccept = (item.to_f > value.to_f)
+                        elsif @param[:operand] == 'greaterOrEqual'
+                            thisAccept = (item.to_f >= value.to_f)
+                        end
+                        if thisAccept
+                            allAccept = true
+                            break
+                        end
                     end
-                    if accept
+                    if allAccept
                         acceptFile.puts line if acceptFile
+                        acceptCount += 1
                     else
                         rejectFile.puts line if rejectFile
+                        rejectCount += 1
                     end
                 end
             end
         end
+        puts "\rReading #{totalCount} entries... done."
+        
         acceptFile.close if acceptFile
         rejectFile.close if rejectFile
+        puts "Accepted #{acceptCount} entries, rejected #{rejectCount} entries."
 	end
 end
 
