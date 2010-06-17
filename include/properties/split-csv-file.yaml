@@ -43,6 +43,7 @@ parameters:
     group: Condition
     label: Column
     default: 'peptide'
+    examples: ['peptide', 'protein', 'defline', 'scan count', 'PBC count', 'Ratio mean', 'Ratio SD', 'Ratio RSD', 'charge', 'filename']
     type: string
   - key: operand
     group: Condition
