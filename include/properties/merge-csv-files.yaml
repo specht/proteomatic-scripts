@@ -1,0 +1,23 @@
+group: Miscellaneous
+
+title: Merge CSV files
+
+description: >
+  Merge multiple CSV files. All input files must have the same header.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: merged
+    label: merged entries
+    format: csv
+    filename: merged.csv
+    default: yes

@@ -36,7 +36,7 @@ output:
     label: rejected entries
     format: csv
     filename: rejected.csv
-    default: yes
+    default: no
 
 parameters:
   - key: column
