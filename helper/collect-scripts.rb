@@ -44,7 +44,7 @@ else
     allScripts = ARGV
 end
 
-allScripts.reject { |x| x.include?('.defunct.') }
+allScripts.reject! { |x| x.include?('.defunct.') }
 allScripts.sort!
 
 # allScripts.each do |script|
