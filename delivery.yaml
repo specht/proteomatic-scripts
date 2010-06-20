@@ -1,0 +1,4 @@
+runCommands:
+  - "ruby helper/cache-script-info.rb"
+  - "rm delivery.yaml"
+  - "ruby qtrace.rb --resolveDependencies"
