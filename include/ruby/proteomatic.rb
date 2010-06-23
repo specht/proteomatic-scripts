@@ -40,6 +40,7 @@ UNSENT_REPORTS_PATH = 'unsent-filetracker-reports'
 class StdoutListener
 	def initialize(ak_OldDevice = STDOUT)
 		@mk_OldDevice = ak_OldDevice
+        @mk_OldDevice.sync = true
 		@ms_Output = ''
 	end
 	
@@ -404,6 +405,9 @@ class ProteomaticScript
         
 		handleArguments()
         
+        $stdout.sync = true
+        $stderr.sync = true
+        
 		if @mb_Daemon
 			resolveDependencies()
 			lk_Server = TCPServer.new('', @mi_DaemonPort);
@@ -435,13 +439,10 @@ class ProteomaticScript
 			@mk_EndTime = Time.now
 			puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
 			$stdout = STDOUT
+            $stdout.sync = true
 			@ms_EavesdroppedOutput = lk_Listener.get()
 			submitRunToFileTracker() if @ms_FileTrackerHost
 		end
-
-        # don't buffer the output
-        $stdout.sync = true
-        $stderr.sync = true
 	end
     
     def configOk()
