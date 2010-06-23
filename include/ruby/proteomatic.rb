@@ -311,13 +311,8 @@ class ProteomaticScript
 		@mk_TempFiles = Array.new
 	
 		# flush stdout and stderr every second... TODO: find a better way
-		@mk_FlushThread = Thread.new do
-			while true
-				$stdout.flush
-				$stderr.flush
-				sleep 1.0
-			end
-		end
+        $stdout.sync = true
+        $stderr.sync = true
         
         @mk_ScriptProperties = nil
         if (as_DescriptionPath)

@@ -4,14 +4,8 @@ Dir::chdir(File::join(Dir::pwd, File::dirname($0), '..'))
 require 'yaml'
 require 'include/ruby/externaltools'
 
-flushThread = Thread.new do
-    while true
-        $stdout.flush
-        $stderr.flush
-        sleep 1.0
-    end
-end
-
+$stdout.sync = true
+$stderr.sync = true
 
 deps = ARGV.dup
 if deps.include?('--extToolsPath')
