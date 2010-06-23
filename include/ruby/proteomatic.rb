@@ -310,10 +310,6 @@ class ProteomaticScript
 	
 		@mk_TempFiles = Array.new
 	
-		# flush stdout and stderr every second... TODO: find a better way
-        $stdout.sync = true
-        $stderr.sync = true
-        
         @mk_ScriptProperties = nil
         if (as_DescriptionPath)
             @mk_ScriptProperties = YAML::load_file(as_DescriptionPath)
@@ -442,6 +438,10 @@ class ProteomaticScript
 			@ms_EavesdroppedOutput = lk_Listener.get()
 			submitRunToFileTracker() if @ms_FileTrackerHost
 		end
+
+        # don't buffer the output
+        $stdout.sync = true
+        $stderr.sync = true
 	end
     
     def configOk()
