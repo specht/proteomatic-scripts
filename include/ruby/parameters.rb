@@ -27,7 +27,7 @@ class Parameters
 		@mk_ParametersOrder = Array.new
 	end
 	
-	def addParameter(ak_Parameter, as_ExtTool = '')
+	def addParameter(ak_Parameter, as_ExtTool = '', ab_GetInfoOnly = false)
 		if (!ak_Parameter.has_key?('key') || ak_Parameter['key'].length == 0)
 			puts "Internal error: Parameter has no key."
 			exit 1
@@ -46,22 +46,30 @@ class Parameters
 		ak_Parameter['label'] = ls_Key if (!ak_Parameter.has_key?('label'))
 		lk_FallbackDefaultValue = nil
 		if (ak_Parameter.has_key?('valuesFromProgram'))
-			ls_Switch = ak_Parameter['valuesFromProgram']
-			ls_Result = ''
-			IO.popen("#{ExternalTools::binaryPath(as_ExtTool)} #{ls_Switch}") { |f| ls_Result = f.read }
-			#puts ls_Result
-			ak_Parameter['choices'] = Array.new
-			ls_Result.each_line do |ls_Line|
-				lk_Line = ls_Line.split(':')
-				next if lk_Line.size != 2
-				# check whether key is a number
-				next if (lk_Line.first.strip =~ /^-?\d+$/) == nil
-				ak_Parameter['choices'].push({lk_Line[0].strip => lk_Line[1].strip})
-			end
+            if ab_GetInfoOnly
+                return false
+            else
+                ls_Switch = ak_Parameter['valuesFromProgram']
+                ls_Result = ''
+                IO.popen("#{ExternalTools::binaryPath(as_ExtTool)} #{ls_Switch}") { |f| ls_Result = f.read }
+                #puts ls_Result
+                ak_Parameter['choices'] = Array.new
+                ls_Result.each_line do |ls_Line|
+                    lk_Line = ls_Line.split(':')
+                    next if lk_Line.size != 2
+                    # check whether key is a number
+                    next if (lk_Line.first.strip =~ /^-?\d+$/) == nil
+                    ak_Parameter['choices'].push({lk_Line[0].strip => lk_Line[1].strip})
+                end
+            end
 		end
 		if (ak_Parameter.has_key?('valuesFromConfig'))
-			lk_Config = ak_Parameter['valuesFromConfig']
-			ak_Parameter['choices'] = ExternalTools::getToolConfig(lk_Config['tool'])[lk_Config['key']]
+            if ab_GetInfoOnly
+                return false
+            else
+                lk_Config = ak_Parameter['valuesFromConfig']
+                ak_Parameter['choices'] = ExternalTools::getToolConfig(lk_Config['tool'])[lk_Config['key']]
+            end
 		end
 		case ak_Parameter['type']
 		when 'bool' then
@@ -96,6 +104,7 @@ class Parameters
 		end
 		@mk_Parameters[ls_Key] = ak_Parameter
 		reset(ls_Key)
+        return true
 	end
 	
 	def keys()

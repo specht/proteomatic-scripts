@@ -305,9 +305,9 @@ class ProteomaticScript
 		end
 	end
 	
-	def initialize(as_DescriptionPath = nil)
+	def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false)
         
-        @mb_GetShortYamlInfoOnly = (as_DescriptionPath != nil)
+        @mb_GetInfoOnly = ab_GetInfoOnly
 	
 		@mk_TempFiles = Array.new
 	
@@ -530,6 +530,7 @@ class ProteomaticScript
 	end
 	
     def yamlInfo(ab_Short = false)
+        return '' if @mb_GetInfoOnlyFailed && (!ab_Short)
         ls_Result = ''
         ls_Result << "---yamlInfo\n"
         info = Hash.new
@@ -848,29 +849,30 @@ class ProteomaticScript
 		
 		@mk_Parameters = Parameters.new
 
-        unless @mb_GetShortYamlInfoOnly
-            # add external tool parameters if desired
-            unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
-                if (@mk_ScriptProperties.has_key?('externalParameters'))
-                    @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
-                        lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
-                        lk_Properties['parameters'].each do |lk_Parameter| 
-                            lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
-                            @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool)
+        # add external tool parameters if desired
+        unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
+            if (@mk_ScriptProperties.has_key?('externalParameters'))
+                @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
+                    lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
+                    lk_Properties['parameters'].each do |lk_Parameter| 
+                        lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
+                        result = @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool, @mb_GetInfoOnly)
+                        if @mb_GetInfoOnly && (!result)
+                            @mb_GetInfoOnlyFailed = true
                         end
                     end
                 end
-            
-                # add script parameters
-                if @mk_ScriptProperties.include?('parameters')
-                    @mk_ScriptProperties['parameters'].each do |lk_Parameter| 
-                        if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
-                            puts "Internal error: Parameter key must not start with 'input' or 'output'."
-                            puts lk_Parameter.to_yaml
-                            exit 1
-                        end
-                        @mk_Parameters.addParameter(lk_Parameter)
+            end
+        
+            # add script parameters
+            if @mk_ScriptProperties.include?('parameters')
+                @mk_ScriptProperties['parameters'].each do |lk_Parameter| 
+                    if (lk_Parameter['key'][0, 5] == 'input' || lk_Parameter['key'][0, 6] == 'output')
+                        puts "Internal error: Parameter key must not start with 'input' or 'output'."
+                        puts lk_Parameter.to_yaml
+                        exit 1
                     end
+                    @mk_Parameters.addParameter(lk_Parameter)
                 end
             end
         end

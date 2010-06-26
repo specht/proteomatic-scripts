@@ -24,11 +24,24 @@ puts "Caching ---yamlInfo --short for #{allScripts.size} scripts..."
 allScripts.each_with_index do |script, index|
     descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.rb', '')}.yaml"
     FileUtils::mkpath(File::join(File::dirname(descriptionPath), '..', '..', 'cache'))
-    object = ProteomaticScript.new(descriptionPath)
-    next unless object.configOk()
-    yamlInfo = object.yamlInfo(true)
-    next unless yamlInfo[0, 11] == '---yamlInfo'
-    File::open(File::join(File::dirname(descriptionPath), '..', '..', 'cache', script + '.yamlinfo'), 'w') do |f|
-        f.puts yamlInfo
+    
+    object = ProteomaticScript.new(descriptionPath, true)
+    if (object.configOk())
+        yamlInfo = object.yamlInfo(true)
+        if yamlInfo[0, 11] == '---yamlInfo'
+            File::open(File::join(File::dirname(descriptionPath), '..', '..', 'cache', script + '.short.yamlinfo'), 'w') do |f|
+                f.puts yamlInfo
+            end
+        end
+    end
+    
+    object = ProteomaticScript.new(descriptionPath, true)
+    if (object.configOk())
+        yamlInfo = object.yamlInfo(false)
+        if yamlInfo[0, 11] == '---yamlInfo'
+            File::open(File::join(File::dirname(descriptionPath), '..', '..', 'cache', script + '.long.yamlinfo'), 'w') do |f|
+                f.puts yamlInfo
+            end
+        end
     end
 end
