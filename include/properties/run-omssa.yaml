@@ -14,7 +14,7 @@ input:
     min: 1
   - key: databases
     label: database
-    formats: [fasta]
+    formats: [fasta, blastdb]
     min: 1
 
 proposePrefix:
