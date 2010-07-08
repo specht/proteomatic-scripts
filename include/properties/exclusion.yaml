@@ -1,0 +1,24 @@
+group: Miscellaneous/Sets
+
+title: Exclusion (XOR)
+
+description: >
+  This script creates the exclusion (XOR) of two or more sets.
+
+type: processor
+
+input:
+  - key: entries
+    label: entries
+    formats: [txt]
+    min: 2
+
+defaultOutputDirectory: entries
+
+output:
+  - key: exclusion
+    label: exclusion
+    format: txt
+    filename: exclusion.txt
+    default: no
+
