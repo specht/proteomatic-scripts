@@ -1,0 +1,29 @@
+group: Miscellaneous/Sets
+
+title: Difference
+
+description: >
+  Creates the difference of two sets (Set A - Set B).
+  Each set can constists of several files.
+
+type: processor
+
+input:
+  - key: entriesA
+    label: set A
+    formats: [txt]
+    min: 1
+  - key: entriesB
+    label: set B
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: entriesA
+
+output:
+  - key: difference
+    label: difference
+    format: txt
+    filename: difference.txt
+    default: no
+

@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Michael Specht
+# Copyright (c) 2010 Till Bald
 # 
 # This file is part of Proteomatic.
 # 
@@ -19,21 +19,26 @@ require 'include/ruby/proteomatic'
 require 'set'
 
 
-class Intersection < ProteomaticScript
-	def run()
-        entries = nil
-        @input[:entries].each do |path|
+class Difference < ProteomaticScript
+    def run()
+        entriesA = Set.new
+        entriesB = Set.new
+        @input[:entriesA].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
-            entries ||= thisEntries
-            entries &= thisEntries
+            entriesA |= thisEntries
         end
-        puts "Intersected entries: #{entries.size}."
-        if @output[:intersection]
-            File::open(@output[:intersection], 'w') do |f|
+        @input[:entriesB].each do |path|
+            thisEntries = Set.new(File::read(path).split("\n"))
+            entriesB |= thisEntries
+        end
+        entries = entriesA - entriesB
+        puts "Different entries: #{entries.size}."
+        if @output[:difference]
+            File::open(@output[:difference], 'w') do |f|
                 f.puts entries.to_a.join("\n")
             end
         end
     end
 end
 
-lk_Object = Intersection.new
+lk_Object = Difference.new

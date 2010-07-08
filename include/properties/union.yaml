@@ -1,9 +1,9 @@
 group: Miscellaneous/Sets
 
-title: Union
+title: Union (OR)
 
 description: >
-  This script creates the union of several sets.
+  Creates the union of several sets.
 
 type: processor
 

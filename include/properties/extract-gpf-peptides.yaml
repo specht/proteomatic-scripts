@@ -1,0 +1,35 @@
+group: Proteomics/Identification/GPF
+
+title: Extract GPF peptides
+
+description: >
+  Extract all immediate, intron split and triplet split peptides from one or
+  more GPF result files. Please note that the resulting sets are not necessarily
+  disjoint, for many peptides are found both immediate and intron-split by GPF.
+
+type: processor
+
+input:
+  - key: in
+    label: GPF results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: immediatePeptides
+    label: immediate peptides
+    format: txt
+    filename: immediate.txt
+    default: no
+  - key: intronSplitPeptides
+    label: intron split peptides
+    format: txt
+    filename: intron-split.txt
+    default: no
+  - key: tripletSplitPeptides
+    label: triplet split peptides
+    format: txt
+    filename: triplet-split.txt
+    default: no

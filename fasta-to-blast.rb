@@ -15,25 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
+
 require 'include/ruby/proteomatic'
-require 'set'
+require 'include/ruby/fasta'
+require 'fileutils'
 
 
-class Intersection < ProteomaticScript
+class FastaToBlast < ProteomaticScript
 	def run()
-        entries = nil
-        @input[:entries].each do |path|
-            thisEntries = Set.new(File::read(path).split("\n"))
-            entries ||= thisEntries
-            entries &= thisEntries
-        end
-        puts "Intersected entries: #{entries.size}."
-        if @output[:intersection]
-            File::open(@output[:intersection], 'w') do |f|
-                f.puts entries.to_a.join("\n")
-            end
-        end
-    end
+		@output.each do |inPath, outPath|
+            puts 'Converting database to BLAST format...'
+            tempDir = tempFilename('fasta-to-blast-')
+            FileUtils::mkdir(tempDir)
+            FileUtils::cp(inPath, tempDir)
+            createBlastDatabase(File::join(tempDir, File::basename(inPath)))
+            FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.phr', File::dirname(outPath));
+            FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.pin', File::dirname(outPath));
+            FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.psq', File::dirname(outPath));
+		end
+	end
 end
 
-lk_Object = Intersection.new
+lk_Object = FastaToBlast.new

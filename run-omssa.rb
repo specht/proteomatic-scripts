@@ -26,7 +26,7 @@ require 'fileutils'
 
 class RunOmssa < ProteomaticScript
 
-	def runOmssa(as_SpectrumFilename, as_DatabasePath, as_OutputDirectory, as_Format = 'csv')
+	def runOmssa(as_SpectrumFilename, ak_Databases, as_OutputDirectory, as_Format = 'csv')
 		lk_OutFiles = Array.new
 		
 		lb_TestDtaExisted = File.exists?('test.dta')
@@ -37,7 +37,7 @@ class RunOmssa < ProteomaticScript
 		ls_InputSwitch = '-fm'
 		ls_InputSwitch = '-f' if fileMatchesFormat(as_SpectrumFilename, 'dta')
 
-		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" -d \"#{as_DatabasePath}\" #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
+		ls_Command = "\"#{ExternalTools::binaryPath('omssa.omssacl')}\" #{ak_Databases.collect { |x| '-d "' + x + '"' }.join(' ')} #{ls_InputSwitch} \"#{as_SpectrumFilename}\" -oc \"#{ls_OutFilename}\" -ni "
 		ls_Command += @mk_Parameters.commandLineFor('omssa.omssacl')
         ls_Command += " -nt #{@param[:threadCount]}"
 		runCommand(ls_Command)
@@ -76,38 +76,61 @@ class RunOmssa < ProteomaticScript
 	def run()
 		@ms_TempPath = tempFilename('run-omssa')
 		FileUtils::mkpath(@ms_TempPath)
-		# use the temp path for the BLAST database as well
-		# BUT: if there are spaces in the path, find something else
-		ls_DatabaseTempPath = @ms_TempPath
-		if ls_DatabaseTempPath.include?(' ')
-			@input[:databases].each do |ls_DatabasePath|
-				ls_DatabaseTempPath = tempFilename('run-omssa', File::dirname(ls_DatabasePath))
-				break unless ls_DatabaseTempPath.include?(' ')
-			end
-		end
-		ls_DatabaseTempPath = Dir::tmpdir if (ls_DatabaseTempPath.include?(' '))
-		ls_DatabaseTempPath = 'c:/' if (ls_DatabaseTempPath.include?(' '))
-		if (ls_DatabaseTempPath.include?(' '))
-			puts 'Sorry, but Run OMSSA is unable to continue.'
-			puts 'For the conversion of the FASTA database into the BLAST format, formatdb is used ' +
-			'which requires a path without spaces. In order to solve this problem, please move the ' +
-			'FASTA database file to a location without spaces in the path.'
-			exit 1
-		else
-			FileUtils::mkpath(ls_DatabaseTempPath)
-		end
-		
-		puts 'Merging databases...' unless @input[:databases].size == 1
-		ls_DatabasePath= tempFilename('merged-database', ls_DatabaseTempPath);
-		File::open(ls_DatabasePath, 'w') do |lk_OutFile|
-			@input[:databases].each do |ls_Path|
-				File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
-			end
-		end
-		
-		puts 'Converting database to BLAST format...'
-		createBlastDatabase(ls_DatabasePath)
-		
+        
+        useDatabases = Array.new
+        
+        gotFastaDatabases = false
+        @input[:databases].each do |path|
+            if fileMatchesFormat(path, 'fasta')
+                gotFastaDatabases = true
+            else
+                useDatabases << stripBlastDatabasePath(path)
+            end
+        end
+        
+        if gotFastaDatabases
+            # use the temp path for the BLAST database as well
+            # BUT: if there are spaces in the path, find something else
+            ls_DatabaseTempPath = @ms_TempPath
+            if ls_DatabaseTempPath.include?(' ')
+                @input[:databases].each do |ls_DatabasePath|
+                    ls_DatabaseTempPath = tempFilename('run-omssa', File::dirname(ls_DatabasePath))
+                    break unless ls_DatabaseTempPath.include?(' ')
+                end
+            end
+            ls_DatabaseTempPath = Dir::tmpdir if (ls_DatabaseTempPath.include?(' '))
+            ls_DatabaseTempPath = 'c:/' if (ls_DatabaseTempPath.include?(' '))
+            if (ls_DatabaseTempPath.include?(' '))
+                puts 'Sorry, but Run OMSSA is unable to continue.'
+                puts 'For the conversion of the FASTA database into the BLAST format, formatdb is used ' +
+                'which requires a path without spaces. In order to solve this problem, please move the ' +
+                'FASTA database file to a location without spaces in the path.'
+                exit 1
+            else
+                FileUtils::mkpath(ls_DatabaseTempPath)
+            end
+            
+            puts 'Merging databases...' unless @input[:databases].size == 1
+            ls_DatabasePath= tempFilename('merged-database', ls_DatabaseTempPath);
+            File::open(ls_DatabasePath, 'w') do |lk_OutFile|
+                @input[:databases].each do |ls_Path|
+                    next unless fileMatchesFormat(ls_Path, 'fasta')
+                    File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
+                end
+            end
+            
+            puts 'Converting database to BLAST format...'
+            createBlastDatabase(ls_DatabasePath)
+            useDatabases << ls_DatabasePath
+        end
+        
+        useDatabases.uniq!
+        
+        if useDatabases.size > 1
+            puts "Error: Due to limitations in the OMSSA executable, it is not possible to specify additional databases if a BLAST-formatted protein database has been specified."
+            exit
+        end
+        
 		# check if there are spectra files that are not dta or mgf
 		lk_PreparedSpectraFiles = Array.new
 		lk_XmlFiles = Array.new
@@ -139,14 +162,14 @@ class RunOmssa < ProteomaticScript
 		li_Counter = 0
 		lk_PreparedSpectraFiles.each do |ls_Path|
 			print "\rRunning OMSSA: #{li_Counter * 100 / lk_PreparedSpectraFiles.size}% done."
-			lk_OutFiles += runOmssa(ls_Path, ls_DatabasePath, @ms_TempPath, 'csv')
+			lk_OutFiles += runOmssa(ls_Path, useDatabases, @ms_TempPath, 'csv')
 			li_Counter += 1
 		end
 		puts "\rRunning OMSSA: 100% done."
 		
 		# merge results
 		ls_TempResultPath = File::join(@ms_TempPath, 'temp-results.csv')
-		print "Merging OMSSA results..."
+		print 'Merging OMSSA results...'
 		mergeCsvFiles(lk_OutFiles, ls_TempResultPath)
 		puts 'done.'
 		

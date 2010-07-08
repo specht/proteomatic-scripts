@@ -1,9 +1,9 @@
 group: Miscellaneous/Sets
 
-title: Intersection (AND)
+title: Exclusion (XOR)
 
 description: >
-  Creates the intersection of several sets.
+  Creates the exclusion (XOR) of two or more sets.
 
 type: processor
 
@@ -11,14 +11,14 @@ input:
   - key: entries
     label: entries
     formats: [txt]
-    min: 1
+    min: 2
 
 defaultOutputDirectory: entries
 
 output:
-  - key: intersection
-    label: intersection
+  - key: exclusion
+    label: exclusion
     format: txt
-    filename: intersection.txt
+    filename: exclusion.txt
     default: no
 

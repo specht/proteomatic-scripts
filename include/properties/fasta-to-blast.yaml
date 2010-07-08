@@ -1,0 +1,24 @@
+group: Proteomics/Protein databases
+
+title: Convert FASTA to BLAST database
+
+type: converter
+
+description: >
+  Convert FASTA databases into the BLAST database format.
+
+input:
+  - key: databases
+    label: database
+    formats: [fasta]
+
+defaultOutputDirectory: databases
+
+output:
+  - key: databases
+    label: BLAST formatted database files
+    format: blastdb
+    filename: '#{filename}.phr'
+
+needs:
+  - ext.blast

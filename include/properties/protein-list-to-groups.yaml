@@ -1,0 +1,28 @@
+group: Proteomics/Miscellaneous
+
+title: Apply protein groups to protein list 
+
+description: >
+  Shift a list of proteins to protein groups.
+
+type: processor
+
+input:
+  - key: proteinGroups
+    label: protein groups
+    formats: [yaml]
+    min: 1
+    max: 1
+  - key: proteinList
+    label: protein list
+    formats: [txt]
+    min: 1
+
+defaultOutputDirectory: proteinList
+
+output:
+  - key: results
+    label: grouped proteins
+    format: txt
+    filename: grouped.txt
+    default: yes

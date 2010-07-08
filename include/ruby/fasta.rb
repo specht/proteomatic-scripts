@@ -36,3 +36,9 @@ def createBlastDatabase(as_Filename)
 		FileUtils.rm_f([as_Filename + '.phr', as_Filename + '.psq', as_Filename + '.pin'])
 	end
 end
+
+
+def stripBlastDatabasePath(path)
+    return path[0, path.size - 4] if ['.phr', '.pin', '.psq'].include?(path[-4, 4].downcase)
+    return path
+end
