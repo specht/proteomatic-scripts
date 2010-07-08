@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Michael Specht
+# Copyright (c) 2010 Till Bald
 # 
 # This file is part of Proteomatic.
 # 
@@ -22,22 +22,18 @@ require 'set'
 class Difference < ProteomaticScript
 	def run()
         entries = Set.new
+        entriesA = Set.new
+        entriesB = Set.new
         firstFile = true
-        @input[:entries].each do |path|
+        @input[:entriesA].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
-            if firstFile
-                entries = thisEntries
-            else
-	        thisEntries.each do |item|
-		  if entries.include?(item)
-		    entries.delete(item)
-		  else
-		    entries.add(item)
-		  end
-		end
-            end
-            firstFile = false
+            entriesA |= thisEntries
         end
+        @input[:entriesB].each do |path|
+            thisEntries = Set.new(File::read(path).split("\n"))
+            entriesB |= thisEntries
+        end
+        entries = entriesA - entriesB
         puts "Different entries: #{entries.size}."
         if @output[:difference]
             File::open(@output[:difference], 'w') do |f|

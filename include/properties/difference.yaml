@@ -3,17 +3,22 @@ group: Miscellaneous/Sets
 title: Difference
 
 description: >
-  This script creates the difference of two sets.
+  Creates the difference of two sets (Set A - Set B).
+  Each set can constists of several files.
 
 type: processor
 
 input:
-  - key: entries
-    label: entries
+  - key: entriesA
+    label: Set A
     formats: [txt]
-    min: 2
+    min: 1
+  - key: entriesB
+    label: Set B
+    formats: [txt]
+    min: 1
 
-defaultOutputDirectory: entries
+defaultOutputDirectory: entriesA
 
 output:
   - key: difference
