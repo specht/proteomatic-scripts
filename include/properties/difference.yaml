@@ -1,0 +1,24 @@
+group: Miscellaneous/Sets
+
+title: Difference
+
+description: >
+  This script creates the difference of two sets.
+
+type: processor
+
+input:
+  - key: entries
+    label: entries
+    formats: [txt]
+    min: 2
+
+defaultOutputDirectory: entries
+
+output:
+  - key: difference
+    label: difference
+    format: txt
+    filename: difference.txt
+    default: no
+
