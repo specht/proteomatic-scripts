@@ -1,6 +1,6 @@
 group: Miscellaneous/Sets
 
-title: Intersection
+title: Intersection (AND)
 
 description: >
   Creates the intersection of several sets.
