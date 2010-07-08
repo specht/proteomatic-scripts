@@ -21,17 +21,11 @@ require 'set'
 
 class Intersection < ProteomaticScript
 	def run()
-        entries = Set.new
-        firstFile = true
+        entries = nil
         @input[:entries].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
-            if firstFile
-                entries = thisEntries
-            else
-                entries &= thisEntries
-            end
+            entries ||= thisEntries
             entries &= thisEntries
-            firstFile = false
         end
         puts "Intersected entries: #{entries.size}."
         if @output[:intersection]
