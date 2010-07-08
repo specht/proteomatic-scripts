@@ -21,18 +21,15 @@ require 'set'
 
 class Exclusion < ProteomaticScript
     def run()
-        entries = Set.new
         intersection = nil
         union = Set.new
-        firstFile = true
         @input[:entries].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
             union |= thisEntries
             intersection ||= thisEntries
             intersection &= thisEntries
-            firstFile = false
         end
-        entries = union -intersection
+        entries = union - intersection
         puts "Exclusive entries: #{entries.size}."
         if @output[:exclusion]
             File::open(@output[:exclusion], 'w') do |f|

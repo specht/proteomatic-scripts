@@ -10,11 +10,11 @@ type: processor
 
 input:
   - key: entriesA
-    label: Set A
+    label: set A
     formats: [txt]
     min: 1
   - key: entriesB
-    label: Set B
+    label: set B
     formats: [txt]
     min: 1
 

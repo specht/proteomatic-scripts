@@ -20,11 +20,9 @@ require 'set'
 
 
 class Difference < ProteomaticScript
-	def run()
-        entries = Set.new
+    def run()
         entriesA = Set.new
         entriesB = Set.new
-        firstFile = true
         @input[:entriesA].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
             entriesA |= thisEntries
