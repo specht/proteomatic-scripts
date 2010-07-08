@@ -19,6 +19,7 @@ require 'include/ruby/externaltools'
 require 'include/ruby/formats'
 require 'include/ruby/misc'
 require 'include/ruby/parameters'
+require 'include/ruby/ext/json'
 require 'drb'
 require 'fileutils'
 require 'set'
@@ -305,7 +306,13 @@ class ProteomaticScript
 		end
 	end
 	
-	def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false)
+	def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false, as_ControlFilePath = nil)
+        
+        control = nil
+        if as_ControlFilePath
+            control = YAML::load_file(as_ControlFilePath)
+            as_DescriptionPath = control['pathToYamlDescription']
+        end
         
         @mb_GetInfoOnly = ab_GetInfoOnly
 	
@@ -384,7 +391,7 @@ class ProteomaticScript
         @mb_ConfigOk = true
         if (@mb_NeedsConfig && !@mb_HasConfig)
             @mb_ConfigOk = false
-            unless as_DescriptionPath
+            unless @mb_GetInfoOnly
                 puts "Error: This script needs a configuration file. Please check the config directory for a template and instructions."
                 exit 1
             end
@@ -401,7 +408,7 @@ class ProteomaticScript
             puts e
             exit 1
         end
-        return if as_DescriptionPath
+        return if @mb_GetInfoOnly
         
 		handleArguments()
         
@@ -434,14 +441,54 @@ class ProteomaticScript
 				puts e
 				exit 1
 			end
-			run()
-			finishOutputFiles()
-			@mk_EndTime = Time.now
-			puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
+            if as_ControlFilePath
+                # control has already been parsed at the c'tor start
+                responseFilePath = control['responseFilePath']
+                outputFilePath = control['responseFilePath']
+                
+                if (control['action'] == 'query')
+                    response = Hash.new
+                    response['startTime'] = @mk_StartTime
+                    response['input'] = Hash.new
+                    @input.keys.each do |key|
+                        response['input'][key.to_s] = @input[key]
+                    end
+                    response['output'] = Hash.new
+                    @output.keys.each do |key|
+                        response['output'][key.to_s] = @output[key]
+                    end
+                    response['param'] = Hash.new
+                    @param.keys.each do |key|
+                        response['param'][key.to_s] = @param[key]
+                    end
+                    response['run'] = 'run'
+                    
+                    File::open(responseFilePath, 'w') do |f|
+                        if control['responseFormat'] == 'json'
+                            f.puts JSON::generate(response)
+                        else
+                            f.puts response.to_yaml
+                        end
+                    end
+                elsif (control['action'] == 'finish')
+                    @mk_StartTime = control['startTime']
+                    finishOutputFiles()
+                    scriptOutput = File::read(outputFilePath)
+                    # add script output to internal buffer
+                    @mk_EndTime = Time.now
+                    puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
+                    submitRunToFileTracker() if @ms_FileTrackerHost
+                end
+            else
+                run()
+                finishOutputFiles()
+                @mk_EndTime = Time.now
+                puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
+                submitRunToFileTracker() if @ms_FileTrackerHost
+            end
 			$stdout = STDOUT
             $stdout.sync = true
 			@ms_EavesdroppedOutput = lk_Listener.get()
-			submitRunToFileTracker() if @ms_FileTrackerHost
 		end
 	end
     

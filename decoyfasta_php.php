@@ -24,11 +24,17 @@ class BlastScript extends ProteomaticScript
 {
     function run()
     {
-        echo "Hello, this is the BLAST script!\n";
-        echo "I have parameters:\n";
-        var_dump($this->param);
-        echo "I have input files:\n";
-        var_dump($this->input);
+        $a = $this->param->decoyEntryPrefix;
+        echo "Using $a as a decoy entry prefix.\n";
+        echo "I want a sailship!\n";
+        echo "I say, a sailship!\n";
+        echo "Look, I'm creating the target/decoy database!\n";
+        for ($i = 0; $i <= 100; $i++)
+        {
+            echo "\rProcessing... $i% done.";
+            usleep(10000);
+        }
+        echo "\n";
     }
 }
 
