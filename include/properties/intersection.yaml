@@ -3,7 +3,7 @@ group: Miscellaneous/Sets
 title: Intersection
 
 description: >
-  This script creates the intersection of several sets.
+  Creates the intersection of several sets.
 
 type: processor
 

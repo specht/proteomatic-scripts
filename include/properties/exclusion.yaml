@@ -3,7 +3,7 @@ group: Miscellaneous/Sets
 title: Exclusion (XOR)
 
 description: >
-  This script creates the exclusion (XOR) of two or more sets.
+  Creates the exclusion (XOR) of two or more sets.
 
 type: processor
 
