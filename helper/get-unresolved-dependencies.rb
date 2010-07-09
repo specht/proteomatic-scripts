@@ -14,7 +14,13 @@ if scripts.include?('--extToolsPath')
 end
 
 scripts.each do |script|
+    extension = script.downcase
     descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.rb', '')}.yaml"
+    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.php', '')}.yaml" if extension[-4, 4] == '.php'
+    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.php4', '')}.yaml" if extension[-5, 5] == '.php4'
+    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.php5', '')}.yaml" if extension[-5, 5] == '.php5'
+    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.py', '')}.yaml" if extension[-3, 3] == '.py'
+    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.pl', '')}.yaml" if extension[-3, 3] == '.pl'
     next unless File::exists?(descriptionPath)
     object = ProteomaticScript.new(descriptionPath, true)
     next unless object.configOk()
