@@ -441,10 +441,11 @@ class ProteomaticScript
 				puts e
 				exit 1
 			end
+            resolveDependencies()
             if as_ControlFilePath
                 # control has already been parsed at the c'tor start
                 responseFilePath = control['responseFilePath']
-                outputFilePath = control['responseFilePath']
+                outputFilePath = control['outputFilePath']
                 
                 if (control['action'] == 'query')
                     response = Hash.new
@@ -461,6 +462,20 @@ class ProteomaticScript
                     @param.keys.each do |key|
                         response['param'][key.to_s] = @param[key]
                     end
+                    # add external tools
+                    if @mk_ScriptProperties.include?('needs')
+                        @mk_ScriptProperties['needs'].each do |ls_ExtTool|
+                            # skip if 'config' and not a proper 'package.program' tool
+                            next unless ls_ExtTool[0, 4] == 'ext.'
+                            ls_ExtTool.sub!('ext.', '')
+                            response['binaryPath'] ||= Hash.new
+                            ExternalTools::toolsForPackage(ls_ExtTool).each do |x|
+                                path = binaryPath(x, false)
+                                response['binaryPath'][x] = path if path
+                            end
+                        end
+                    end
+                    
                     response['run'] = 'run'
                     
                     File::open(responseFilePath, 'w') do |f|
@@ -471,10 +486,9 @@ class ProteomaticScript
                         end
                     end
                 elsif (control['action'] == 'finish')
-                    @mk_StartTime = control['startTime']
+                    @mk_StartTime = Time.parse(control['startTime'])
                     finishOutputFiles()
-                    scriptOutput = File::read(outputFilePath)
-                    # add script output to internal buffer
+                    @ms_EavesdroppedOutput = File::read(outputFilePath)
                     @mk_EndTime = Time.now
                     puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
                     submitRunToFileTracker() if @ms_FileTrackerHost
@@ -1493,4 +1507,8 @@ class ProteomaticScript
 		end
 		#puts ls_Output if ab_PrintStdOut			
 	end
+    
+    def binaryPath(as_Tool, installIfNotThere = true)
+        return ExternalTools::binaryPath(as_Tool, installIfNotThere)
+    end
 end

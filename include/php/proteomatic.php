@@ -69,7 +69,7 @@ abstract class ProteomaticScript
         fclose($controlFile);
         
         // call Proteomatic's any language hub
-        $this->call("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
+        passthru("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
         
         // check if we're supposed to run this thing now
         $response = json_decode(file_get_contents($responseFilePath));
@@ -82,6 +82,7 @@ abstract class ProteomaticScript
 
             ob_start(array(&$this, "outputCatcher"), 8);
             $this->collectedOutput = "";
+            $this->anyLanguageHubResponse = $response;
             $this->run();
             ob_end_clean();
             
@@ -100,89 +101,12 @@ abstract class ProteomaticScript
             fwrite($controlFile, "startTime: \"$startTime\"\n");
             fclose($controlFile);
             
-            $this->call("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
+            passthru("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
         }
         
         unlink($controlFilePath);
         unlink($responseFilePath);
         unlink($outputFilePath);
-    }
-    
-    function call($commandLine)
-    {
-        $descriptorSpec = array(
-            1 => array('pipe', 'w'),
-            2 => array('pipe', 'a')
-        );
-
-        $process = proc_open($commandLine, $descriptorSpec, $pipes);
-        $exitCode = false;
-
-        if (is_resource($process)) {
-            $read_output = $read_error = false;
-            $buffer_len  = $prev_buffer_len = 0;
-            $ms          = 10;
-            $output      = '';
-            $read_output = true;
-            $error       = '';
-            $read_error  = true;
-            stream_set_blocking($pipes[1], 0);
-            stream_set_blocking($pipes[2], 0);
-            while ($read_error != false and $read_output != false)
-            {
-                if ($read_output != false)
-                {
-                    if(feof($pipes[1]))
-                    {
-                        fclose($pipes[1]);
-                        $read_output = false;
-                    }
-                    else
-                    {
-                        $str = fgets($pipes[1], 1024);
-                        $len = strlen($str);
-                        if ($len)
-                        {
-                            $output .= $str;
-                            echo $str;
-                            $buffer_len += $len;
-                        }
-                    }
-                }
-            
-                if ($read_error != false)
-                {
-                    if(feof($pipes[2]))
-                    {
-                        fclose($pipes[2]);
-                        $read_error = false;
-                    }
-                    else
-                    {
-                        $str = fgets($pipes[2], 1024);
-                        $len = strlen($str);
-                        if ($len)
-                        {
-                            $error .= $str;
-                            $buffer_len += $len;
-                        }
-                    }
-                }
-            
-                if ($buffer_len > $prev_buffer_len)
-                {
-                    $prev_buffer_len = $buffer_len;
-                    $ms = 10;
-                }
-                else
-                {
-                    usleep($ms * 1000); // sleep for $ms milliseconds
-                    if ($ms < 160)
-                        $ms = $ms * 2;
-                }
-            }
-            proc_close($process);
-        }
     }
     
     function outputCatcher($buffer)
@@ -191,6 +115,11 @@ abstract class ProteomaticScript
         fflush(STDOUT);
         $this->collectedOutput .= $buffer;
         return "";
+    }
+    
+    function binaryPath($tool)
+    {
+        return $this->anyLanguageHubResponse->binaryPath->$tool;
     }
 }
 

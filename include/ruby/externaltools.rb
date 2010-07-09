@@ -159,14 +159,26 @@ class ExternalTools
 		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
-	def self.binaryPath(as_Tool)
+	def self.binaryPath(as_Tool, installIfNotThere = true)
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
 		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
-		install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) unless File::exists?(ls_Path)
+        unless File::exists?(ls_Path)
+            if (installIfNotThere)
+                install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) 
+            else
+                return nil
+            end
+        end
 		return ls_Path
 	end
+    
+    def self.toolsForPackage(as_Package)
+        return Dir[File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Package}.*.yaml")].collect do |x|
+            File::basename(x).sub('ext.', '').sub('.yaml', '')
+        end
+    end
 	
 	def self.installed?(as_Package)
 		lb_Ok = true

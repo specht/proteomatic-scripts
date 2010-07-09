@@ -20,44 +20,21 @@ along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once ('include/php/proteomatic.php');
 
-class BlastScript extends ProteomaticScript
+class DecoyFasta extends ProteomaticScript
 {
     function run()
     {
-        $a = $this->param->decoyEntryPrefix;
-        echo "Using $a as a decoy entry prefix.\n";
-        echo "I want a sailship!\n";
-        echo "I say, a sailship!\n";
-        echo "Look, I'm creating the target/decoy database!\n";
-        for ($i = 0; $i <= 100; $i++)
+        if (isset($this->output->outputDatabase))
         {
-            echo "\rProcessing... $i% done.";
-            usleep(10000);
+            echo "Creating target/decoy database...\n";
+            $databases = "";
+            foreach ($this->input->databases as $path)
+                $databases .= ' "'.$path.'"';
+            $command = "{$this->binaryPath('ptb.decoyfasta')} --output \"{$this->output->outputDatabase}\" --method \"{$this->param->targetDecoyMethod}\" --keepStart {$this->param->targetDecoyKeepStart} --keepEnd {$this->param->targetDecoyKeepEnd} --targetFormat \"{$this->param->targetEntryPrefix}\" --decoyFormat \"{$this->param->decoyEntryPrefix}\" $databases";
+            passthru($command);
+            echo "done.\n";
         }
-        echo "\n";
     }
 }
 
-$script = new BlastScript();
-
-// require 'include/php/proteomatic'
-// require 'include/ruby/externaltools'
-// require 'yaml'
-// require 'set'
-// 
-// 
-// class DecoyFasta < ProteomaticScript
-//  def run()
-//      if @output[:outputDatabase]
-//          print 'Creating target/decoy database...'
-//          ls_Command = "#{ExternalTools::binaryPath('ptb.decoyfasta')} --output \"#{@output[:outputDatabase]}\" --method \"#{@param[:targetDecoyMethod]}\" --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} --targetFormat \"#{@param[:targetEntryPrefix]}\" --decoyFormat \"#{@param[:decoyEntryPrefix]}\" #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
-//          runCommand(ls_Command, true)
-//          puts 'done.'
-//      end
-//  end
-// end
-// 
-// lk_Object = DecoyFasta.new
-
-?>
-
+$script = new DecoyFasta();
