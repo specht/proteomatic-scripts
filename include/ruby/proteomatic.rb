@@ -433,8 +433,6 @@ class ProteomaticScript
 # 			puts "#{@ms_Title} daemon listening at #{DRb.uri}"
 # 			DRb.thread.join
 		else
-			lk_Listener = StdoutListener.new(STDOUT)
-			$stdout = lk_Listener
 			begin
 				applyArguments(ARGV)
 			rescue ProteomaticArgumentException => e
@@ -494,15 +492,17 @@ class ProteomaticScript
                     submitRunToFileTracker() if @ms_FileTrackerHost
                 end
             else
+                lk_Listener = StdoutListener.new(STDOUT)
+                $stdout = lk_Listener
                 run()
+                $stdout = STDOUT
+                $stdout.sync = true
+                @ms_EavesdroppedOutput = lk_Listener.get()
                 finishOutputFiles()
                 @mk_EndTime = Time.now
                 puts "Execution took #{formatTime(@mk_EndTime - @mk_StartTime)}."
                 submitRunToFileTracker() if @ms_FileTrackerHost
             end
-			$stdout = STDOUT
-            $stdout.sync = true
-			@ms_EavesdroppedOutput = lk_Listener.get()
 		end
 	end
     
