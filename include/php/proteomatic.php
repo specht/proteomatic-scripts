@@ -30,7 +30,7 @@ abstract class ProteomaticScript
         
         // check for user-defined Ruby
         $pathToRuby = "ruby";
-        if (($index = array_search('--pathToRuby', $argv)) != FALSE)
+        if (($index = array_search('--pathToRuby', $argv)) !== FALSE)
         {
             $chunk = array_splice($argv, $index, 2);
             $pathToRuby = $chunk[1];
