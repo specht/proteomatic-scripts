@@ -18,9 +18,7 @@ abstract class ProteomaticScript
         
         // remove $currentDir from $scriptFilename if it's a prefix
         if ((count($currentDir) > 0) && (strpos($scriptFilename, $currentDir) == 0))
-        {
             $scriptFilename = str_replace($currentDir, "", $scriptFilename);
-        }
         
         // change working directory to script's directory
         $completeScriptPath = realpath($currentDir."/".$scriptFilename);
