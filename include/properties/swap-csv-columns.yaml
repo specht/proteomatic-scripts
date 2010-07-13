@@ -1,0 +1,36 @@
+group: Miscellaneous
+
+title: Swap CSV columns
+
+description: >
+    Swap CSV columns by exchanging two header fields.
+
+type: converter
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: in
+    label: Swapped results
+    format: csv
+    filename: swapped.csv
+    default: yes
+    
+
+parameters:
+  - key: columnA
+    label: Column A
+    default: 'Amount light'
+    examples: ['Amount light', 'Amount heavy', 'peptide', 'protein', 'defline', 'scan count', 'PBC count', 'Ratio mean', 'Ratio SD', 'Ratio RSD', 'charge', 'filename']
+    type: string
+  - key: columnB
+    label: Column B
+    default: 'Amount heavy'
+    examples: ['Amount light', 'Amount heavy', 'peptide', 'protein', 'defline', 'scan count', 'PBC count', 'Ratio mean', 'Ratio SD', 'Ratio RSD', 'charge', 'filename']
+    type: string
