@@ -29,9 +29,11 @@ class AddFingerprints < ProteomaticScript
 			File::open(inPath) do |lk_In|
 				headerLine = lk_In.readline
 				header = mapCsvHeader(headerLine)
+                drKey = 'd'
+                drKey = 'r' unless header[drKey]
 				lk_In.each_line do |line|
 					lineArray = line.parse_csv()
-					key = "#{lineArray[header['a']].to_i}/#{lineArray[header['d']].to_i}"
+					key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
 					amount = lineArray[header['amount']].to_f
 					lk_Sum[key] ||= 0.0
 					lk_Sum[key] += amount

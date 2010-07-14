@@ -29,10 +29,12 @@ class AnalyzeCompositionFingerprints < ProteomaticScript
 			maximum = 0.0
 			File::open(ls_Path) do |f|
 				header = mapCsvHeader(f.readline)
+                drKey = 'd'
+                drKey = 'r' unless header[drKey]
 				f.each_line do |line|
 					lineArray = line.parse_csv()
 					lk_Fingerprint[ls_Path] ||= Hash.new
-					key = "#{lineArray[header['a']].to_i}/#{lineArray[header['d']].to_i}"
+					key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
 					lk_Fingerprint[ls_Path][key] ||= 0.0
 					amount = lineArray[header['amount']].to_f
 					lk_Fingerprint[ls_Path][key] += amount

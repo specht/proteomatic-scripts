@@ -27,9 +27,11 @@ class MultiplyFingerprint < ProteomaticScript
 		lk_Mask = Hash.new
 		File::open(@input[:mask].first, 'r') do |f|
 			header = mapCsvHeader(f.readline)
+            drKey = 'd'
+            drKey = 'r' unless header[drKey]
 			f.each_line do |line|
 				lineArray = line.parse_csv()
-				key = "#{lineArray[header['a']].to_i}/#{lineArray[header['d']].to_i}"
+				key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
 				lk_Mask[key] = lineArray[header['amount']].to_f
 			end
 		end
@@ -38,10 +40,12 @@ class MultiplyFingerprint < ProteomaticScript
 				File::open(inPath) do |lk_In|
 					headerLine = lk_In.readline
 					header = mapCsvHeader(headerLine)
+                    drKey = 'd'
+                    drKey = 'r' unless header[drKey]
 					lk_Out.puts headerLine
 					lk_In.each_line do |line|
 						lineArray = line.parse_csv()
-						key = "#{lineArray[header['a']].to_i}/#{lineArray[header['d']].to_i}"
+						key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
 						amount = lineArray[header['amount']].to_f
 						factor = lk_Mask[key]
 						factor ||= 0.0

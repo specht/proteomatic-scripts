@@ -92,9 +92,11 @@ class RenderCompositionFingerprint < ProteomaticScript
 			lk_Amounts = Hash.new
 			File::open(ls_InPath, 'r') do |f|
 				header = mapCsvHeader(f.readline)
+                drKey = 'd'
+                drKey = 'r' unless header[drKey]
 				f.each_line do |line|
 					lineArray = line.parse_csv()
-					ls_Product = "#{lineArray[header['a']]}/#{lineArray[header['d']]}"
+					ls_Product = "#{lineArray[header['a']]}/#{lineArray[header[drKey]]}"
 					lk_Amounts[ls_Product] ||= 0.0
 					lk_Amounts[ls_Product] += lineArray[header['amount']].to_f
 				end
