@@ -25,7 +25,7 @@ class DecoyFasta < ProteomaticScript
 	def run()
 		if @output[:outputDatabase]
 			print 'Creating target/decoy database...'
-			ls_Command = "#{binaryPath('ptb.decoyfasta')} --output \"#{@output[:outputDatabase]}\" --method \"#{@param[:targetDecoyMethod]}\" --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} --targetFormat \"#{@param[:targetEntryPrefix]}\" --decoyFormat \"#{@param[:decoyEntryPrefix]}\" #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
+			ls_Command = "#{binaryPath('ptb.decoyfasta')} --output \"#{@output[:outputDatabase]}\" --method \"#{@param[:targetDecoyMethod]}\" --keepStart #{@param[:targetDecoyKeepStart]} --keepEnd #{@param[:targetDecoyKeepEnd]} --targetFormat \"#{@param[:targetEntryPrefix]}\" --decoyFormat \"#{@param[:decoyEntryPrefix]}\" --decoyAmount #{@param[:decoyAmount]} #{@input[:databases].collect { |x| '"' + x + '"'}.join(' ')}"
 			runCommand(ls_Command, true)
 			puts 'done.'
 		end
