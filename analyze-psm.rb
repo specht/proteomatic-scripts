@@ -265,15 +265,22 @@ class AnalyzePsm < ProteomaticScript
 					lk_Histogram = Array.new
 					
 					lf_LogScale = 0.4
-					li_TotalCount = 0
-					li_DecoyCount = 0
+					lf_TotalCount = 0.0
+                    li_TargetCount = 0
+                    li_DecoyCountUnweighted = 0
+					lf_DecoyCount = 0.0
 					lk_SortedByScore.each do |ls_Key|
 						lk_Psm = lk_ScanHash[ls_Key]
-						li_TotalCount += 1
-						li_DecoyCount += 1 if lk_Psm[:decoy]
-						lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f
-						lf_Fpr *= 0.5
-						lk_Histogram << {:fpr => lf_Fpr, :score => lk_Psm[:score], :decoyCount => li_DecoyCount.to_f / lk_SortedByScore.size, :targetCount => (li_TotalCount - li_DecoyCount).to_f / lk_SortedByScore.size }
+                        if lk_Psm[:decoy]
+                            li_DecoyCountUnweighted += 1 
+                            lf_DecoyCount = li_DecoyCountUnweighted.to_f / @param[:decoyAmount]
+                        else
+                            li_TargetCount += 1
+                        end
+                        lf_TotalCount = lf_DecoyCount + li_TargetCount
+						lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
+ 						lf_Fpr *= 0.5
+						lk_Histogram << {:fpr => lf_Fpr, :score => lk_Psm[:score], :decoyCount => lf_DecoyCount / lk_SortedByScore.size, :targetCount => (lf_TotalCount - lf_DecoyCount).to_f / lk_SortedByScore.size }
 					end
 					
 					lk_Out.puts "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' version='1.1' baseProfile='full' width='#{@mi_Width}px' height='#{@mi_Height}px'><rect x='0' y='0' width='#{@mi_Width}px' height='#{@mi_Height}px' fill='#fff' />"
@@ -340,8 +347,8 @@ class AnalyzePsm < ProteomaticScript
 
 					begin
 						li_ScaleSkip = lk_ScaleSkips[li_ScaleSkipIndex] * (10 ** li_ScaleExponent)
-						ld_Distance = (scale(li_CurrentScale.to_f, 0, li_TotalCount) - 
-							scale(li_CurrentScale.to_f + li_ScaleSkip, 0, li_TotalCount)).abs
+						ld_Distance = (scale(li_CurrentScale.to_f, 0, lf_TotalCount) - 
+							scale(li_CurrentScale.to_f + li_ScaleSkip, 0, lf_TotalCount)).abs
 							
 						break unless ld_Distance < 32.0
 						li_ScaleSkipIndex += 1
@@ -352,8 +359,8 @@ class AnalyzePsm < ProteomaticScript
 					end while ld_Distance < 32.0
 
 					li_ScaleSkip = lk_ScaleSkips[li_ScaleSkipIndex] * (10 ** li_ScaleExponent)
-					while (li_CurrentScale <= li_TotalCount)
-						ld_Position = scale(li_CurrentScale.to_f, 0, li_TotalCount) + @mi_Left
+					while (li_CurrentScale <= lf_TotalCount)
+						ld_Position = scale(li_CurrentScale.to_f, 0, lf_TotalCount) + @mi_Left
 						ls_Label = "#{li_CurrentScale}"
 						lk_Out.puts "<polyline points='#{ld_Position} #{@mi_Height - @mi_Bottom} #{ld_Position} #{@mi_Height - @mi_Bottom + 4}' stroke='#555753' stroke-width='1.0px' />"
 						lk_Out.puts "<text x='#{ld_Position}' y='#{@mi_Height - @mi_Bottom + 12}' style='font-size: 6pt; text-anchor: middle;'>#{ls_Label}</text>"

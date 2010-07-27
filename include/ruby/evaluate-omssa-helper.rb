@@ -21,7 +21,7 @@ require 'include/ruby/misc'
 require 'set'
 
 
-def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_')
+def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_', ai_DecoyAmount = 1)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -157,25 +157,42 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetP
 		
 		lk_ScansByE = lk_LocalScanHash.keys.sort { |a, b| lk_LocalScanHash[a][:e] <=> lk_LocalScanHash[b][:e] }
 		
-		li_TotalCount = 0
-		li_DecoyCount = 0
+        
+        li_TotalCountUnweighted = 0
+		lf_TotalCount = 0.0
+        
+        li_TargetCount = 0
+        
+		li_DecoyCountUnweighted = 0
+        lf_DecoyCount = 0.0
+        
 		li_CropCount = 0
+        
 		lk_ScansByE.each do |ls_Scan|
-			li_TotalCount += 1
-			li_DecoyCount += 1 if lk_LocalScanHash[ls_Scan][:decoy][true]
-			lf_Fpr = li_DecoyCount.to_f * 2.0 / li_TotalCount.to_f
-			if (li_DecoyCount > 0)
+            li_TotalCountUnweighted += 1
+            
+            if lk_LocalScanHash[ls_Scan][:decoy][true]
+                li_DecoyCountUnweighted += 1
+                lf_DecoyCount = li_DecoyCountUnweighted.to_f / ai_DecoyAmount
+            else
+                li_TargetCount += 1
+            end
+            
+            lf_TotalCount = lf_DecoyCount + li_TargetCount
+			lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
+            
+			if (li_DecoyCountUnweighted > 0)
 				if (lb_FoundValidFpr)
 					# search for the global maximum FPR that is <= target FPR
 					if ((lf_Fpr > lk_ActualFpr[ls_Spot]) && (lf_Fpr <= af_TargetFpr))
 						lk_ActualFpr[ls_Spot] = lf_Fpr
-						li_CropCount = li_TotalCount
+						li_CropCount = li_TotalCountUnweighted
 					end
 				else
 					# search for the global minimum FPR
 					if ((!lk_ActualFpr[ls_Spot]) || (lf_Fpr < lk_ActualFpr[ls_Spot]))
 						lk_ActualFpr[ls_Spot] = lf_Fpr
-						li_CropCount = li_TotalCount
+						li_CropCount = li_TotalCountUnweighted
 						lb_FoundValidFpr = true if (lf_Fpr <= af_TargetFpr)
 					end
 				end

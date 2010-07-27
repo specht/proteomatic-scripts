@@ -37,3 +37,10 @@ parameters:
     default: '__td__decoy_'
     description: This will be prepended to every decoy entry during target/decoy generation.
     enabled: doTargetDecoy
+  - key: decoyAmount
+    group: Tweaks
+    label: Amount of decoys per target
+    type: int
+    default: 1
+    min: 1
+    description: Specify how many decoys have been generated for every target.

@@ -52,3 +52,10 @@ parameters:
     type: string
     default: '__td__decoy_'
     group: Tweaks
+  - key: decoyAmount
+    group: Tweaks
+    label: Amount of decoys per target
+    type: int
+    default: 1
+    min: 1
+    description: Specify how many decoys have been generated for every target.
