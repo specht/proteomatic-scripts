@@ -1244,6 +1244,11 @@ class ProteomaticScript
 						ls_Path = File.join(ls_OutputDirectory, @param['outputPrefix'.intern] + lk_OutputFile['filename'])
 						# ignore prefix if in daemon mode
 						ls_Path = File.join(ls_OutputDirectory, lk_OutputFile['filename']) if @mb_Daemon
+                        # replace lilypads with values #{...}
+                        @param.each_pair do |k, v|
+                            next unless v.class == String
+                            ls_Path.gsub!('#{' + k.to_s + '}', v);
+                        end
 						@output[ls_Key.intern] = ls_Path
 					end
 				end
@@ -1270,6 +1275,11 @@ class ProteomaticScript
 							lk_ExistingFiles.push(ls_Path)
 							puts "Notice: #{ls_OutPath} already exists - #{ls_Path} will be skipped."
 						else
+                            # replace lilypads with values #{...}
+                            @param.each_pair do |k, v|
+                                next unless v.class == String
+                                ls_OutPath.gsub!('#{' + k.to_s + '}', v);
+                            end
 							@output[ls_Path] = ls_OutPath
 						end
 					end

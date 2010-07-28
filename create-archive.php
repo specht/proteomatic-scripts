@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (c) 2010 Michael Specht
+Copyright (c) 2010 Sebastian Kuhlgert and Michael Specht
 
 This file is part of Proteomatic.
 
@@ -29,8 +29,8 @@ class CreateArchive extends ProteomaticScript
             echo "Creating an archive from filelist...\n";
             $inputfiles = "";
             foreach ($this->input->files as $path)
-                $inputfiles .= "\"".$path. "\" ";
-			$command = "{$this->binaryPath('7zip.7zip')} a -t{$this->param->compressioswitch} {$this->output->outputArchive} ".$inputfiles;
+                $inputfiles .= "'".$path. "' ";
+            $command = "{$this->binaryPath('7zip.7zip')} a -t{$this->param->compressionmethod} -{$this->param->compressionlevel} {$this->output->outputArchive} ".$inputfiles;
             passthru($command);
             echo "done.\n";
         }

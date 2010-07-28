@@ -3,9 +3,9 @@
 abstract class ProteomaticScript
 {
     abstract protected function run();
-	
-	protected $param;
-    protected $input;
+    
+    protected $param;
+        protected $input;
     protected $output;
     
     function __construct()
@@ -33,17 +33,17 @@ abstract class ProteomaticScript
             $chunk = array_splice($argv, $index, 2);
             $pathToRuby = $chunk[1];
         }
-
+        
         // determine path to YAML description
         $parts = explode('.', $scriptFilename);
         $scriptBasename = implode('.', array_slice($parts, 0, count($parts) - 1));
         $pathToYamlDescription = realpath("include/properties/$scriptBasename.yaml");
-
+        
         // create parameter string
         $argString = "";
         foreach ($argv as $arg)
-            $argString .= " \"$arg\"";
-        
+            $argString .= " '$arg'";
+            
         // now we have to allocate three temporary files:
         // - control 
         // - response
@@ -61,13 +61,15 @@ abstract class ProteomaticScript
         
         $controlFile = fopen($controlFilePath, 'w');
         fwrite($controlFile, "action: query\n");
-        fwrite($controlFile, "pathToYamlDescription: \"$pathToYamlDescription\"\n");
-        fwrite($controlFile, "responseFilePath: \"$responseFilePath\"\n");
+        fwrite($controlFile, "pathToYamlDescription: \"".str_replace("\\", "\\\\", $pathToYamlDescription)."\"\n");
+        fwrite($controlFile, "responseFilePath: \"".str_replace("\\", "\\\\", $responseFilePath)."\"\n");
         fwrite($controlFile, "responseFormat: json\n");
         fclose($controlFile);
         
         // call Proteomatic's any language hub
-        passthru("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
+        //exec("\"$pathToRuby\" \"helper/any-language-hub.rb\" \"".str_replace("\\", "\\\\", $controlFilePath)."\" $argString");
+        $command = "'$pathToRuby' ./helper/any-language-hub.rb '".str_replace("\\", "/", $controlFilePath)."' $argString";
+        passthru($command);
         
         // check if we're supposed to run this thing now
         $response = json_decode(file_get_contents($responseFilePath));
@@ -92,14 +94,14 @@ abstract class ProteomaticScript
             
             $controlFile = fopen($controlFilePath, 'w');
             fwrite($controlFile, "action: finish\n");
-            fwrite($controlFile, "pathToYamlDescription: \"$pathToYamlDescription\"\n");
-            fwrite($controlFile, "responseFilePath: \"$responseFilePath\"\n");
+            fwrite($controlFile, "pathToYamlDescription: \"".str_replace("\\", "\\\\", $pathToYamlDescription)."\"\n");
+            fwrite($controlFile, "responseFilePath: \"".str_replace("\\", "\\\\", $responseFilePath)."\"\n");
             fwrite($controlFile, "responseFormat: json\n");
-            fwrite($controlFile, "outputFilePath: \"$outputFilePath\"\n");
+            fwrite($controlFile, "outputFilePath: \"".str_replace("\\", "\\\\", $outputFilePath)."\"\n");
             fwrite($controlFile, "startTime: \"$startTime\"\n");
             fclose($controlFile);
-            
-            passthru("\"$pathToRuby\" helper/any-language-hub.rb \"$controlFilePath\" $argString");
+
+            passthru("'$pathToRuby' ./helper/any-language-hub.rb '".str_replace("\\", "/", $controlFilePath)."' $argString");
         }
         
         unlink($controlFilePath);
