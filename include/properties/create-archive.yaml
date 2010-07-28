@@ -1,0 +1,52 @@
+group: Miscellaneous
+
+title: Create archive
+
+type: processor
+
+description: >
+  Create an archive from a set of input files (e.g. archive.zip)
+
+input:
+  - key: files
+    label: input
+    formats: [any]
+    min: 1
+
+output:
+  - key: outputArchive
+    label: archive
+    format: any
+    filename: archive.#{compressionmethod}
+    default: yes
+        
+defaultOutputDirectory: files
+
+parameters:
+  - key: compressionmethod
+    label: Compression method
+    type: enum
+    choices:
+      - "7z": "7Z"
+      - "tar.gz": "TAR-GZIP"
+      - "zip": "ZIP"
+      - "tar.bz2": "TAR-BZIP2"
+      - "tar": "TAR"
+      - "iso": "ISO (Mac & Linux)"
+      - "udf": "UDF (Mac & Linux)"
+    default: 'zip'
+    description: Compression method used for archive.
+  - key: compressionlevel
+    label: Compression level
+    type: enum
+    choices:
+      - "mx0": "No compression"
+      - "mx1": "Very low compression"
+      - "mx3": "Fast compression"
+      - "mx5": "Normal compression"
+      - "mx7": "Maximum compression"
+      - "mx9": "Ultra compression"
+    default: "mx5"
+
+needs:
+  - ext.7zip
