@@ -23,48 +23,48 @@ require 'yaml'
 require 'fileutils'
 
 class AnalyzeCompositionFingerprints < ProteomaticScript
-	def run()
-		lk_Fingerprint = Hash.new
-		@input[:compositionFingerprint].each do |ls_Path|
-			maximum = 0.0
-			File::open(ls_Path) do |f|
-				header = mapCsvHeader(f.readline)
+    def run()
+        lk_Fingerprint = Hash.new
+        @input[:compositionFingerprint].each do |ls_Path|
+            maximum = 0.0
+            File::open(ls_Path) do |f|
+                header = mapCsvHeader(f.readline)
                 drKey = 'd'
                 drKey = 'r' unless header[drKey]
-				f.each_line do |line|
-					lineArray = line.parse_csv()
-					lk_Fingerprint[ls_Path] ||= Hash.new
-					key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
-					lk_Fingerprint[ls_Path][key] ||= 0.0
-					amount = lineArray[header['amount']].to_f
-					lk_Fingerprint[ls_Path][key] += amount
-					maximum = lk_Fingerprint[ls_Path][key] if lk_Fingerprint[ls_Path][key] > maximum
-				end
-			end
-			# normalize fingerprint
-			sum = 0.0
-			averageDP = 0.0
-			averageDA = 0.0
-			aSum = 0.0
-			dSum = 0.0
-			lk_Fingerprint[ls_Path].keys.each do |key|
-				lk_Fingerprint[ls_Path][key] /= maximum
-				sum += lk_Fingerprint[ls_Path][key]
-				ad = key.split('/')
-				a = ad[0].to_i
-				d = ad[1].to_i
-				relativeDA = a.to_f / (a + d)
-				# add relative to average DA (weighted!)
-				averageDA += relativeDA * lk_Fingerprint[ls_Path][key]
-				averageDP += (a + d).to_f * lk_Fingerprint[ls_Path][key]
-				aSum += a.to_f * lk_Fingerprint[ls_Path][key]
-				dSum += d.to_f * lk_Fingerprint[ls_Path][key]
-			end
-			averageDA /= sum
-			averageDP /= sum
-			puts "DP #{sprintf('%5.2f', averageDP)} / DA #{sprintf('%5.2f', averageDA * 100.0)}% / DA (mass) #{sprintf('%5.2f', aSum / (aSum + dSum) * 100.0)}% / #{File::basename(ls_Path)}"
-		end
-	end
+                f.each_line do |line|
+                    lineArray = line.parse_csv()
+                    lk_Fingerprint[ls_Path] ||= Hash.new
+                    key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
+                    lk_Fingerprint[ls_Path][key] ||= 0.0
+                    amount = lineArray[header['amount']].to_f
+                    lk_Fingerprint[ls_Path][key] += amount
+                    maximum = lk_Fingerprint[ls_Path][key] if lk_Fingerprint[ls_Path][key] > maximum
+                end
+            end
+            # normalize fingerprint
+            sum = 0.0
+            averageDP = 0.0
+            averageDA = 0.0
+            aSum = 0.0
+            dSum = 0.0
+            lk_Fingerprint[ls_Path].keys.each do |key|
+                lk_Fingerprint[ls_Path][key] /= maximum
+                sum += lk_Fingerprint[ls_Path][key]
+                ad = key.split('/')
+                a = ad[0].to_i
+                d = ad[1].to_i
+                relativeDA = a.to_f / (a + d)
+                # add relative to average DA (weighted!)
+                averageDA += relativeDA * lk_Fingerprint[ls_Path][key]
+                averageDP += (a + d).to_f * lk_Fingerprint[ls_Path][key]
+                aSum += a.to_f * lk_Fingerprint[ls_Path][key]
+                dSum += d.to_f * lk_Fingerprint[ls_Path][key]
+            end
+            averageDA /= sum
+            averageDP /= sum
+            puts "DP #{sprintf('%5.2f', averageDP)} / DA #{sprintf('%5.2f', averageDA * 100.0)}% / DA (mass) #{sprintf('%5.2f', aSum / (aSum + dSum) * 100.0)}% / #{File::basename(ls_Path)}"
+        end
+    end
 end
 
 lk_Object = AnalyzeCompositionFingerprints.new

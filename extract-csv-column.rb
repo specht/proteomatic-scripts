@@ -23,7 +23,7 @@ require 'yaml'
 require 'fileutils'
 
 class ExtractCsvColumn < ProteomaticScript
-	def run()
+    def run()
         column = stripCsvHeader(@param[:column])
         items = Array.new
         @input[:in].each do |path|
@@ -50,7 +50,7 @@ class ExtractCsvColumn < ProteomaticScript
                 f.puts items.join("\n")
             end
         end
-	end
+    end
 end
 
 lk_Object = ExtractCsvColumn.new

@@ -20,7 +20,7 @@ require 'set'
 
 
 class Highlight < ProteomaticScript
-	def run()
+    def run()
         # load items to be highlighted
         items = Set.new
         @input[:items].each do |path|
@@ -34,7 +34,7 @@ class Highlight < ProteomaticScript
         
         puts "Got #{items.size} items to highlight."
         
-		@output.each do |inPath, outPath|
+        @output.each do |inPath, outPath|
             File::open(outPath, 'w') do |fo|
                 File::open(inPath, 'r') do |fi|
                     lineBatch = ''
@@ -57,7 +57,7 @@ class Highlight < ProteomaticScript
                 end
             end
         end
-	end
+    end
 end
 
 lk_Object = Highlight.new

@@ -2,7 +2,7 @@ require 'include/ruby/proteomatic'
 require 'fileutils'
 
 class QTraceCropXhtmlReport < ProteomaticScript
-	def run()
+    def run()
         requirements = Hash.new
         unless @param[:peptides].empty?
             items = @param[:peptides].split(/\s/).reject { |x| x.empty? }
@@ -41,7 +41,7 @@ class QTraceCropXhtmlReport < ProteomaticScript
             end
         end
         
-		@output.each do |inPath, outPath|
+        @output.each do |inPath, outPath|
             File::open(outPath, 'w') do |fo|
                 File::open(inPath, 'r') do |fi|
                     copyLine = true
@@ -77,9 +77,9 @@ class QTraceCropXhtmlReport < ProteomaticScript
                     end
                 end
             end
-		end
+        end
         puts "Cropped #{copiedQeCount} from a total of #{allQeCount} quantitation events."
-	end
+    end
 end
 
 lk_Object = QTraceCropXhtmlReport.new

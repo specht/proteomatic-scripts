@@ -33,3 +33,7 @@ parameters:
     description: Safe proteins have been identified by at least two distinct peptides or by at least one GPF peptide
     type: flag
     default: false
+  - key: printPeptidesToHtml
+    label: Print peptide details in HTML report
+    type: flag
+    default: false

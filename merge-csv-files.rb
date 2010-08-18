@@ -85,7 +85,7 @@ class MergeCsvFiles < ProteomaticScript
         end
     end
     
-	def run()
+    def run()
         unless @output[:merged]
             puts "Notice: Doing nothing, because no output file has been requested."
             exit 0
@@ -120,7 +120,7 @@ class MergeCsvFiles < ProteomaticScript
             puts "Error: The header fields are not the same in all input files, unable to merge!"
             exit 1
         end
-	end
+    end
 end
 
 lk_Object = MergeCsvFiles.new

@@ -23,7 +23,7 @@ require 'yaml'
 require 'fileutils'
 
 class SwapCsvColumns < ProteomaticScript
-	def run()
+    def run()
         colA = stripCsvHeader(@param[:columnA])
         colB = stripCsvHeader(@param[:columnB])
         @output.each_pair do |inPath, outPath|
@@ -50,7 +50,7 @@ class SwapCsvColumns < ProteomaticScript
                 end
             end
         end
-	end
+    end
 end
 
 lk_Object = SwapCsvColumns.new

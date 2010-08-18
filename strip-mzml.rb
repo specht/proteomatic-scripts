@@ -5,7 +5,7 @@ require 'set'
 
 
 class StripMs1Scans < ProteomaticScript
-	def run()
+    def run()
         # scanIds: # in certain mzml files
         #   MT_CP_blabla_01: Set([113, 100])
         # allScanIds: Set([113, 100]) # in all mzml files
@@ -37,7 +37,7 @@ class StripMs1Scans < ProteomaticScript
             end
         end
 
-		@output.each do |ls_InPath, ls_OutPath|
+        @output.each do |ls_InPath, ls_OutPath|
             filename = File::basename(ls_InPath).split('.').first
             filename.chomp!('-no-ms1')
             filename.chomp!('-stripped')
@@ -46,7 +46,7 @@ class StripMs1Scans < ProteomaticScript
             thisScanIds ||= Set.new
             thisScanIds |= allScanIds
 
-			ls_TempOutPath = tempFilename('strip-mzml', File.dirname(ls_OutPath))
+            ls_TempOutPath = tempFilename('strip-mzml', File.dirname(ls_OutPath))
             FileUtils::mkpath(ls_TempOutPath)
             ls_ScanIdsPath = File::join(ls_TempOutPath, 'scan-ids.txt')
             ls_StrippedMzMlPath = File::join(ls_TempOutPath, 'stripped.mzml')
@@ -57,27 +57,27 @@ class StripMs1Scans < ProteomaticScript
                 end
             end
 
-			puts "Stripping #{File.basename(ls_InPath)}..."
+            puts "Stripping #{File.basename(ls_InPath)}..."
             $stdout.flush
 
-			# call stripscans
+            # call stripscans
             scanIdOption = "--#{@param[:scanIdAction]}ScanIds \"#{ls_ScanIdsPath}\""
             scanIdOption = '' if thisScanIds.empty?
-			ls_Command = "#{ExternalTools::binaryPath('ptb.stripscans')} --quiet --outputPath \"#{ls_StrippedMzMlPath}\" --stripMsLevels \"#{@param[:stripMsLevels]}\" #{scanIdOption} \"#{ls_InPath}\""
-			runCommand(ls_Command)
+            ls_Command = "#{ExternalTools::binaryPath('ptb.stripscans')} --quiet --outputPath \"#{ls_StrippedMzMlPath}\" --stripMsLevels \"#{@param[:stripMsLevels]}\" #{scanIdOption} \"#{ls_InPath}\""
+            runCommand(ls_Command)
 
-			unless (@param[:compression].empty?)
-				ls_7ZipPath = ExternalTools::binaryPath('7zip.7zip')
-				ls_Command = "\"#{ls_7ZipPath}\" a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} \"#{ls_OutPath}\" \"#{ls_StrippedMzMlPath}\" -mx5"
-				runCommand(ls_Command)
+            unless (@param[:compression].empty?)
+                ls_7ZipPath = ExternalTools::binaryPath('7zip.7zip')
+                ls_Command = "\"#{ls_7ZipPath}\" a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} \"#{ls_OutPath}\" \"#{ls_StrippedMzMlPath}\" -mx5"
+                runCommand(ls_Command)
             else
                 FileUtils::mv(ls_StrippedMzMlPath, ls_OutPath)
-			end
+            end
 
-			FileUtils::mv(ls_OutPath, ls_OutPath.sub('.proteomatic.part', ''))
-			FileUtils::rm_rf(ls_TempOutPath)
-		end
-	end
+            FileUtils::mv(ls_OutPath, ls_OutPath.sub('.proteomatic.part', ''))
+            FileUtils::rm_rf(ls_TempOutPath)
+        end
+    end
 end
 
 lk_Object = StripMs1Scans.new

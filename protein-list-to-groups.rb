@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 	
+#     
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -24,7 +24,7 @@ require 'yaml'
 
 
 class ProteinListToGroups < ProteomaticScript
-	def run()
+    def run()
         puts 'Loading protein groups...'
         proteinGroups = YAML::load_file(@input[:proteinGroups].first)
         allProteins = Hash.new
@@ -69,7 +69,7 @@ class ProteinListToGroups < ProteomaticScript
             end
         end
         puts "Shifted #{acceptCount} of #{totalCount} proteins, removed #{rejectCount} proteins because they appeared in multiple groups."
-	end
+    end
 end
 
 lk_Object = ProteinListToGroups.new

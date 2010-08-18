@@ -23,40 +23,40 @@ require 'fileutils'
 
 class MultiplyFingerprint < ProteomaticScript
 
-	def run()
-		lk_Mask = Hash.new
-		File::open(@input[:mask].first, 'r') do |f|
-			header = mapCsvHeader(f.readline)
+    def run()
+        lk_Mask = Hash.new
+        File::open(@input[:mask].first, 'r') do |f|
+            header = mapCsvHeader(f.readline)
             drKey = 'd'
             drKey = 'r' unless header[drKey]
-			f.each_line do |line|
-				lineArray = line.parse_csv()
-				key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
-				lk_Mask[key] = lineArray[header['amount']].to_f
-			end
-		end
-		@output.each_pair do |inPath, outPath|
-			File::open(outPath, 'w') do |lk_Out|
-				File::open(inPath) do |lk_In|
-					headerLine = lk_In.readline
-					header = mapCsvHeader(headerLine)
+            f.each_line do |line|
+                lineArray = line.parse_csv()
+                key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
+                lk_Mask[key] = lineArray[header['amount']].to_f
+            end
+        end
+        @output.each_pair do |inPath, outPath|
+            File::open(outPath, 'w') do |lk_Out|
+                File::open(inPath) do |lk_In|
+                    headerLine = lk_In.readline
+                    header = mapCsvHeader(headerLine)
                     drKey = 'd'
                     drKey = 'r' unless header[drKey]
-					lk_Out.puts headerLine
-					lk_In.each_line do |line|
-						lineArray = line.parse_csv()
-						key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
-						amount = lineArray[header['amount']].to_f
-						factor = lk_Mask[key]
-						factor ||= 0.0
-						amount *= factor
-						lineArray[header['amount']] = amount
-						lk_Out.puts lineArray.to_csv()
-					end
-				end
-			end
-		end
-	end
+                    lk_Out.puts headerLine
+                    lk_In.each_line do |line|
+                        lineArray = line.parse_csv()
+                        key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
+                        amount = lineArray[header['amount']].to_f
+                        factor = lk_Mask[key]
+                        factor ||= 0.0
+                        amount *= factor
+                        lineArray[header['amount']] = amount
+                        lk_Out.puts lineArray.to_csv()
+                    end
+                end
+            end
+        end
+    end
 end
 
 lk_Object = MultiplyFingerprint.new

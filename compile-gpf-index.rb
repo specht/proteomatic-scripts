@@ -25,13 +25,13 @@ require 'set'
 
 
 class CompileGpfIndex < ProteomaticScript
-	def run()
-		@output.each do |ls_InPath, ls_OutPath|
-			ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} #{ls_InPath} #{ls_OutPath} \"\""
-			runCommand(ls_Command, true)
-		end
-		
-	end
+    def run()
+        @output.each do |ls_InPath, ls_OutPath|
+            ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} #{ls_InPath} #{ls_OutPath} \"\""
+            runCommand(ls_Command, true)
+        end
+        
+    end
 end
 
 lk_Object = CompileGpfIndex.new

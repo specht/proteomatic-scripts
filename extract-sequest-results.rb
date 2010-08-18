@@ -27,8 +27,8 @@ require 'yaml'
 
 
 class ExtractSequestResults < ProteomaticScript
-	def run()
-		# get peptides from PSM list
+    def run()
+        # get peptides from PSM list
         ls_Protein = nil
         lk_ForbiddenScanIds = Set.new
         results = Hash.new
@@ -114,7 +114,7 @@ class ExtractSequestResults < ProteomaticScript
                 f.puts allModProteins.to_a.sort.join("\n")
             end
         end
-	end
+    end
 end
 
 lk_Object = ExtractSequestResults.new

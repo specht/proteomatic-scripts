@@ -22,9 +22,9 @@ require 'set'
 
 
 class SixFrames < ProteomaticScript
-	def run()
-		if @output[:outputDatabase]
-			print 'Creating six frame translation...'
+    def run()
+        if @output[:outputDatabase]
+            print 'Creating six frame translation...'
             parts = Array.new
             @input[:input].each do |path|
                 outFilename = @output[:outputDatabase]
@@ -48,9 +48,9 @@ class SixFrames < ProteomaticScript
                     end
                 end
             end
-			puts 'done.'
-		end
-	end
+            puts 'done.'
+        end
+    end
 end
 
 lk_Object = SixFrames.new

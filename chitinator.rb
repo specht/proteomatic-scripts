@@ -23,12 +23,12 @@ require 'fileutils'
 
 class Chitinator < ProteomaticScript
 
-	def run()
-		ls_Command = "\"#{ExternalTools::binaryPath('chitinator.chitinator')}\""
-		ls_Command += " --writeCompositionFingerprint \"#{@output[:compositionFingerprint]}\"" if @output[:compositionFingerprint]
-		ls_Command += ' ' + @mk_Parameters.commandLineFor('chitinator.chitinator')
-		runCommand(ls_Command, true)
-	end
+    def run()
+        ls_Command = "\"#{ExternalTools::binaryPath('chitinator.chitinator')}\""
+        ls_Command += " --writeCompositionFingerprint \"#{@output[:compositionFingerprint]}\"" if @output[:compositionFingerprint]
+        ls_Command += ' ' + @mk_Parameters.commandLineFor('chitinator.chitinator')
+        runCommand(ls_Command, true)
+    end
 end
 
 lk_Object = Chitinator.new

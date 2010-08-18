@@ -24,77 +24,77 @@ require 'fileutils'
 
 
 class RunPeaks < ProteomaticScript
-	def run()
-		ls_PeaksConfig = readData('config').strip
-		
-		ls_VariableMods = ''
-		if @param[:variableModifications] && !@param[:variableModifications].empty?
-			ls_VariableMods = "<varied_modi>\n"
-			ls_VariableMods += @param[:variableModifications].split(',').collect { |x| "<modi>#{x}</modi>\n" }.join('')
-			ls_VariableMods += "</varied_modi>\n"
-		end
-		
-		ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
-		ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
+    def run()
+        ls_PeaksConfig = readData('config').strip
+        
+        ls_VariableMods = ''
+        if @param[:variableModifications] && !@param[:variableModifications].empty?
+            ls_VariableMods = "<varied_modi>\n"
+            ls_VariableMods += @param[:variableModifications].split(',').collect { |x| "<modi>#{x}</modi>\n" }.join('')
+            ls_VariableMods += "</varied_modi>\n"
+        end
+        
+        ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
+        ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
         
         # no empty lines allowed in PEAKS config
-		ls_PeaksConfig.sub!("\n\n", "\n")
-		
-		puts ls_PeaksConfig
-		
-		ls_TempPath = tempFilename('peaks')
-		ls_TempInPath = File::join(ls_TempPath, 'in')
-		ls_TempOutPath = File::join(ls_TempPath, 'out')
-		FileUtils::mkpath(ls_TempInPath)
-		FileUtils::mkpath(ls_TempOutPath)
-		
-		# check if there are spectra files that are not dta or mgf
-		lk_PreparedSpectraFiles = Array.new
-		lk_XmlFiles = Array.new
-		@input[:spectra].each do |ls_Path|
-			if ['dta', 'mgf'].include?(@inputFormat[ls_Path])
-				# it's DTA or MGF, give that directly to PEAKS
-				lk_PreparedSpectraFiles.push(ls_Path)
-				FileUtils::cp(ls_Path, ls_TempInPath)
-			else
-				# it's something else, convert it first
-				lk_XmlFiles.push("\"" + ls_Path + "\"") 
-			end
-		end
-		
-		unless (lk_XmlFiles.empty?)
-			# convert spectra to MGF
-			puts 'Converting XML spectra to MGF format...'
-			ls_Command = "\"#{ExternalTools::binaryPath('ptb.xml2mgf')}\" -o \"#{File::join(ls_TempInPath, 'xml2mgf-out.mgf')}\" #{lk_XmlFiles.join(' ')}"
-			runCommand(ls_Command)
-		end
-		
-		ls_ParamFile = File::join(ls_TempPath, 'peaks-config.xml')
-		File.open(ls_ParamFile, 'w') do |lk_File|
-			lk_File.write(ls_PeaksConfig)
-		end
-		
-		lf_PrecursorTolerance = @param[:precursorIonTolerance]
-		lf_ProductTolerance = @param[:productIonTolerance]
-		ls_Parameters = "-xfi \"#{ls_TempInPath}\" \"#{ls_TempOutPath}\" \"#{ls_ParamFile}\" \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
-		ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
-		print 'Running PEAKS...'
-		ls_OldPath = Dir::pwd()
-		Dir::chdir(ls_TempPath)
-		runCommand(ls_Command)
-		
-		Dir::chdir(ls_OldPath)
-		if @output[:fasFile]
-			File::open(@output[:fasFile], 'w') do |f|
-				Dir[File::join(ls_TempOutPath, '*.fas')].each do |path|
-					contents = File::read(path)
-					f.puts contents
-				end
-			end
-		end
+        ls_PeaksConfig.sub!("\n\n", "\n")
+        
+        puts ls_PeaksConfig
+        
+        ls_TempPath = tempFilename('peaks')
+        ls_TempInPath = File::join(ls_TempPath, 'in')
+        ls_TempOutPath = File::join(ls_TempPath, 'out')
+        FileUtils::mkpath(ls_TempInPath)
+        FileUtils::mkpath(ls_TempOutPath)
+        
+        # check if there are spectra files that are not dta or mgf
+        lk_PreparedSpectraFiles = Array.new
+        lk_XmlFiles = Array.new
+        @input[:spectra].each do |ls_Path|
+            if ['dta', 'mgf'].include?(@inputFormat[ls_Path])
+                # it's DTA or MGF, give that directly to PEAKS
+                lk_PreparedSpectraFiles.push(ls_Path)
+                FileUtils::cp(ls_Path, ls_TempInPath)
+            else
+                # it's something else, convert it first
+                lk_XmlFiles.push("\"" + ls_Path + "\"") 
+            end
+        end
+        
+        unless (lk_XmlFiles.empty?)
+            # convert spectra to MGF
+            puts 'Converting XML spectra to MGF format...'
+            ls_Command = "\"#{ExternalTools::binaryPath('ptb.xml2mgf')}\" -o \"#{File::join(ls_TempInPath, 'xml2mgf-out.mgf')}\" #{lk_XmlFiles.join(' ')}"
+            runCommand(ls_Command)
+        end
+        
+        ls_ParamFile = File::join(ls_TempPath, 'peaks-config.xml')
+        File.open(ls_ParamFile, 'w') do |lk_File|
+            lk_File.write(ls_PeaksConfig)
+        end
+        
+        lf_PrecursorTolerance = @param[:precursorIonTolerance]
+        lf_ProductTolerance = @param[:productIonTolerance]
+        ls_Parameters = "-xfi \"#{ls_TempInPath}\" \"#{ls_TempOutPath}\" \"#{ls_ParamFile}\" \"Proteomatic resptm\" #{lf_PrecursorTolerance} #{lf_ProductTolerance} 10 2"
+        ls_Command = "java -Xmx512M -jar #{getConfigValue('peaksBatchJar')} " + ls_Parameters
+        print 'Running PEAKS...'
+        ls_OldPath = Dir::pwd()
+        Dir::chdir(ls_TempPath)
+        runCommand(ls_Command)
+        
+        Dir::chdir(ls_OldPath)
+        if @output[:fasFile]
+            File::open(@output[:fasFile], 'w') do |f|
+                Dir[File::join(ls_TempOutPath, '*.fas')].each do |path|
+                    contents = File::read(path)
+                    f.puts contents
+                end
+            end
+        end
         FileUtils::rm_rf(ls_TempPath)
         puts 'done.'
-	end
+    end
 end
 
 lk_Object = RunPeaks.new

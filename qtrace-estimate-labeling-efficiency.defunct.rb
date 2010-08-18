@@ -27,8 +27,8 @@ require 'yaml'
 
 
 class QTraceEstimateLabelingEfficiency < ProteomaticScript
-	def run()
-		# get peptides from PSM list
+    def run()
+        # get peptides from PSM list
         results = loadPsm(@input[:psmFile].first, :silent => false) 
 
         peptidesBySpectralCount = results[:peptideHash].keys.sort do |a, b|
@@ -86,7 +86,7 @@ class QTraceEstimateLabelingEfficiency < ProteomaticScript
                 end
             end
         end
-	end
+    end
 end
 
 lk_Object = QTraceEstimateLabelingEfficiency.new

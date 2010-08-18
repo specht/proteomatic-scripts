@@ -22,8 +22,8 @@ require 'fileutils'
 
 
 class FastaToBlast < ProteomaticScript
-	def run()
-		@output.each do |inPath, outPath|
+    def run()
+        @output.each do |inPath, outPath|
             puts 'Converting database to BLAST format...'
             tempDir = tempFilename('fasta-to-blast-')
             FileUtils::mkdir(tempDir)
@@ -32,8 +32,8 @@ class FastaToBlast < ProteomaticScript
             FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.phr', File::dirname(outPath));
             FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.pin', File::dirname(outPath));
             FileUtils::mv(File::join(tempDir, File::basename(inPath)) + '.psq', File::dirname(outPath));
-		end
-	end
+        end
+    end
 end
 
 lk_Object = FastaToBlast.new

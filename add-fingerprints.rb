@@ -23,34 +23,34 @@ require 'fileutils'
 
 class AddFingerprints < ProteomaticScript
 
-	def run()
-		lk_Sum = Hash.new
-		@input[:fingerprints].each do |inPath|
-			File::open(inPath) do |lk_In|
-				headerLine = lk_In.readline
-				header = mapCsvHeader(headerLine)
+    def run()
+        lk_Sum = Hash.new
+        @input[:fingerprints].each do |inPath|
+            File::open(inPath) do |lk_In|
+                headerLine = lk_In.readline
+                header = mapCsvHeader(headerLine)
                 drKey = 'd'
                 drKey = 'r' unless header[drKey]
-				lk_In.each_line do |line|
-					lineArray = line.parse_csv()
-					key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
-					amount = lineArray[header['amount']].to_f
-					lk_Sum[key] ||= 0.0
-					lk_Sum[key] += amount
-				end
-			end
-		end
-		if @output[:sumFingerprint]
-			File::open(@output[:sumFingerprint], 'w') do |lk_Out|
-				lk_Out.puts "Amount,A,D"
-				lk_Sum.keys.each do |key|
-					a = key.split('/')[0]
-					d = key.split('/')[1]
-					lk_Out.puts "#{lk_Sum[key]},#{a},#{d}"
-				end
-			end
-		end
-	end
+                lk_In.each_line do |line|
+                    lineArray = line.parse_csv()
+                    key = "#{lineArray[header['a']].to_i}/#{lineArray[header[drKey]].to_i}"
+                    amount = lineArray[header['amount']].to_f
+                    lk_Sum[key] ||= 0.0
+                    lk_Sum[key] += amount
+                end
+            end
+        end
+        if @output[:sumFingerprint]
+            File::open(@output[:sumFingerprint], 'w') do |lk_Out|
+                lk_Out.puts "Amount,A,D"
+                lk_Sum.keys.each do |key|
+                    a = key.split('/')[0]
+                    d = key.split('/')[1]
+                    lk_Out.puts "#{lk_Sum[key]},#{a},#{d}"
+                end
+            end
+        end
+    end
 end
 
 lk_Object = AddFingerprints.new

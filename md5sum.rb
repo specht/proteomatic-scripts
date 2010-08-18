@@ -21,7 +21,7 @@ require 'yaml'
 
 class Md5Sum < ProteomaticScript
 
-	def run()
+    def run()
         lk_Digest = Digest::MD5.new()
         files = @input[:files].sort do |a, b|
             File::basename(a) <=> File::basename(b)
@@ -46,7 +46,7 @@ class Md5Sum < ProteomaticScript
                 puts "Success: The determined MD5 matches the asserted MD5."
             end
         end
-	end
+    end
 end
 
 lk_Object = Md5Sum.new

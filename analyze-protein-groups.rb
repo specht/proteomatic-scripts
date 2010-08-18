@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 	
+#     
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,7 +23,7 @@ require 'set'
 require 'yaml'
 
 class AnalyzeProteinGroups < ProteomaticScript
-	def run()
+    def run()
         proteinGroupsInfo = YAML::load_file(@input[:proteinGroups].first)
         
         proteinGroups = Array.new
@@ -54,7 +54,7 @@ class AnalyzeProteinGroups < ProteomaticScript
                 f.puts nonUniqueProteins.to_a.sort.join("\n")
             end
         end
-	end
+    end
 end
 
 lk_Object = AnalyzeProteinGroups.new

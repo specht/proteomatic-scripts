@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 	
+#     
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,24 +23,24 @@ require 'set'
 require 'yaml'
 
 class ApplyProteinGroups < ProteomaticScript
-	def run()
-		# first check whether all headers are equal, because in the end they will be merged
-		ls_Header = nil
-		lk_HeaderMap = nil
-		@input[:omssaResults].each do |ls_Path|
-			File.open(ls_Path, 'r') do |lk_In|
-				# skip header
-				ls_Header = lk_In.readline.strip
-				lk_ThisHeaderMap = mapCsvHeader(ls_Header)
-				if (lk_HeaderMap)
-					if (lk_HeaderMap != lk_ThisHeaderMap)
-						puts "Error: The header lines of all input files are not identical (#{ls_Path} is different, for example)."
-						exit 1
-					end
-				end
-				lk_HeaderMap = lk_ThisHeaderMap
-			end
-		end
+    def run()
+        # first check whether all headers are equal, because in the end they will be merged
+        ls_Header = nil
+        lk_HeaderMap = nil
+        @input[:omssaResults].each do |ls_Path|
+            File.open(ls_Path, 'r') do |lk_In|
+                # skip header
+                ls_Header = lk_In.readline.strip
+                lk_ThisHeaderMap = mapCsvHeader(ls_Header)
+                if (lk_HeaderMap)
+                    if (lk_HeaderMap != lk_ThisHeaderMap)
+                        puts "Error: The header lines of all input files are not identical (#{ls_Path} is different, for example)."
+                        exit 1
+                    end
+                end
+                lk_HeaderMap = lk_ThisHeaderMap
+            end
+        end
         
         proteinGroupsInfo = YAML::load_file(@input[:proteinGroups].first)
         
@@ -59,19 +59,19 @@ class ApplyProteinGroups < ProteomaticScript
         
         puts "Got #{proteinGroupsForProtein.size} proteins in #{proteinGroups.size} protein groups."
 
-		lk_Result = Hash.new
-		
-		if @output[:results]
+        lk_Result = Hash.new
+        
+        if @output[:results]
             print "Replacing proteins with protein groups..."
-			File.open(@output[:results], 'w') do |lk_Out|
-				lk_Out.puts(ls_Header)
-				@input[:omssaResults].each do |ls_Path|
-					File.open(ls_Path, 'r') do |lk_In|
+            File.open(@output[:results], 'w') do |lk_Out|
+                lk_Out.puts(ls_Header)
+                @input[:omssaResults].each do |ls_Path|
+                    File.open(ls_Path, 'r') do |lk_In|
                         # skip header, we already made sure it's always the same
                         # and we wrote it already
-						lk_In.readline
-						lk_In.each_line do |line|
-							lineArray = line.parse_csv()
+                        lk_In.readline
+                        lk_In.each_line do |line|
+                            lineArray = line.parse_csv()
                             protein = lineArray[lk_HeaderMap['defline']]
                             if proteinGroupsForProtein.include?(protein)
                                 proteinGroupsForProtein[protein].each do |group|
@@ -79,13 +79,13 @@ class ApplyProteinGroups < ProteomaticScript
                                 end
                             end
                             lk_Out.puts lineArray.to_csv()
-						end
-					end
-				end
-			end
+                        end
+                    end
+                end
+            end
             puts "done."
-		end
-	end
+        end
+    end
 end
 
 lk_Object = ApplyProteinGroups.new

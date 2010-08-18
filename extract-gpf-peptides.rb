@@ -23,7 +23,7 @@ require 'set'
 
 
 class ExtractGpfPeptides < ProteomaticScript
-	def run()
+    def run()
         immediatePeptides = Set.new
         intronSplitPeptides = Set.new
         tripletSplitPeptides = Set.new
@@ -75,7 +75,7 @@ class ExtractGpfPeptides < ProteomaticScript
         File::open(@output[:immediatePeptides], 'w') { |f| f.puts immediatePeptides.to_a.sort.join("\n") } if @output[:immediatePeptides]
         File::open(@output[:intronSplitPeptides], 'w') { |f| f.puts intronSplitPeptides.to_a.sort.join("\n") } if @output[:intronSplitPeptides]
         File::open(@output[:tripletSplitPeptides], 'w') { |f| f.puts tripletSplitPeptides.to_a.sort.join("\n") } if @output[:tripletSplitPeptides]
-	end
+    end
 end
 
 

@@ -21,7 +21,7 @@ require 'set'
 
 
 class CheckMod < ProteomaticScript
-	def run()
+    def run()
         peptides = @param[:peptides].split(/[\s,]+/)
         peptides.collect! { |x| x.strip.upcase }
         peptides.reject! { |x| x.empty? }
@@ -165,7 +165,7 @@ class CheckMod < ProteomaticScript
         puts
         
         FileUtils::rm_rf(@ms_TempPath)
-    end		
+    end        
     
     def calculateScore(scan, peptide)
         lk_Masses = {'G' => 57.021464, 'A' => 71.037114, 'S' => 87.032029,

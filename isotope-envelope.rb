@@ -150,7 +150,7 @@ class IsotopeEnvelope < ProteomaticScript
     end
     
     
-	def run()
+    def run()
         loadData()
         
 #         puts pickPeptideFast(@param[:peptide]).to_yaml
@@ -179,7 +179,7 @@ class IsotopeEnvelope < ProteomaticScript
             error = (m0 - average).abs() / average * 1000000.0
             puts "A#{@param[:label] != 'none' ? '*' : ''}#{sprintf('%+d', isotope)}: #{sprintf('%1.6f', histogram[isotope].to_f / max)} (#{sprintf('%1.2f', error)} ppm)"
         end
-	end
+    end
 end
 
 lk_Object = IsotopeEnvelope.new

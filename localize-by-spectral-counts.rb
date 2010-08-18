@@ -22,7 +22,7 @@ require 'yaml'
 require 'fileutils'
 
 class LocalizeBySpectralCounts < ProteomaticScript
-	def run()
+    def run()
         itemKey = (@param[:scope] + 's').intern
         spectralCounts = Hash.new
         puts "Reading PSM lists..."
@@ -63,7 +63,7 @@ class LocalizeBySpectralCounts < ProteomaticScript
         end
         resultFile.close if resultFile
         puts "Localized #{localizedCount} of #{spectralCounts.size} #{@param[:scope]}s."
-	end
+    end
 end
 
 lk_Object = LocalizeBySpectralCounts.new

@@ -20,7 +20,7 @@ require 'set'
 
 
 class Union < ProteomaticScript
-	def run()
+    def run()
         entries = Set.new
         @input[:entries].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))

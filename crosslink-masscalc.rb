@@ -39,7 +39,7 @@ class CrossLinkMassCalc < ProteomaticScript
                cutIndex == 0 ? "(complete)" : "y#{peptide.size - cutIndex}"
     end
     
-	def run()
+    def run()
         @hydrogenMass = $proteomicsKnowledge[:isotopes]['H'][:default][:monoisotopicmass]
         @oxygenMass = $proteomicsKnowledge[:isotopes]['O'][:default][:monoisotopicmass]
         @waterMass = @hydrogenMass * 2.0 + @oxygenMass
@@ -101,7 +101,7 @@ class CrossLinkMassCalc < ProteomaticScript
             end
         end
         puts allMz.sort { |a, b| a[0] <=> b[0] }.collect { |x| sprintf('%9.4f', x[0]) + ': ' + x[1] }.uniq.join("\n")
-	end
+    end
 end
 
 lk_Object = CrossLinkMassCalc.new

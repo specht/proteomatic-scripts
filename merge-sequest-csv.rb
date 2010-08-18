@@ -24,43 +24,43 @@ require 'yaml'
 
 
 class MergeSequestCsv < ProteomaticScript
-	def run()
-		
-		ls_AllHeader = nil
-		ls_AllHeaderPath = nil
-		if @output[:mergedResults]
-			@input[:sequestResults].each do |ls_Path|
-				File::open(ls_Path, 'r') do |f|
-					ls_ThisHeader = f.readline.strip + "\n" + f.readline.strip
-					ls_AllHeader ||= ls_ThisHeader
-					ls_AllHeaderPath ||= ls_Path
-					if (ls_AllHeader != ls_ThisHeader)
-						puts "Error: first two lines must be identical in all input files!"
-						puts "#{File::basename(ls_AllHeaderPath)}: [#{ls_AllHeader}]"
-						puts "#{File::basename(ls_Path)}: [#{ls_ThisHeader}]"
-						exit 1
-					end
-				end
-			end
-			File::open(@output[:mergedResults], 'w') do |lk_Out|
-				lk_Out.puts ls_AllHeader
-				@input[:sequestResults].each do |ls_Path|
-					ls_Basename = File::basename(ls_Path).sub('.csv', '')
-					File::open(ls_Path, 'r') do |f|
-						ls_ThisHeader = f.readline + f.readline
-						f.each_line do |line|
-							lineArray = line.parse_csv()
-							if (!lineArray[0] && (lineArray[1] && (!lineArray[1].empty?)))
-								scanId = ls_Basename + '.' + lineArray[1]
-								lineArray[1] = scanId
-							end
-							lk_Out.puts lineArray.to_csv()
-						end
-					end
-				end
-			end
-		end
-	end
+    def run()
+        
+        ls_AllHeader = nil
+        ls_AllHeaderPath = nil
+        if @output[:mergedResults]
+            @input[:sequestResults].each do |ls_Path|
+                File::open(ls_Path, 'r') do |f|
+                    ls_ThisHeader = f.readline.strip + "\n" + f.readline.strip
+                    ls_AllHeader ||= ls_ThisHeader
+                    ls_AllHeaderPath ||= ls_Path
+                    if (ls_AllHeader != ls_ThisHeader)
+                        puts "Error: first two lines must be identical in all input files!"
+                        puts "#{File::basename(ls_AllHeaderPath)}: [#{ls_AllHeader}]"
+                        puts "#{File::basename(ls_Path)}: [#{ls_ThisHeader}]"
+                        exit 1
+                    end
+                end
+            end
+            File::open(@output[:mergedResults], 'w') do |lk_Out|
+                lk_Out.puts ls_AllHeader
+                @input[:sequestResults].each do |ls_Path|
+                    ls_Basename = File::basename(ls_Path).sub('.csv', '')
+                    File::open(ls_Path, 'r') do |f|
+                        ls_ThisHeader = f.readline + f.readline
+                        f.each_line do |line|
+                            lineArray = line.parse_csv()
+                            if (!lineArray[0] && (lineArray[1] && (!lineArray[1].empty?)))
+                                scanId = ls_Basename + '.' + lineArray[1]
+                                lineArray[1] = scanId
+                            end
+                            lk_Out.puts lineArray.to_csv()
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
 

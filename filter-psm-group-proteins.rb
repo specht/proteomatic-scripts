@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 	
+#     
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,7 +23,7 @@ require 'set'
 require 'yaml'
 
 class FilterPsmGroupProteins < ProteomaticScript
-	def run()
+    def run()
         print 'Loading PSM...'
         proteins = Hash.new
         @input[:omssaResults].each do |path|
@@ -63,7 +63,7 @@ class FilterPsmGroupProteins < ProteomaticScript
         command = ExternalTools::binaryPath('ptb.groupproteins')
         command += " --output \"#{@output[:proteinGroups]}\" \"#{tempPath}\""
         runCommand(command, true)
-	end
+    end
 end
 
 lk_Object = FilterPsmGroupProteins.new

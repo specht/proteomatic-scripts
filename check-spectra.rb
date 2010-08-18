@@ -21,10 +21,10 @@ require 'yaml'
 require 'fileutils'
 
 class CheckSpectra < ProteomaticScript
-	def run()
-		ls_Command = "\"#{ExternalTools::binaryPath('ptb.checkspectra')}\" #{@input[:spectra].collect { |x| '"' + x + '"' }.join(' ')}"
-		runCommand(ls_Command, true)
-	end
+    def run()
+        ls_Command = "\"#{ExternalTools::binaryPath('ptb.checkspectra')}\" #{@input[:spectra].collect { |x| '"' + x + '"' }.join(' ')}"
+        runCommand(ls_Command, true)
+    end
 end
 
 lk_Object = CheckSpectra.new

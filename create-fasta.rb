@@ -20,7 +20,7 @@ require 'set'
 
 
 class CreateFasta < ProteomaticScript
-	def run()
+    def run()
         entries = Set.new
         @input[:sequences].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))

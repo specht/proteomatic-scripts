@@ -23,7 +23,7 @@ require 'yaml'
 require 'fileutils'
 
 class SplitCsvFile < ProteomaticScript
-	def run()
+    def run()
         acceptFile = nil
         rejectFile = nil
         acceptFile = File::open(@output[:acceptedEntries], 'w') if @output[:acceptedEntries]
@@ -112,7 +112,7 @@ class SplitCsvFile < ProteomaticScript
         acceptFile.close if acceptFile
         rejectFile.close if rejectFile
         puts "Accepted #{acceptCount} entries, rejected #{rejectCount} entries."
-	end
+    end
 end
 
 lk_Object = SplitCsvFile.new

@@ -21,7 +21,7 @@ require 'set'
 
 
 class MatchPeptides < ProteomaticScript
-	def run()
+    def run()
         # load peptides
         peptides = Set.new
         @input[:peptides].each do |path|
@@ -78,7 +78,7 @@ class MatchPeptides < ProteomaticScript
             f.puts "</body>"
             f.puts "</html>"
         end
-	end
+    end
 end
 
 lk_Object = MatchPeptides.new

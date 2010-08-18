@@ -21,6 +21,21 @@ require 'include/ruby/misc'
 require 'set'
 
 
+class String
+    alias_method :old_parse_csv, :parse_csv
+    
+    def parse_csv(options = {})
+        result = nil
+        begin
+            result = old_parse_csv(options)
+        rescue
+            puts "Error parsing CSV line: #{self}"
+        end
+        result
+    end
+end
+
+
 def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_', ai_DecoyAmount = 1)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:

@@ -27,8 +27,8 @@ require 'yaml'
 
 
 class ExtractOmssaResults < ProteomaticScript
-	def run()
-		# get peptides from PSM list
+    def run()
+        # get peptides from PSM list
         results = loadPsm(@input[:psmFile].first, :silent => false) 
         allProteins = results[:proteins].keys.reject do |x|
             results[:proteins][x].size < @param[:distinctPeptides]
@@ -64,7 +64,7 @@ class ExtractOmssaResults < ProteomaticScript
                 f.puts allModProteins.to_a.sort.join("\n")
             end
         end
-	end
+    end
 end
 
 lk_Object = ExtractOmssaResults.new

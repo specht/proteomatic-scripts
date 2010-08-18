@@ -11,7 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 	
+#     
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -24,7 +24,7 @@ require 'yaml'
 
 
 class CompareQuantitationRatios < ProteomaticScript
-	def run()
+    def run()
         scope = @param[:scope]
         columnCount = Hash.new
         columnCount['peptide'] = 0
@@ -104,7 +104,7 @@ class CompareQuantitationRatios < ProteomaticScript
             end
         end
         puts "Wrote #{outLines} output lines."
-	end
+    end
 end
 
 

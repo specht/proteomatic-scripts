@@ -20,7 +20,7 @@ require 'set'
 
 
 class Intersection < ProteomaticScript
-	def run()
+    def run()
         entries = nil
         @input[:entries].each do |path|
             thisEntries = Set.new(File::read(path).split("\n"))
