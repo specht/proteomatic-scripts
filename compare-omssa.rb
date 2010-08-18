@@ -181,7 +181,6 @@ class CompareOmssa < ProteomaticScript
                 end
             end
         end
-        exit
     end
 end
 
