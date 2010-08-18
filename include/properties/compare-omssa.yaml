@@ -34,6 +34,11 @@ parameters:
     type: flag
     default: false
   - key: printPeptidesToHtml
-    label: Print peptide details in HTML report
+    label: Add peptides to HTML report
+    type: flag
+    default: false
+  - key: printPeptidesToCsv
+    label: Add peptides to CSV report
+    description: If this flag is checked, the distinct peptide columns will be omitted.
     type: flag
     default: false

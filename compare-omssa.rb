@@ -153,10 +153,25 @@ class CompareOmssa < ProteomaticScript
         if @output[:csvReport]
             File.open(@output[:csvReport], 'w') do |lk_Out|
                 ls_PlaceHolder = ',' * lk_RunKeys.size
-                lk_Out.puts "Protein,Spectral count#{ls_PlaceHolder}SD,Distinct peptide count#{ls_PlaceHolder}SD"
-                lk_Out.puts ",#{lk_RunKeys.join(',') },,#{lk_RunKeys.join(',') },"
+                
+                lk_Out.print "Protein,#{@param[:printPeptidesToCsv] ? 'Peptide,' : ''}Spectral count#{ls_PlaceHolder}SD"
+                unless @param[:printPeptidesToCsv]
+                    lk_Out.print ",Distinct peptide count#{ls_PlaceHolder}SD" 
+                end
+                lk_Out.puts
+                
+                lk_Out.print ",#{@param[:printPeptidesToCsv] ? 'Peptide,' : ''}#{lk_RunKeys.join(',') },"
+                unless @param[:printPeptidesToCsv]
+                    lk_Out.print ",#{lk_RunKeys.join(',') },"
+                end
+                lk_Out.puts
+                
                 lk_Proteins.each do |ls_Protein|
                     lk_Out.print "\"#{ls_Protein}\","
+                    
+                    if @param[:printPeptidesToCsv]
+                        lk_Out.print ','
+                    end
                     
                     lk_Values = Array.new
                     ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
@@ -166,18 +181,39 @@ class CompareOmssa < ProteomaticScript
                         "#{li_Count},"
                     end.join('')
                     lk_Out.print ls_SpectralCountString
-                    lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))},"
-                    
-                    lk_Values = Array.new
-                    ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
-                        li_Count = 0
-                        li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
-                        lk_Values.push(li_Count)
-                        "#{li_Count},"
-                    end.join('')
-                    lk_Out.print ls_DistinctPeptidesCountString
                     lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))}"
+                    
+                    unless @param[:printPeptidesToCsv]
+                        lk_Out.print(",")
+                        lk_Values = Array.new
+                        ls_DistinctPeptidesCountString = lk_RunKeys.collect do |ls_Key|
+                            li_Count = 0
+                            li_Count = lk_RunResults[ls_Key][:proteins][ls_Protein].size if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein)
+                            lk_Values.push(li_Count)
+                            "#{li_Count},"
+                        end.join('')
+                        lk_Out.print ls_DistinctPeptidesCountString
+                        lk_Out.print "#{sprintf("%1.2f", stddev(lk_Values))}"
+                    end
                     lk_Out.puts
+                    if @param[:printPeptidesToCsv]
+                        # now print the individual peptides
+                        thisPeptides = lk_RunKeys.inject(Set.new()) { |x, key| x |= Set.new(lk_RunResults[key][:proteins][ls_Protein]) }
+                        thisPeptides.each do |ls_Peptide|
+                            lk_Out.print "\"#{ls_Protein}\",\"#{ls_Peptide}\","
+                            
+                            lk_Values = Array.new
+                            ls_SpectralCountString = lk_RunKeys.collect do |ls_Key|
+                                li_Count = 0
+                                li_Count = lk_RunResults[ls_Key][:spectralCounts][:peptides][ls_Peptide][:total] if lk_RunResults[ls_Key][:proteins].has_key?(ls_Protein) && lk_RunResults[ls_Key][:proteins][ls_Protein].include?(ls_Peptide)
+                                lk_Values.push(li_Count)
+                                "#{li_Count}"
+                            end.join(',')
+                            lk_Out.print ls_SpectralCountString
+                            lk_Out.print ",#{sprintf("%1.2f", stddev(lk_Values))}"
+                            lk_Out.puts
+                        end
+                    end
                 end
             end
         end
