@@ -1,0 +1,25 @@
+group: Proteomics/Identification/PEAKS
+
+title: Convert PEAKS results to CSV
+
+type: converter
+
+description: >
+  Convert PEAKS FASTA results to CSV.
+
+input:
+  - key: peptides
+    label: PEAKS de novo peptide
+    formats: [fasta]
+    min: 1
+    
+defaultOutputDirectory: peptides
+
+proposePrefix:
+  - peptides
+
+output:
+  - key: peptides
+    label: CSV results
+    format: csv
+    filename: '#{basename}.csv'
