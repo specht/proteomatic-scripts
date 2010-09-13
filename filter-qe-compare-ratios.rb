@@ -53,8 +53,12 @@ class CompareQuantitationRatios < ProteomaticScript
         end
         itemHash = Hash.new
         basenames = @input[:ratios].collect { |x| File::basename(x) }
-        inputKeys = mergeFilenames(basenames, true)
-        inputKeys ||= basenames
+        if @param[:useShortColumnHeaders]
+            inputKeys = mergeFilenames(basenames, true)
+            inputKeys ||= basenames
+        else
+            inputKeys = basenames.dup
+        end
         @input[:ratios].each_with_index do |path, inputFileIndex|
             File::open(path, 'r') do |f|
                 header = mapCsvHeader(f.readline)

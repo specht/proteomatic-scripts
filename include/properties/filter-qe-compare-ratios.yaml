@@ -32,6 +32,10 @@ parameters:
     type: flag
     default: no
     label: Keep ratios that do not appear in every input file
+  - key: useShortColumnHeaders
+    type: flag
+    default: no
+    label: Use short column headers
   - group: Columns
     key: ratiomean
     type: flag
