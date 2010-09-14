@@ -48,6 +48,7 @@ parameters:
     examples:
       - "15N"
       - "R 13C"
+      - "RP* 13C"
       - "RK 13C 15N"
       - "^R 15N"
   - key: useIsotopeEnvelopes
