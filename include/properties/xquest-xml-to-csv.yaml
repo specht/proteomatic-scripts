@@ -1,0 +1,22 @@
+group: Proteomics/Crosslinking
+
+title: Convert xQuest XML to CSV
+
+description: >
+  Convert xQuest XML results to CSV.
+
+type: converter
+
+input:
+  - key: xmlFiles
+    label: XML file
+    formats: [xml]
+    min: 1
+
+defaultOutputDirectory: xmlFiles
+
+output:
+  - key: xmlFiles
+    label: CSV files
+    format: csv
+    filename: '#{basename}.csv'
