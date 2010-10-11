@@ -1,0 +1,23 @@
+group: Proteomics/Spectra
+
+title: Merge MGF files
+
+description: >
+  Merge multiple MGF files.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [mgf]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: merged
+    label: merged entries
+    format: mgf
+    filename: merged.mgf
+    default: yes
