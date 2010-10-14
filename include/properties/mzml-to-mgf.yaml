@@ -1,0 +1,41 @@
+group: Proteomics/Spectra
+
+title: Convert mzML to MGF
+
+description: >
+  Convert fragmentation scans of mzML files to the MGF format.
+  <b>Attention</b>: All MS1 scans are discarded.
+
+type: converter
+
+input:
+  - key: mzmlFiles
+    label: mzML
+    formats: [xml-mzml, xml-mzml-compressed]
+    min: 1
+
+defaultOutputDirectory: mzmlFiles
+
+output:
+  - key: mzmlFiles
+    label: MGF files
+    format: mgf
+    filename: '#{basename}.mgf'
+
+parameters:
+  - key: mzDecimals
+    label: m/z decimal places
+    type: int
+    default: 4
+    min: 0
+  - key: intensityDecimals
+    label: Intensity decimal places
+    type: int
+    default: 4
+    min: 0
+
+needs:
+  - ext.ptb
+
+filetracker:
+  - dontMd5InputFiles: [mzmlFiles]
