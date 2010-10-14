@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2007-2010 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -28,7 +28,6 @@ require 'yaml'
 
 class FilterQuantitationEventsByBand < ProteomaticScript
     def run()
-    
         # handle band numbers that should be excluded
         lk_ExcludeBandNumbers = Set.new
         unless @param[:excludeBands].strip.empty?
@@ -102,7 +101,7 @@ class FilterQuantitationEventsByBand < ProteomaticScript
                             if lk_PeptideToProtein[ls_Peptide] != ls_Protein
                                 puts "Error: The peptide => protein assignments are not consistent in #{ls_InPath}."
                                 puts "The offending pair was #{ls_Peptide} => #{ls_Protein}."
-                                puts "In a previous quantitation event, the peptide was assigned to another protein."
+                                puts "In another quantitation event, the peptide was assigned to a different protein."
                                 exit
                             end
                         end
@@ -113,6 +112,7 @@ class FilterQuantitationEventsByBand < ProteomaticScript
             puts
         end
         lk_BestBandForItem = Hash.new
+        
         lk_BandNumberForSpotName = Hash.new
         lk_BandToRun = Hash.new
         print 'Reading PSM lists, determining best bands...'
