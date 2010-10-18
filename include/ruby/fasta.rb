@@ -42,3 +42,20 @@ def stripBlastDatabasePath(path)
     return path[0, path.size - 4] if ['.phr', '.pin', '.psq'].include?(path[-4, 4].downcase)
     return path
 end
+
+
+def fastaIterator(io, &block)
+    id = nil
+    sequence = ''
+    io.each_line do |line|
+        line.strip!
+        if line[0, 1] == '>'
+            yield(id, sequence) unless sequence.empty?
+            id = line[1, line.size - 1].strip
+            sequence = ''
+        else
+            sequence += line
+        end
+    end
+    yield(id, sequence) unless sequence.empty?
+end
