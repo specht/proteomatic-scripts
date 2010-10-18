@@ -1,0 +1,37 @@
+group: Proteomics/Protein databases
+
+title: Chop FASTA databases
+
+description: >
+  Chop FASTA databases into chunks.
+
+type: converter
+
+input:
+  - key: databases
+    label: FASTA database
+    formats: [fasta]
+
+defaultOutputDirectory: databases
+
+output:
+  - key: databases
+    label: chopped database
+    format: fasta
+    filename: "#{basename}-chopped.fasta"
+    default: yes
+        
+parameters:
+  - key: windowSize
+    type: int
+    default: 400
+    min: 1
+    label: Chunk size
+  - key: windowShift
+    type: float
+    default: 50.0
+    suffix: '%'
+    decimals: 2
+    label: Chunk overlap
+    min: 0.0
+    max: 100.0
