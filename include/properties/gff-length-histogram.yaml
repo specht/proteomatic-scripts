@@ -1,0 +1,32 @@
+group: Proteomics/Miscellaneous
+
+title: Visualize GFF feature lengths
+
+type: processor
+
+description: >
+  Create a histogram of feature lengths in a GFF file.
+
+input:
+  - key: input
+    label: gff
+    formats: [gff]
+    min: 1
+    
+defaultOutputDirectory: input
+
+proposePrefix:
+  - input
+
+output:
+  - key: histogram
+    label: histogram
+    format: csv
+    filename: histogram.csv
+    default: yes
+
+parameters:
+  - key: binSize
+    type: int
+    default: 10
+    label: Bin size
