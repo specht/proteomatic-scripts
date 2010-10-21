@@ -1,0 +1,3 @@
+h1. Synopsis
+
+The Proteomatic scripts are the CLI backend to Proteomatic.
