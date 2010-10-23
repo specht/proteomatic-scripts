@@ -1,0 +1,27 @@
+group: Proteomics/Crosslinking
+
+title: Remove PSM scans from xQuest results
+
+description: >
+  Remove xQuest results from scans which have been identified by other programs such as OMSSA.
+
+type: processor
+
+input:
+  - key: psmList
+    label: PSM list
+    formats: [csv]
+    min: 1
+  - key: xQuestResults
+    label: xQuest results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: xQuestResults
+
+output:
+  - key: croppedXQuestResults
+    label: Cropped xQuest results
+    format: csv
+    filename: no-conflicting-psm.csv
+    default: yes
