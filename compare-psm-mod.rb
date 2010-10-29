@@ -36,10 +36,24 @@ end
 
 
 class ComparePsmMod < ProteomaticScript
+    
+    # removes leading zeroes from scan counts, like so:
+    # 'JP_conF_7-24_E1_271009.0889.0889.3' => 'JP_conF_7-24_E1_271009.889.889.3'
+    def sanitizeScanId(id)
+        parts = id.split('.')
+        result = id
+        if parts.size >= 4
+            parts[-2] = parts[-2].to_i.to_s
+            parts[-3] = parts[-3].to_i.to_s
+            result = parts.join('.')
+        end
+        return result
+    end
+    
     def run()
         lk_Files = @input[:sequestResults] + @input[:omssaResults]
         lk_Ids = lk_Files.collect { |x| File::basename(x).sub('.csv', '') }.sort
-        lk_ProteinCountForId = Hash.new
+        lk_ProteinsForId = Hash.new
         fullProteinForProteinId = Hash.new
 
         # lk_AllResults:
@@ -57,7 +71,7 @@ class ComparePsmMod < ProteomaticScript
             #puts lk_Results.to_yaml
             # lk_Results[:proteins] => {'protein' => ['pep1', 'pep2']}
             # lk_Results[:peptideHash] => {'peptide' => {:scans => [scans...]}}
-            lk_ProteinCountForId[ls_Id] = lk_Results[:proteins].size
+            lk_ProteinsForId[ls_Id] = Set.new(lk_Results[:proteins].keys)
             puts "#{lk_Results[:proteins].size} proteins."
             lk_Results[:proteins].keys.each do |ls_OriginalProtein|
                 ls_Protein = ls_OriginalProtein.dup
@@ -66,6 +80,7 @@ class ComparePsmMod < ProteomaticScript
                 fullProteinForProteinId[ls_Protein] << ls_OriginalProtein
                 lk_Results[:proteins][ls_OriginalProtein].each do |ls_Peptide|
                     lk_Results[:peptideHash][ls_Peptide][:scans].each do |ls_Scan|
+                        ls_Scan = sanitizeScanId(ls_Scan)
                         # initialize ls_ModPeptide with clean unmodified peptide
                         ls_ModPeptide = ls_Peptide
                         # if there's a modification, update ls_ModPeptide
@@ -107,6 +122,7 @@ class ComparePsmMod < ProteomaticScript
                         if (ls_Protein && lk_Line[2])
                             # here comes a peptide
                             ls_ScanId = File::basename(ls_Path) + '.' + lk_Line[1]
+                            ls_ScanId = sanitizeScanId(ls_ScanId)
                             next if lk_ForbiddenScanIds.include?(ls_ScanId)
                             if lk_Line[2].split('.').size != 3
                                 puts "Error: Expecting K.PEPTIDER.A style peptides in SEQUEST results."
@@ -145,18 +161,15 @@ class ComparePsmMod < ProteomaticScript
                 ls_Id = File::basename(ls_Path).sub('.csv', '')
                 ls_Protein = nil
                 File::open(ls_Path, 'r') do |lk_File|
-                    # fake scan id
-                    li_ScanId = 1000000
                     header = mapCsvHeader(lk_File.readline)
-                    unless header.include?('peptide') && header.include?('protein')
+                    unless header.include?('spectrum') && header.include?('peptide') && header.include?('protein')
                         puts "Error: Not all expected columns were found in #{ls_Path}."
-                        puts "Expected columns are 'peptide' and 'protein'."
+                        puts "Expected columns are 'spectrum', 'peptide' and 'protein'."
                         exit(1)
                     end
                     lk_File.each_line do |ls_Line|
-                        li_ScanId += 1
-                        ls_ScanId = ls_Id + li_ScanId.to_s
                         lk_Line = ls_Line.parse_csv
+                        ls_ScanId = sanitizeScanId(lk_Line[header['spectrum']])
                         next if (!lk_Line[header['peptide']]) || (lk_Line[header['peptide']].strip.empty?)
                         
                         # here comes a peptide
@@ -186,7 +199,7 @@ class ComparePsmMod < ProteomaticScript
                     end
                 end
             end
-            lk_ProteinCountForId[ls_Id] = lk_ThisProteins.size
+            lk_ProteinsForId[ls_Id] = lk_ThisProteins
             puts "#{lk_ThisProteins.size} proteins."
         end
         
@@ -258,7 +271,7 @@ class ComparePsmMod < ProteomaticScript
                         lk_Ids.each do |ls_Id|
                             li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
                             li_Count ||= '0'
-                            f.print "#{li_Count},#{lb_IsModified ? 'mod' : '-'},"
+                            f.print "#{li_Count},#{lb_IsModified ? 'mod' : '"-"'},"
                         end
                         f.puts
                     end
@@ -312,8 +325,18 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "</thead>"
                 f.puts "<tbody>"
                 (0...lk_Ids.size).each do |i|
-                    f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinCountForId[lk_Ids[i]]}</td></tr>"
+                    f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinsForId[lk_Ids[i]].size}</td></tr>"
                 end
+                union = Set.new
+                intersection = nil
+                lk_ProteinsForId.values.each do |s|
+                    union |= s
+                    intersection ||= s
+                    intersection &= s
+                end
+                
+                f.puts "<tr><td class='number'></td><td>union</td><td>#{union.size}</td></tr>"
+                f.puts "<tr><td class='number'></td><td>intersection</td><td>#{intersection.size}</td></tr>"
                 f.puts "</tbody>"
                 f.puts "</table>"
                 f.puts "<p>Total proteins: #{lk_AllResults.size}</p>"
@@ -383,6 +406,7 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "</html>"
             end
         end
+        exit
     end
 end
 

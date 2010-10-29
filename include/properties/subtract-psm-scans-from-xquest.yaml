@@ -23,5 +23,5 @@ output:
   - key: croppedXQuestResults
     label: Cropped xQuest results
     format: csv
-    filename: no-conflicting-psm.csv
+    filename: no-conflicting-xquest-results.csv
     default: yes
