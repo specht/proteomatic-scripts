@@ -1,31 +1,39 @@
 <?php
+/*
+Copyright (c) 2010 Michael Specht and Sebastian Kuhlgert
+
+This file is part of Proteomatic.
+
+Proteomatic is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Proteomatic is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 abstract class ProteomaticScript
 {
     abstract protected function run();
     
     protected $param;
-        protected $input;
+    protected $input;
     protected $output;
     
     function __construct()
     {
         global $argv;
         
-        // remove script name from arg list
-        $scriptFilename = array_shift($argv);
-        $currentDir = getcwd();
-        
-        // remove $currentDir from $scriptFilename if it's a prefix
-        if ((count($currentDir) > 0) && (strpos($scriptFilename, $currentDir) == 0))
-            $scriptFilename = str_replace($currentDir, "", $scriptFilename);
-        
-        // change working directory to script's directory
-        $completeScriptPath = realpath($currentDir."/".$scriptFilename);
-        
-        chdir(dirname($completeScriptPath));
-        $scriptFilename = basename($scriptFilename);
-        
+        $scriptPath = array_shift($argv);
+        // chdir to script's directory
+		$scriptDir = dirname($scriptPath);
+
         // check for user-defined Ruby
         $pathToRuby = "ruby";
         if (($index = array_search('--pathToRuby', $argv)) !== FALSE)
@@ -33,44 +41,51 @@ abstract class ProteomaticScript
             $chunk = array_splice($argv, $index, 2);
             $pathToRuby = $chunk[1];
         }
-        
+		
         // determine path to YAML description
-        $parts = explode('.', $scriptFilename);
-        $scriptBasename = implode('.', array_slice($parts, 0, count($parts) - 1));
-        $pathToYamlDescription = realpath("include/properties/$scriptBasename.yaml");
+        $scriptBasename = explode('.', basename($scriptPath));
+		$scriptBasename = $scriptBasename[0];
+        $pathToYamlDescription = implode(DIRECTORY_SEPARATOR, array($scriptDir, 'include', 'properties', $scriptBasename.'.yaml'));
         
-        // create parameter string
-        $argString = "";
-        foreach ($argv as $arg)
-            $argString .= " '$arg'";
-            
         // now we have to allocate three temporary files:
         // - control 
         // - response
         // - output
         
-        $controlFilePath = realpath(tempnam(sys_get_temp_dir(), 'p-php-c-'));
+        $controlFilePath = tempnam(sys_get_temp_dir(), 'p-php-c-');
         $controlFile = fopen($controlFilePath, 'w');
         fclose($controlFile);
-        $responseFilePath = realpath(tempnam(sys_get_temp_dir(), 'p-php-r-'));
+        $responseFilePath = tempnam(sys_get_temp_dir(), 'p-php-r-');
         $responseFile = fopen($responseFilePath, 'w');
         fclose($responseFile);
-        $outputFilePath = realpath(tempnam(sys_get_temp_dir(), 'p-php-o-'));
+        $outputFilePath = tempnam(sys_get_temp_dir(), 'p-php-o-');
         $outputFile = fopen($outputFilePath, 'w');
         fclose($outputFile);
+
+        $argString = "";
+        foreach ($argv as $arg)
+        {
+            // replace \n \t \r "
+            $arg = str_replace("\n", "\\n", $arg);
+            $arg = str_replace("\t", "\\t", $arg);
+            $arg = str_replace("\r", "\\r", $arg);
+            $arg = str_replace("\"", "\\\"", $arg);
+            $argString .= "  - \"".$arg."\"\n";
+        }
         
         $controlFile = fopen($controlFilePath, 'w');
         fwrite($controlFile, "action: query\n");
         fwrite($controlFile, "pathToYamlDescription: \"".str_replace("\\", "\\\\", $pathToYamlDescription)."\"\n");
         fwrite($controlFile, "responseFilePath: \"".str_replace("\\", "\\\\", $responseFilePath)."\"\n");
         fwrite($controlFile, "responseFormat: json\n");
+        fwrite($controlFile, "arguments:\n".$argString);
+
         fclose($controlFile);
-        
+		
         // call Proteomatic's any language hub
-        //exec("\"$pathToRuby\" \"helper/any-language-hub.rb\" \"".str_replace("\\", "\\\\", $controlFilePath)."\" $argString");
-        $command = "'$pathToRuby' ./helper/any-language-hub.rb '".str_replace("\\", "/", $controlFilePath)."' $argString";
-        passthru($command);
-        
+        $hubPath = implode(DIRECTORY_SEPARATOR, array($scriptDir, 'helper', 'any-language-hub.rb'));
+        $command = escapeshellarg($pathToRuby) . ' ' . escapeshellarg($hubPath) . ' ' . escapeshellarg($controlFilePath);
+        system($command);
         // check if we're supposed to run this thing now
         $response = json_decode(file_get_contents($responseFilePath));
         
@@ -97,11 +112,13 @@ abstract class ProteomaticScript
             fwrite($controlFile, "pathToYamlDescription: \"".str_replace("\\", "\\\\", $pathToYamlDescription)."\"\n");
             fwrite($controlFile, "responseFilePath: \"".str_replace("\\", "\\\\", $responseFilePath)."\"\n");
             fwrite($controlFile, "responseFormat: json\n");
+            fwrite($controlFile, "arguments:\n".$argString);
             fwrite($controlFile, "outputFilePath: \"".str_replace("\\", "\\\\", $outputFilePath)."\"\n");
             fwrite($controlFile, "startTime: \"$startTime\"\n");
             fclose($controlFile);
 
-            passthru("'$pathToRuby' ./helper/any-language-hub.rb '".str_replace("\\", "/", $controlFilePath)."' $argString");
+			$command = escapeshellarg($pathToRuby) . ' ' . escapeshellarg($hubPath) . ' ' . escapeshellarg($controlFilePath);
+			system($command);
         }
         
         unlink($controlFilePath);

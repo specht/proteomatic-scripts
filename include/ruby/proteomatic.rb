@@ -309,9 +309,11 @@ class ProteomaticScript
 	def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false, as_ControlFilePath = nil)
         
         control = nil
+		@mk_Arguments = ARGV.dup
         if as_ControlFilePath
             control = YAML::load_file(as_ControlFilePath)
             as_DescriptionPath = control['pathToYamlDescription']
+			@mk_Arguments = control['arguments'].dup
         end
         
         @mb_GetInfoOnly = ab_GetInfoOnly
@@ -360,19 +362,19 @@ class ProteomaticScript
 		end
 		
 		# see if there's a filetracker configuration on the command line
-		if ARGV.include?('--useFileTracker')
-			fileTrackerHostAndPort = ARGV[ARGV.index('--useFileTracker') + 1]
-			ARGV.slice!(ARGV.index('--useFileTracker'), 2)
+		if @mk_Arguments.include?('--useFileTracker')
+			fileTrackerHostAndPort = @mk_Arguments[@mk_Arguments.index('--useFileTracker') + 1]
+			@mk_Arguments.slice!(@mk_Arguments.index('--useFileTracker'), 2)
 			fileTrackerHostAndPortList = fileTrackerHostAndPort.split(':')
 			@ms_FileTrackerHost = fileTrackerHostAndPortList[0]
 			@mi_FileTrackerPort = fileTrackerHostAndPortList[1].to_i
 		end
 		
-        # see if there's a parameter in ARGV that defines where external tools 
+        # see if there's a parameter in @mk_Arguments that defines where external tools 
         # should be located
-        if ARGV.include?('--extToolsPath')
-            path = ARGV[ARGV.index('--extToolsPath') + 1]
-            ARGV.slice!(ARGV.index('--extToolsPath'), 2)
+        if @mk_Arguments.include?('--extToolsPath')
+            path = @mk_Arguments[@mk_Arguments.index('--extToolsPath') + 1]
+            @mk_Arguments.slice!(@mk_Arguments.index('--extToolsPath'), 2)
             ExternalTools::setExtToolsPath(path)
         end
         
@@ -383,7 +385,7 @@ class ProteomaticScript
 		
 		loadDescription()
         
-		if ARGV == ['--resolveDependencies']
+		if @mk_Arguments == ['--resolveDependencies']
 			resolveDependencies()
 			exit 0
 		end
@@ -397,7 +399,7 @@ class ProteomaticScript
             end
         end
 		
-		if ARGV == ['--showFileDependencies']
+		if @mk_Arguments == ['--showFileDependencies']
 			showFileDependencies()
 			exit 0
 		end
@@ -434,7 +436,7 @@ class ProteomaticScript
 # 			DRb.thread.join
 		else
 			begin
-				applyArguments(ARGV)
+				applyArguments(@mk_Arguments)
 			rescue ProteomaticArgumentException => e
 				puts e
 				exit 1
@@ -670,16 +672,16 @@ class ProteomaticScript
     end
     
 	def handleArguments()
-		if ARGV.first == '--daemon'
+		if @mk_Arguments.first == '--daemon'
 			@mb_Daemon = true
 			@mi_DaemonPort = DEFAULT_DAEMON_PORT
-			@mi_DaemonPort = ARGV[1].to_i if ARGV.size > 1
+			@mi_DaemonPort = @mk_Arguments[1].to_i if @mk_Arguments.size > 1
 		end
-        if ARGV.first == '---yamlInfo'
-            puts yamlInfo(ARGV.include?('--short'))
+        if @mk_Arguments.first == '---yamlInfo'
+            puts yamlInfo(@mk_Arguments.include?('--short'))
             exit 0
         end
-		if ARGV == ['--help']
+		if @mk_Arguments == ['--help']
 			puts help()
 			exit 0
 		end		
@@ -886,7 +888,7 @@ class ProteomaticScript
 		
 		# check dependencies if called from GUI
 		if @mk_ScriptProperties.has_key?('needs')
-			if (ARGV.first == '---yamlInfo') && (!ARGV.include?('--short'))
+			if (@mk_Arguments.first == '---yamlInfo') && (!@mk_Arguments.include?('--short'))
 				ls_Response = ''
 				@mk_ScriptProperties['needs'].each do |ls_ExtTool|
 					next unless ls_ExtTool[0, 4] == 'ext.'
@@ -911,7 +913,7 @@ class ProteomaticScript
 		@mk_Parameters = Parameters.new
 
         # add external tool parameters if desired
-        unless ((ARGV.first == '---yamlInfo') && (ARGV.include?('--short')))
+        unless ((@mk_Arguments.first == '---yamlInfo') && (@mk_Arguments.include?('--short')))
             if (@mk_ScriptProperties.has_key?('externalParameters'))
                 @mk_ScriptProperties['externalParameters'].each do |ls_ExtTool|
                     lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
