@@ -38,12 +38,12 @@ parameters:
     label: Compression level
     type: enum
     choices:
-      - '0': No compression
-      - '1': Very low compression
-      - '3': Fast compression
-      - '5': Normal compression
-      - '7': Maximum compression
-      - '9': Ultra compression
+      - '0': no compression
+      - '1': very low
+      - '3': fast
+      - '5': normal
+      - '7': maximum
+      - '9': ultra
     default: '5'
 
 needs:
