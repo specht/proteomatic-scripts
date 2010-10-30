@@ -1,5 +1,5 @@
-require 'include/ruby/proteomatic'
-require 'include/ruby/evaluate-omssa-helper'
+require './include/ruby/proteomatic'
+require './include/ruby/evaluate-omssa-helper'
 require 'fileutils'
 require 'set'
 

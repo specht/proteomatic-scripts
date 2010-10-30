@@ -16,8 +16,8 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 
-require 'include/ruby/proteomatic'
-require 'include/ruby/fasta'
+require './include/ruby/proteomatic'
+require './include/ruby/fasta'
 require 'fileutils'
 
 

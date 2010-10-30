@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/ruby/proteomatic'
-require 'include/ruby/evaluate-omssa-helper'
-require 'include/ruby/ext/fastercsv'
-require 'include/ruby/misc'
+require './include/ruby/proteomatic'
+require './include/ruby/evaluate-omssa-helper'
+require './include/ruby/ext/fastercsv'
+require './include/ruby/misc'
 require 'set'
 require 'yaml'
 

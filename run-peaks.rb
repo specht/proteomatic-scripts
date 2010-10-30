@@ -17,8 +17,8 @@
 
 # Run Peaks (a Proteomatic script)
 
-require 'include/ruby/proteomatic'
-require 'include/ruby/misc'
+require './include/ruby/proteomatic'
+require './include/ruby/misc'
 require 'yaml'
 require 'fileutils'
 

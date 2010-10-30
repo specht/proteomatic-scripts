@@ -1,4 +1,4 @@
-require 'include/ruby/proteomatic'
+require './include/ruby/proteomatic'
 require 'fileutils'
 
 class QTraceCropXhtmlReport < ProteomaticScript

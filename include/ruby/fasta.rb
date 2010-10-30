@@ -16,7 +16,7 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'fileutils'
-require 'include/ruby/externaltools'
+require './include/ruby/externaltools'
 
 def createBlastDatabase(as_Filename)
 	# create blast database if necessary

@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/ruby/proteomatic'
-require 'include/ruby/externaltools'
-require 'include/ruby/formats'
+require './include/ruby/proteomatic'
+require './include/ruby/externaltools'
+require './include/ruby/formats'
 require 'net/http'
 require 'net/ftp'
 require 'yaml'

@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/ruby/misc'
-require 'include/ruby/externaltools'
+require './include/ruby/misc'
+require './include/ruby/externaltools'
 require 'set'
 require 'yaml'
 

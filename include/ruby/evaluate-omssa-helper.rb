@@ -16,8 +16,8 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'bigdecimal'
-require 'include/ruby/ext/fastercsv'
-require 'include/ruby/misc'
+require './include/ruby/ext/fastercsv'
+require './include/ruby/misc'
 require 'set'
 
 

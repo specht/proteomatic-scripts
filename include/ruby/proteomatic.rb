@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'include/ruby/externaltools'
-require 'include/ruby/formats'
-require 'include/ruby/misc'
-require 'include/ruby/parameters'
-require 'include/ruby/ext/json'
+require './include/ruby/externaltools'
+require './include/ruby/formats'
+require './include/ruby/misc'
+require './include/ruby/parameters'
+require './include/ruby/ext/json'
 require 'drb'
 require 'fileutils'
 require 'set'
