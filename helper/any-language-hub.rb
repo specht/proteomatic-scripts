@@ -1,3 +1,5 @@
+$: << File::join(File::dirname($0), '..')
+
 require 'include/ruby/proteomatic'
 require 'yaml'
 

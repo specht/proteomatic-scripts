@@ -14,39 +14,37 @@ input:
     min: 1
 
 output:
-  - key: outputArchive
+  - key: archive
     label: archive
     format: any
-    filename: archive.#{compressionmethod}
+    filename: "archive.#{type}"
     default: yes
         
 defaultOutputDirectory: files
 
 parameters:
-  - key: compressionmethod
-    label: Compression method
+  - key: type
+    label: Archive type
     type: enum
     choices:
-      - "7z": "7Z"
-      - "tar.gz": "TAR-GZIP"
-      - "zip": "ZIP"
-      - "tar.bz2": "TAR-BZIP2"
-      - "tar": "TAR"
-      - "iso": "ISO (Mac & Linux)"
-      - "udf": "UDF (Mac & Linux)"
-    default: 'zip'
-    description: Compression method used for archive.
-  - key: compressionlevel
+      - "zip": "zip"
+      - "tar.gz": "tar.gz"
+      - "tar.bz2": "tar.bz2"
+      - "7z": "7z"
+      - "tar": "tar"
+    default: zip
+    description: Choose the archive type.
+  - key: level
     label: Compression level
     type: enum
     choices:
-      - "mx0": "No compression"
-      - "mx1": "Very low compression"
-      - "mx3": "Fast compression"
-      - "mx5": "Normal compression"
-      - "mx7": "Maximum compression"
-      - "mx9": "Ultra compression"
-    default: "mx5"
+      - '0': No compression
+      - '1': Very low compression
+      - '3': Fast compression
+      - '5': Normal compression
+      - '7': Maximum compression
+      - '9': Ultra compression
+    default: '5'
 
 needs:
   - ext.7zip
