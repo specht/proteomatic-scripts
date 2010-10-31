@@ -1,6 +1,4 @@
-$: << File::join(File::dirname($0), '..')
-
-require 'include/ruby/proteomatic'
+require './include/ruby/proteomatic'
 require 'yaml'
 
 # This is the hub to any other scripting language. Call with 

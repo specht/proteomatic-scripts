@@ -2,7 +2,7 @@
 Dir::chdir(File::join(Dir::pwd, File::dirname($0), '..'))
 
 require 'yaml'
-require 'include/ruby/externaltools'
+require './include/ruby/externaltools'
 
 $stdout.sync = true
 $stderr.sync = true

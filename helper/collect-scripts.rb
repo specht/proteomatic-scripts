@@ -2,7 +2,7 @@
 Dir::chdir(File::join(Dir::pwd, File::dirname($0), '..'))
 
 require 'yaml'
-require 'include/ruby/proteomatic'
+require './include/ruby/proteomatic'
 
 #extensions = ['.rb', '.php', '.py', '.pl']
 

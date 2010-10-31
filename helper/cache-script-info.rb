@@ -4,11 +4,11 @@ require 'fileutils'
 Dir::chdir(File::join(Dir::pwd, File::dirname($0), '..'))
 
 require 'yaml'
-require 'include/ruby/proteomatic'
+require './include/ruby/proteomatic'
 
 #extensions = ['.rb', '.php', '.py', '.pl']
 
-extensions = ['.rb']
+extensions = ['.rb', '.py', '.php']
 allScripts = []
 extensions.each do |ext|
     allScripts += Dir["*#{ext}"]
@@ -22,7 +22,9 @@ results = Hash.new
 puts "Caching ---yamlInfo --short for #{allScripts.size} scripts..."
 
 allScripts.each_with_index do |script, index|
-    descriptionPath = "include/properties/#{script.sub('.defunct.', '.').sub('.rb', '')}.yaml"
+    next if script.include?('.defunct.')
+    pathParts = script.split('.')
+    descriptionPath = "./include/properties/#{pathParts[0, pathParts.size - 1].join('.')}.yaml"
     FileUtils::mkpath(File::join(File::dirname(descriptionPath), '..', '..', 'cache'))
     
     object = ProteomaticScript.new(descriptionPath, true)
