@@ -249,10 +249,6 @@ class ComparePsmMod < ProteomaticScript
             lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] << ls_ScanId
         end
         
-        File::open('/home/michael/Desktop/out.txt', 'w') do |f|
-            f.puts lk_AllResults.keys.sort.join("\n")
-        end
-
         puts "Comparing #{lk_AllResults.size} proteins."
         
         lk_ProteinInterestingnessScores = Hash.new
