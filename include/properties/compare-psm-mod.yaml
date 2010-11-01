@@ -52,3 +52,4 @@ parameters:
     type: flag
     default: yes
     label: Strip proteins at first whitespace
+    description: SEQUEST seems to print the protein ID up to the first whitespace instead of the complete protein name. Activate this flag to make OMSSA protein IDs compatible to SEQUEST.

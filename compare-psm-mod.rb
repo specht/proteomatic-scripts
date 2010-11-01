@@ -34,6 +34,17 @@ def meanAndStandardDeviation(ak_Values)
     return ld_Mean, ld_Sd
 end
 
+def unionAndIntersection(sets)
+    union = Set.new()
+    intersection = nil
+    sets.each do |s|
+        union |= s
+        intersection ||= s
+        intersection &= s
+    end
+    return union, intersection
+end
+
 
 class ComparePsmMod < ProteomaticScript
     
@@ -59,8 +70,8 @@ class ComparePsmMod < ProteomaticScript
         # lk_AllResults:
         #   protein 1:
         #     PEPTiDE: 
-        #       id1: 5
-        #       id2: 8
+        #       omssa-file: [scan1, scan2]
+        #       sequest-file: [scan2, scan3]
         lk_AllResults = Hash.new
         
         # parse OMSSA CSV files
@@ -71,13 +82,14 @@ class ComparePsmMod < ProteomaticScript
             #puts lk_Results.to_yaml
             # lk_Results[:proteins] => {'protein' => ['pep1', 'pep2']}
             # lk_Results[:peptideHash] => {'peptide' => {:scans => [scans...]}}
-            lk_ProteinsForId[ls_Id] = Set.new(lk_Results[:proteins].keys)
+            lk_ProteinsForId[ls_Id] = Set.new()
             puts "#{lk_Results[:proteins].size} proteins."
             lk_Results[:proteins].keys.each do |ls_OriginalProtein|
                 ls_Protein = ls_OriginalProtein.dup
                 ls_Protein = ls_Protein.split(/\s/).first if @param[:useProteinIds]
                 fullProteinForProteinId[ls_Protein] ||= Set.new
                 fullProteinForProteinId[ls_Protein] << ls_OriginalProtein
+                lk_ProteinsForId[ls_Id] << ls_Protein
                 lk_Results[:proteins][ls_OriginalProtein].each do |ls_Peptide|
                     lk_Results[:peptideHash][ls_Peptide][:scans].each do |ls_Scan|
                         ls_Scan = sanitizeScanId(ls_Scan)
@@ -89,8 +101,8 @@ class ComparePsmMod < ProteomaticScript
                         end
                         lk_AllResults[ls_Protein] ||= Hash.new
                         lk_AllResults[ls_Protein][ls_ModPeptide] ||= Hash.new
-                        lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] ||= 0
-                        lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] += 1
+                        lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] ||= Set.new()
+                        lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] << ls_Scan
                     end
                 end
             end
@@ -233,8 +245,12 @@ class ComparePsmMod < ProteomaticScript
             ls_Id = lk_Scan[:id]
             lk_AllResults[ls_Protein] ||= Hash.new
             lk_AllResults[ls_Protein][ls_ModPeptide] ||= Hash.new
-            lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] ||= 0
-            lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] += 1
+            lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] ||= Set.new()
+            lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id] << ls_ScanId
+        end
+        
+        File::open('/home/michael/Desktop/out.txt', 'w') do |f|
+            f.puts lk_AllResults.keys.sort.join("\n")
         end
 
         puts "Comparing #{lk_AllResults.size} proteins."
@@ -246,17 +262,17 @@ class ComparePsmMod < ProteomaticScript
             lk_ProteinData.each do |ls_ModPeptide, lk_ModPeptideData|
                 lk_Numbers = Hash.new
                 lk_Ids.each { |x| lk_Numbers[x] = 0 }
-                lk_ModPeptideData.each { |ls_Id, li_Count| lk_Numbers[ls_Id] = li_Count }
+                lk_ModPeptideData.each { |ls_Id, lk_ScanIds| lk_Numbers[ls_Id] = lk_ScanIds.size }
                 ld_Mean, ld_Sd = meanAndStandardDeviation(lk_Numbers.values)
                 lk_ModPeptideInterestingnessScores[ls_Protein + '/' + ls_ModPeptide] = ld_Sd
                 ld_Interestingness += ld_Sd
             end
             lk_ProteinInterestingnessScores[ls_Protein] = ld_Interestingness
         end
-        
+
         if @output[:peptideReport]
             File::open(@output[:peptideReport], 'w') do |f|
-                f.puts "Protein,Peptide(s),#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}"
+                f.puts "Protein,Peptide(s),#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}Union,Intersection"
                 lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
                     lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
                         f.print "\"#{ls_Protein}\","
@@ -269,10 +285,22 @@ class ComparePsmMod < ProteomaticScript
                         end
                         f.print "\"#{ls_ModPeptide}\","
                         lk_Ids.each do |ls_Id|
-                            li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
-                            li_Count ||= '0'
+                            li_Count = '0'
+                            if lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                                li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id].size
+                            end
                             f.print "#{li_Count},#{lb_IsModified ? 'mod' : '"-"'},"
                         end
+                        allScans = lk_Ids.collect do |ls_Id|
+                            x = Set.new()
+                            if lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                                x = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                            end
+                            x
+                        end
+                        union, intersection = unionAndIntersection(allScans)
+                        f.print "#{union.size}"
+                        f.print ",#{intersection.size}"
                         f.puts
                     end
                 end
@@ -281,35 +309,43 @@ class ComparePsmMod < ProteomaticScript
         
         if @output[:proteinReport]
             File::open(@output[:proteinReport], 'w') do |f|
-                f.puts "Protein,#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}"
+                f.puts "Protein,#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}Union,Intersection"
                 lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
                     f.print "\"#{fullProteinForProteinId[ls_Protein].to_a.first}\","
-                    lk_IdSums = Hash.new
-                    lk_IdModSums = Hash.new
+                    lk_IdScans = Hash.new
+                    lk_IdModScans = Hash.new
                     lk_Ids.each do |x| 
-                        lk_IdSums[x] = 0
-                        lk_IdModSums[x] = 0
+                        lk_IdScans[x] = Set.new()
+                        lk_IdModScans[x] = Set.new()
                     end
                     lk_AllResults[ls_Protein].keys.each do |ls_ModPeptide|
                         lk_Ids.each do |ls_Id|
-                            li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
-                            li_Count ||= 0
-                            lk_IdSums[ls_Id] += li_Count
-                            lk_IdModSums[ls_Id] += li_Count if ls_ModPeptide =~ /[a-z]/
+                            lk_CountScans = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                            lk_CountScans ||= Set.new()
+                            lk_IdScans[ls_Id] |= lk_CountScans
+                            lk_IdModScans[ls_Id] |= lk_CountScans if ls_ModPeptide =~ /[a-z]/
                         end
                     end
                     lk_Ids.each do |ls_Id|
-                        li_Count = lk_IdSums[ls_Id]
-                        li_Count = '0' if li_Count == 0
-                        li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
-                        li_ModifiedPeptideCount = '0' if li_ModifiedPeptideCount == 0
+                        li_Count = lk_IdScans[ls_Id].size
+                        li_ModifiedPeptideCount = lk_IdModScans[ls_Id].size
                         f.print "#{li_Count},#{li_ModifiedPeptideCount},"
                     end
+                    allScans = lk_Ids.collect do |ls_Id|
+                        x = Set.new()
+                        if lk_IdScans[ls_Id]
+                            x = lk_IdScans[ls_Id]
+                        end
+                        x
+                    end
+                    union, intersection = unionAndIntersection(allScans)
+                    f.print "#{union.size}"
+                    f.print ",#{intersection.size}"
                     f.puts
                 end
             end
         end
-        
+
         if @output[:htmlReport]
             File::open(@output[:htmlReport], 'w') do |f|
                 lk_IdNumbers = []
@@ -327,13 +363,7 @@ class ComparePsmMod < ProteomaticScript
                 (0...lk_Ids.size).each do |i|
                     f.puts "<tr><td class='number'>#{i + 1}</td><td>#{lk_Ids[i]}</td><td>#{lk_ProteinsForId[lk_Ids[i]].size}</td></tr>"
                 end
-                union = Set.new
-                intersection = nil
-                lk_ProteinsForId.values.each do |s|
-                    union |= s
-                    intersection ||= s
-                    intersection &= s
-                end
+                union, intersection = unionAndIntersection(lk_ProteinsForId.values)
                 
                 f.puts "<tr><td class='number'></td><td>union</td><td>#{union.size}</td></tr>"
                 f.puts "<tr><td class='number'></td><td>intersection</td><td>#{intersection.size}</td></tr>"
@@ -348,38 +378,50 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "<table>"
                 f.puts "<thead>"
                 f.puts "<tr>"
+                f.print "<th>Protein</th>"
                 if @param[:substituteLongNames]
-                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + x + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                    f.print "#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + x + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
                 else
-                    f.puts "<th>Protein</th>#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + lk_Ids[lk_IdNumbers.index(x)] + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
+                    f.print "#{lk_IdNumbers.collect { |x| '<th class=\'number\' width=\'32\'>' + lk_Ids[lk_IdNumbers.index(x)] + '</th><th class=\'modcell\' width=\'32\'>mod</th>' }.join('')}"
                 end
+                f.print "<th class='number'>union</th>"
+                f.print "<th class='number'>intersection</th>"
+                f.puts
                 f.puts "</tr>"
                 f.puts "</thead>"
                 f.puts "<tbody>"
                 lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
                     f.puts "<tr class='protein'>"
                     f.puts "<td>#{fullProteinForProteinId[ls_Protein].to_a.first}</td>"
-                    lk_IdSums = Hash.new
-                    lk_IdModSums = Hash.new
+                    lk_IdScans = Hash.new
+                    lk_IdModScans = Hash.new
                     lk_Ids.each do |x| 
-                        lk_IdSums[x] = 0
-                        lk_IdModSums[x] = 0
+                        lk_IdScans[x] = Set.new()
+                        lk_IdModScans[x] = Set.new()
                     end
                     lk_AllResults[ls_Protein].keys.each do |ls_ModPeptide|
                         lk_Ids.each do |ls_Id|
-                            li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
-                            li_Count ||= 0
-                            lk_IdSums[ls_Id] += li_Count
-                            lk_IdModSums[ls_Id] += li_Count if ls_ModPeptide =~ /[a-z]/
+                            lk_CountIds = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                            lk_CountIds ||= Set.new()
+                            lk_IdScans[ls_Id] |= lk_CountIds
+                            lk_IdModScans[ls_Id] |= lk_CountIds if ls_ModPeptide =~ /[a-z]/
                         end
                     end
                     lk_Ids.each do |ls_Id|
-                        li_Count = lk_IdSums[ls_Id]
+                        li_Count = lk_IdScans[ls_Id].size
                         li_Count = '&ndash;' if li_Count == 0
-                        li_ModifiedPeptideCount = lk_IdModSums[ls_Id]
+                        li_ModifiedPeptideCount = lk_IdModScans[ls_Id].size
                         li_ModifiedPeptideCount = '&ndash;' if li_ModifiedPeptideCount == 0
                         f.print "<td class=\'number\' width=\'32\'>#{li_Count}</td><td class='modcell' width=\'32\'>#{li_ModifiedPeptideCount}</td>"
                     end
+                    allScans = lk_Ids.collect do |ls_Id| 
+                        x = lk_IdScans[ls_Id]
+                        x ||= Set.new()
+                        x
+                    end
+                    union, intersection = unionAndIntersection(allScans)
+                    f.puts "<td class='number'>#{union.size}</td>"
+                    f.puts "<td class='number'>#{intersection.size}</td>"
                     f.puts "</tr>"
                     lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
                         lb_IsModified = ls_ModPeptide.index(/[a-z]/)
@@ -392,10 +434,20 @@ class ComparePsmMod < ProteomaticScript
                         f.puts "<tr class='peptide#{ls_UnmodClass}'>"
                         f.puts "<td>#{ls_ModPeptide.gsub(/([a-z])/, '<b>\1</b>')}</td>"
                         lk_Ids.each do |ls_Id|
-                            li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
-                            li_Count ||= '&ndash;'
+                            li_Count = '&ndash;'
+                            if lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                                li_Count = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id].size
+                            end
                             f.print "<td class=\'number\'>#{li_Count}</td><td class='modcell'>#{lb_IsModified ? 'mod' : '&ndash;'}</td>"
                         end
+                        allScans = lk_Ids.collect do |ls_Id| 
+                            x = lk_AllResults[ls_Protein][ls_ModPeptide][ls_Id]
+                            x ||= Set.new()
+                            x
+                        end
+                        union, intersection = unionAndIntersection(allScans)
+                        f.puts "<td class='number'>#{union.size}</td>"
+                        f.puts "<td class='number'>#{intersection.size}</td>"
                         f.puts "</tr>"
                     end
                 end
@@ -406,7 +458,6 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "</html>"
             end
         end
-        exit
     end
 end
 
