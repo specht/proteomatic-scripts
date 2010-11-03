@@ -1,0 +1,42 @@
+group: Proteomics/Identification/OMSSA/Miscellaneous
+
+title: PSM score histogram
+
+description: >
+  Calculate a score histogram from peptide/spectral matches (PSM), where
+  score exponents are used for the histogram (an e-value of 1.3e-8 is plotted 
+  as -7.886).
+
+type: processor
+
+defaultOutputDirectory: omssaResults
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+  - key: peptides
+    label: peptide list
+    formats: [txt]
+
+output:
+  - key: histogram
+    label: PSM histogram
+    format: csv
+    filename: psm-histogram.csv
+    default: yes
+
+parameters:
+  - key: stepSize
+    type: float
+    decimals: 4
+    default: 1.0
+    label: Step size
+    description: Specify the score exponent step size.
+    step: 0.1
+  - key: useJ
+    type: flag
+    label: Replace I/L with J
+    default: false
+    
