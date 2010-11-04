@@ -27,4 +27,4 @@ parameters:
     type: string
     default: ''
     label: Prefix
-    examples: ['__putative__', '__putative_gpf__']
+    examples: ['__putative__', '__putative__gpf_']
