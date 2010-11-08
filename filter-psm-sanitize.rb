@@ -34,7 +34,7 @@ class FilterPsmSanitize < ProteomaticScript
                 evalueIndex = nil
                 File::open(inPath, 'r') do |fin|
                     headerLine = fin.readline
-                    fout.puts headerLine
+                    fout.puts headerLine.strip + ',Second best hit score ratio'
                     header = mapCsvHeader(headerLine)
                     filenameidIndex = header['filenameid']
                     unless filenameidIndex
@@ -57,14 +57,27 @@ class FilterPsmSanitize < ProteomaticScript
                         scanId = lineArray[filenameidIndex]
                         peptide = lineArray[peptideIndex]
                         evalue = BigDecimal.new(lineArray[evalueIndex])
-                        scanHash[scanId] ||= [evalue, Set.new([peptide])]
-                        if evalue < scanHash[scanId][0]
-                            # replace scan results because we have found a better e-value
-                            scanHash[scanId] = [evalue, Set.new([peptide])]
-                        elsif evalue == scanHash[scanId][0]
-                            scanHash[scanId][1] << peptide
-                        end
+                        scanHash[scanId] ||= Hash.new
+                        scanHash[scanId][peptide] ||= evalue
+                        scanHash[scanId][peptide] = evalue if evalue < scanHash[scanId][peptide]
                     end
+                end
+                secondBestHitRatios = Hash.new
+                bestPeptideForScan = Hash.new
+                scanHash.keys.each do |scanId|
+                    peptides = scanHash[scanId].keys.sort do |a, b|
+                        scanHash[scanId][a] <=> scanHash[scanId][b]
+                    end
+                    bestPeptide = peptides.first
+                    bestScore = scanHash[scanId][bestPeptide]
+                    nextBestScore = 0.0
+                    if peptides.size > 1
+                        nextBestPeptide = peptides[1]
+                        nextBestScore = scanHash[scanId][nextBestPeptide]
+                    end
+                    ratio = nextBestScore / bestScore
+                    secondBestHitRatios[scanId] = ratio
+                    bestPeptideForScan[scanId] = bestPeptide
                 end
                 totalRowCount = 0
                 printedRowCount = 0
@@ -75,12 +88,11 @@ class FilterPsmSanitize < ProteomaticScript
                         totalRowCount += 1
                         lineArray = line.parse_csv()
                         scanId = lineArray[filenameidIndex]
-                        evalue = BigDecimal.new(lineArray[evalueIndex])
-                        if scanHash[scanId][0] == evalue
-                            if scanHash[scanId][1].size == 1
-                                fout.puts line
-                                printedRowCount += 1
-                            end
+                        peptide = lineArray[peptideIndex]
+#                         evalue = BigDecimal.new(lineArray[evalueIndex])
+                        if bestPeptideForScan[scanId] == peptide
+                            fout.puts line.strip + ",#{secondBestHitRatios[scanId].to_f}"
+                            printedRowCount += 1
                         end
                     end
                 end
