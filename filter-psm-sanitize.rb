@@ -70,12 +70,12 @@ class FilterPsmSanitize < ProteomaticScript
                     end
                     bestPeptide = peptides.first
                     bestScore = scanHash[scanId][bestPeptide]
-                    nextBestScore = 0.0
+                    ratio = 0.0
                     if peptides.size > 1
                         nextBestPeptide = peptides[1]
                         nextBestScore = scanHash[scanId][nextBestPeptide]
+                        ratio = bestScore / nextBestScore
                     end
-                    ratio = nextBestScore / bestScore
                     secondBestHitRatios[scanId] = ratio
                     bestPeptideForScan[scanId] = bestPeptide
                 end
