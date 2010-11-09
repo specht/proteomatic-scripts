@@ -72,6 +72,7 @@ class SplitCsvFile < ProteomaticScript
                     print "\rReading #{totalCount} entries..." if (totalCount % 200) == 0
                     lineArray = line.parse_csv()
                     item = lineArray[allHeader[column]]
+                    item ||= ''
                     item.downcase! if @param[:caseSensitive] == 'no'
                     
                     allAccept = false
