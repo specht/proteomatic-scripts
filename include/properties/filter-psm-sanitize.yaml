@@ -13,7 +13,7 @@ description: >
   PSM lists, you can be sure that no contradicting identifications remain
   and identified peptides and proteins can simply be extracted from the file.
 
-type: converter
+type: processor
 
 input:
   - key: omssaResults
@@ -24,8 +24,8 @@ input:
 defaultOutputDirectory: omssaResults
 
 output:
-  - key: omssaResults
+  - key: results
     label: sanitized PSM list
     format: csv
-    filename: "#{basename}-sanitized.csv"
+    filename: "sanitized.csv"
     default: yes
