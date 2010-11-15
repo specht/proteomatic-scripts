@@ -30,6 +30,7 @@ class FilterPsmSanitize < ProteomaticScript
         totalRowCount = 0
         printedRowCount = 0
         puts "Reading PSM list files..."
+        log10 = Math::log(10.0)
         @input[:omssaResults].each do |inPath|
             puts File::basename(inPath)
             scanHash = Hash.new
@@ -38,7 +39,7 @@ class FilterPsmSanitize < ProteomaticScript
             evalueIndex = nil
             File::open(inPath, 'r') do |fin|
                 headerLine = fin.readline
-                outFile.puts headerLine.strip + ',Second best hit score ratio' if outFile
+                outFile.puts headerLine.strip + ',Hit distinctiveness' if outFile
                 header = mapCsvHeader(headerLine)
                 filenameidIndex = header['filenameid']
                 unless filenameidIndex
@@ -73,11 +74,19 @@ class FilterPsmSanitize < ProteomaticScript
                 end
                 bestPeptide = peptides.first
                 bestScore = scanHash[scanId][bestPeptide]
-                ratio = 0.0
+                ratio = 1000.0
                 if peptides.size > 1
                     nextBestPeptide = peptides[1]
                     nextBestScore = scanHash[scanId][nextBestPeptide]
-                    ratio = bestScore / nextBestScore
+                    if bestScore == 0.0
+                        # if the best score is 0.0, this is a bit fishy, so here's how we deal
+                        # with it: keep one of the peptides but denote via a distinctiveness of 0
+                        # that it's probably no good
+                        ratio = 0.0
+                    else
+                        ratio = Math::log(nextBestScore / bestScore) / log10
+                    end
+                    ratio = 1000.0 if ratio > 1000.0
                 end
                 secondBestHitRatios[scanId] = ratio
                 bestPeptideForScan[scanId] = bestPeptide
@@ -91,7 +100,7 @@ class FilterPsmSanitize < ProteomaticScript
                     peptide = lineArray[peptideIndex]
 #                         evalue = BigDecimal.new(lineArray[evalueIndex])
                     if bestPeptideForScan[scanId] == peptide
-                        outFile.puts line.strip + ",#{secondBestHitRatios[scanId].to_f}" if outFile
+                        outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
                         printedRowCount += 1
                     end
                 end
