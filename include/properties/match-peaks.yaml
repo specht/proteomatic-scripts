@@ -1,0 +1,66 @@
+group: Proteomics/Spectra
+
+title: Match peaks
+
+description: >
+    Match a list of theoretical peaks to mass spectra.
+
+type: processor
+
+input:
+  - key: spectra
+    label: spectra
+    formats: [xml-mzdata, xml-mzdata-compressed, xml-mzxml, xml-mzxml-compressed, xml-mzml, xml-mzml-compressed]
+    min: 1
+  - key: targets
+    label: target peaks
+    formats: [txt, csv]
+    min: 1
+
+defaultOutputDirectory: spectra
+
+output:
+  - key: results
+    label: matches
+    format: csv
+    filename: matched-peaks.csv
+
+parameters:
+  - key: msLevels
+    label: Check MS levels
+    description: Specify which levels to check
+    type: string
+    default: 'all'
+    examples: ['all', '1', '2', '1,2']
+  - key: massAccuracy
+    label: Mass accuracy
+    type: float
+    default: 5.0
+    suffix: ppm
+    step: 1.0
+    min: 0
+  - key: minSnr
+    label: Minimum SNR
+    type: float
+    default: 2.0
+    min: 0.0
+    step: 0.1
+  - key: crop
+    label: Crop peaks lower than
+    type: float
+    default: 0.0
+    suffix: '%'
+    min: 0.0
+    step: 1.0
+    max: 100.0
+  - key: targetMzDecimals
+    label: Force target m/z decimals
+    type: int
+    default: 4
+    min: 0
+
+needs:
+  - ext.ptb
+
+filetracker:
+  - dontMd5InputFiles: [spectra]
