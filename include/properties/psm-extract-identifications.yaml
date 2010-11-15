@@ -1,0 +1,30 @@
+group: Proteomics/Identification/OMSSA/3. Report
+
+title: Extract identifications
+
+description: >
+  Extract identified peptides and proteins from PSM list files.
+
+type: converter
+
+input:
+  - key: psm
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: psm
+
+output:
+  - key: psm
+    label: identifications
+    format: txt
+    filename: "#{basename}-extracted-#{scope}s.txt"
+
+parameters:
+  - key: scope
+    type: enum
+    choices: [peptide, protein]
+    default: peptide
+    label: Scope
+    description: "Specify whether peptides or proteins should be extracted."
