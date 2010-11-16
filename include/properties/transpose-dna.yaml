@@ -7,9 +7,13 @@ description: >
 
 type: processor
 
+output:
+  - key: result
+    format: fasta
+    filename: transposed.fasta
+    label: transposed DNA
+
 parameters:
   - key: nucleotides
     type: string
-    textfield: yes
     label: DNA
-    default: ''

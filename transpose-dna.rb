@@ -17,18 +17,19 @@
 
 require './include/ruby/proteomatic'
 
-# this script transposes DNA, OMG!!
-
-
 class TransposeDna < ProteomaticScript
     def run()
-        lk_Nucleotides = {'A' => 'T', 'C' => 'G', 'G' => 'C', 'T' => 'A'}
-        ls_Source = @param[:nucleotides].upcase.gsub(/[^CGAT]/, '').reverse.upcase
-        ls_Result = ''
-        (0...ls_Source.size).each do |i|
-            ls_Result += lk_Nucleotides[ls_Source[i, 1]]
-        end
-        puts ls_Result
+        # convert all characters to upper case
+        dna = @param[:nucleotides].upcase
+        # remove invalid characters
+        dna.gsub!(/[^CGAT]/, '')
+        # reverse sequence
+        dna.reverse!
+        # replace nucleotides with
+        dna.tr!('ACGT', 'TGCA')
+        # output transposed DNA
+        puts dna
+        File::open(@output[:result], 'w') { |f| f.puts dna } if @output[:result]
     end
 end
 
