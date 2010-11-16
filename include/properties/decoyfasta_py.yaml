@@ -1,0 +1,66 @@
+group: Proteomics/Protein databases
+
+title: Create target/decoy database .py
+
+type: processor
+
+description: >
+  This script creates a target/decoy database from a set of input FASTA databases using python.
+  
+
+input:
+  - key: databases
+    label: database
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - databases
+
+defaultOutputDirectory: databases
+
+output:
+  - key: outputDatabase
+    label: target/decoy database
+    format: fasta
+    filename: target-decoy.fasta
+    default: yes
+
+parameters:
+  - key: targetDecoyMethod
+    label: Target-decoy method
+    type: enum
+    choices: [{'shuffle': 'shuffle protein'}, {'reverse': 'reverse protein'}, {'shuffle-peptide': 'shuffle peptide'}]
+    default: 'reverse'
+    description: Specify how decoys should be created.
+  - key: targetDecoyKeepStart
+    label: Decoy keep start
+    type: int
+    default: 0
+    min: 0
+    description: Specify how many amino acids from the start of a sequence should be left untouched when creating a decoy entry.
+  - key: targetDecoyKeepEnd
+    label: Decoy keep end
+    type: int
+    default: 1
+    min: 0
+    description: Specify how many amino acids from the end of a sequence should be left untouched when creating a decoy entry.
+  - key: targetEntryPrefix
+    label: Target entry prefix
+    type: string
+    default: '__td__target_'
+    description: This will be prepended to every target entry during target/decoy generation.
+  - key: decoyEntryPrefix
+    label: Decoy entry prefix
+    type: string
+    default: '__td__decoy_'
+    description: This will be prepended to every decoy entry during target/decoy generation.
+  - key: decoyAmount
+    label: Amount of decoys per target
+    type: int
+    default: 1
+    min: 1
+    description: Specify how many decoys should be generated for every target.
+
+needs:
+  - ext.ptb

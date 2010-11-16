@@ -1,5 +1,5 @@
 unsent-filetracker-reports/
 tests/run-tests.temp.txt
 cache/
-
+*.pyc
 
