@@ -1,11 +1,11 @@
 group: Proteomics/Protein databases
 
-title: Create target/decoy database .py
+title: Create target/decoy database
 
 type: processor
 
 description: >
-  This script creates a target/decoy database from a set of input FASTA databases using python.
+  This script creates a target/decoy database from a set of input FASTA databases.
   
 
 input:

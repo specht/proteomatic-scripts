@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 """
 Copyright (c) 2010 Christian Fufezan
 
@@ -27,8 +27,7 @@ import proteomatic
 class DecoyFasta(proteomatic.ProteomaticScript):
     def run(self):
         if 'outputDatabase' in self.output.keys():
-            print("Creating taget/decoy database ... \n")
-            #print(self.output)
+            print("Creating taget/decoy database... \n")
             databases = " ".join(["\"{0}\"".format(x) for x in self.input['databases']])
             opts = {
             '--output':         self.output['outputDatabase'],
@@ -38,34 +37,12 @@ class DecoyFasta(proteomatic.ProteomaticScript):
             '--keepStart':      self.param['targetDecoyKeepStart'],
             '--keepEnd':        self.param['targetDecoyKeepEnd']
             }
-            command = self.binaryPath('ptb.decoyfasta')+' '
-            for fl,fi in opts.items():
-                command += fl+' "'+str(fi)+'" '
+            command = self.binaryPath('ptb.decoyfasta') + ' '
+            for fl, fi in opts.items():
+                command += fl + ' "' + str(fi) + '" '
             command += databases
             os.system(command)
-            #print(command)
-            print("Done...")
+            print("done...")
             
 if __name__ == '__main__':
     script = DecoyFasta()
-
-
-"""
-{
-    function run()
-    {
-        if (isset($this->output->outputDatabase))
-        {
-            echo "Creating target/decoy database...\n";
-            $databases = "";
-            foreach ($this->input->databases as $path)
-                $databases .= ' "'.$path.'"';
-            $command = "{$this->binaryPath('ptb.decoyfasta')} --output \"{$this->output->outputDatabase}\" --method \"{$this->param->targetDecoyMethod}\" --keepStart {$this->param->targetDecoyKeepStart} --keepEnd {$this->param->targetDecoyKeepEnd} --targetFormat \"{$this->param->targetEntryPrefix}\" --decoyFormat \"{$this->param->decoyEntryPrefix}\" $databases";
-            passthru($command);
-            echo "done.\n";
-        }
-    }
-}
-
-$script = new DecoyFasta();
-"""
