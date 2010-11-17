@@ -1,0 +1,26 @@
+group: Proteomics/Miscellaneous
+
+title: Tryptic protein digestion
+
+description: >
+  Digest a protein into tryptic peptides,
+  allowing for missed cleavages.
+
+type: processor
+
+output:
+  - key: results
+    format: txt
+    filename: tryptic-peptides.txt
+    label: tryptic peptides
+
+parameters:
+  - key: protein
+    type: string
+    label: Protein
+    textfield: yes
+  - key: mc
+    type: int
+    label: Missed cleavage sites
+    min: 0
+    default: 1
