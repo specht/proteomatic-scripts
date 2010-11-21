@@ -41,7 +41,7 @@ class ExtractGpfPeptides < ProteomaticScript
                     parts = []
                     if assembly[0, 1] == '{'
                         # new assembly: {cre4-tag5/chromosome1}+819374:19,820977:17
-                        assembly.sub!(/{.+}/, '')
+                        assembly.sub!(/\{.+\}/, '')
                         unless ['-', '+'].include?(assembly[0, 1])
                             puts "Error: Not a valid assembly: #{originalAssembly}"
                             exit 1
