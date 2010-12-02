@@ -388,7 +388,12 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "<tbody>"
                 lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
                     f.puts "<tr class='protein'>"
-                    f.puts "<td>#{fullProteinForProteinId[ls_Protein].to_a.first}</td>"
+                    printProtein = fullProteinForProteinId[ls_Protein].to_a.first
+                    if printProtein[0, 9] == '__group__'
+                        items = printProtein.sub('__group__', '').split("\01")
+                        printProtein = "<b>protein group (#{items.size} proteins)</b><br /><ul>" + items.collect { |x| '<li>' + x + '</li>' }.join('') + "</ul>"
+                    end
+                    f.puts "<td>#{printProtein}</td>"
                     lk_IdScans = Hash.new
                     lk_IdModScans = Hash.new
                     lk_Ids.each do |x| 

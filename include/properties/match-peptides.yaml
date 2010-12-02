@@ -19,10 +19,15 @@ input:
 defaultOutputDirectory: peptides
 
 output:
-  - key: results
-    label: results
+  - key: htmlResults
+    label: HTML results
     format: html
     filename: matched-peptides.html
+    default: no
+  - key: yamlResults
+    label: YAML results
+    format: yaml
+    filename: matched-peptides.yaml
     default: yes
 
 needs:

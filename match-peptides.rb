@@ -48,35 +48,73 @@ class MatchPeptides < ProteomaticScript
             puts ' done.'
         end
         inputKeys = @input[:databases].collect { |x| File::basename(x) }
-        File::open(@output[:results], 'w') do |f|
-            f.puts "<html>"
-            f.puts "<head><title>Matched peptides</title>"
-            f.puts DATA.read
-            f.puts "</head>"
-            f.puts "<body>"
-            f.puts "<table>"
-            f.puts "<thead>"
-            f.puts "<tr>"
-            f.puts "<th>Peptide</th>#{inputKeys.collect { |x| '<th>' + x + '</th>' }.join('')}"
-            f.puts "</tr>"
-            f.puts "</thead>"
-            f.puts "<tbody>"
-            peptides.to_a.sort.each do |peptide|
-                f.puts "<tr style='vertical-align: top;'>"
-                f.puts "<td>#{peptide}</td>"
-                @input[:databases].each do |path|
-                    if results[path][peptide]
-                        f.puts "<td><ul>#{results[path][peptide].keys.collect { |x| '<li>' + x + '</li>' }.join('')}</ul></td>"
-                    else
-                        f.puts "<td>&ndash;</td>"
+        if @output[:htmlResults]
+            File::open(@output[:htmlResults], 'w') do |f|
+                f.puts "<html>"
+                f.puts "<head><title>Matched peptides</title>"
+                f.puts DATA.read
+                f.puts "</head>"
+                f.puts "<body>"
+                f.puts "<table>"
+                f.puts "<thead>"
+                f.puts "<tr>"
+                f.puts "<th>Peptide</th>#{inputKeys.collect { |x| '<th>' + x + '</th>' }.join('')}"
+                f.puts "</tr>"
+                f.puts "</thead>"
+                f.puts "<tbody>"
+                peptides.to_a.sort.each do |peptide|
+                    f.puts "<tr style='vertical-align: top;'>"
+                    f.puts "<td>#{peptide}</td>"
+                    @input[:databases].each do |path|
+                        if results[path][peptide]
+                            f.puts "<td><ul>#{results[path][peptide].keys.collect { |x| '<li>' + x + '</li>' }.join('')}</ul></td>"
+                        else
+                            f.puts "<td>&ndash;</td>"
+                        end
+                    end
+                    f.puts "</tr>"
+                end
+                f.puts "</tbody>"
+                f.puts "</table>"
+                f.puts "</body>"
+                f.puts "</html>"
+            end
+        end
+        if @output[:yamlResults]
+            File::open(@output[:yamlResults], 'w') do |f|
+                peptideList = []
+                proteinList = []
+                peptideIndex = {}
+                proteinIndex = {}
+                data = {}
+                peptides.to_a.sort.each do |peptide|
+                    peptideIndex[peptide] = peptideList.size
+                    peptideList << peptide
+                    @input[:databases].each do |path|
+                        if results[path][peptide]
+                            results[path][peptide].keys.each do |protein|
+                                unless proteinIndex.include?(protein)
+                                    proteinIndex[protein] = proteinList.size
+                                    proteinList << protein
+                                end
+                                data[protein] ||= Set.new
+                                data[protein] << peptide
+                            end
+                        end
                     end
                 end
-                f.puts "</tr>"
+                result = {}
+                result['peptides'] = peptideList
+                result['proteins'] = proteinList
+                result['peptidesForProtein'] = Hash.new
+                proteinList.each do |protein|
+                    result['peptidesForProtein'][proteinIndex[protein]] = []
+                    data[protein].each do |peptide|
+                        result['peptidesForProtein'][proteinIndex[protein]] << peptideIndex[peptide]
+                    end
+                end
+                f.puts result.to_yaml
             end
-            f.puts "</tbody>"
-            f.puts "</table>"
-            f.puts "</body>"
-            f.puts "</html>"
         end
     end
 end
