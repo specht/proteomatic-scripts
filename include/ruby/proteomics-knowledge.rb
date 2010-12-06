@@ -51,6 +51,28 @@ File::open('include/proteomics-knowledge-base/isotopes.csv', 'r') do |f|
     end
 end
 
+File::open('include/proteomics-knowledge-base/genetic-codes.txt', 'r') do |f|
+    goodLines = []
+    f.each_line do |line|
+        line.strip!
+        next if line.empty? || line[0, 1] == '#'
+        goodLines << line
+    end
+    $proteomicsKnowledge[:geneticCodes] = Hash.new
+    $proteomicsKnowledge[:geneticCodes][1] = Hash.new
+    goodLines.delete_at(0)
+    (0..4).each do |i|
+        goodLines[i] = goodLines[i][-64, 64]
+    end
+    (0...64).each do |i|
+        triplet = ''
+        (0...3).each do |k|
+            triplet += goodLines[2 + k][i, 1]
+        end
+        $proteomicsKnowledge[:geneticCodes][1][triplet] = goodLines[0][i, 1]
+    end
+end
+
 $proteomicsKnowledge[:isotopes].keys.each do |element|
     lightestIsotope = $proteomicsKnowledge[:isotopes][element].keys.sort.first
     $proteomicsKnowledge[:isotopes][element][:default] = $proteomicsKnowledge[:isotopes][element][lightestIsotope].dup
@@ -73,4 +95,16 @@ def peptideMass(peptide)
         mass += aminoAcidMass(peptide[i, 1])
     end
     return mass
+end
+
+
+def translateDna(dna)
+    result = ''
+    i = 0
+    while i + 2 < dna.length 
+        triplet = dna[i, 3]
+        result += $proteomicsKnowledge[:geneticCodes][1][triplet]
+        i += 3
+    end
+    return result
 end
