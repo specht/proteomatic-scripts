@@ -36,8 +36,8 @@ class RunPeaks < ProteomaticScript
         
         ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
         ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
-        ls_PeaksConfig.sub!('#{PRECURSOR_TOLERANCE}', @param[:precursorIonTolerance])
-        ls_PeaksConfig.sub!('#{PRODUCT_TOLERANCE}', @param[:productIonTolerance])
+        ls_PeaksConfig.sub!('#{PRECURSOR_TOLERANCE}', @param[:precursorIonTolerance].to_s)
+        ls_PeaksConfig.sub!('#{PRODUCT_TOLERANCE}', @param[:productIonTolerance].to_s)
         
         # no empty lines allowed in PEAKS config
         ls_PeaksConfig.sub!("\n\n", "\n")
