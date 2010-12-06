@@ -36,6 +36,8 @@ class RunPeaks < ProteomaticScript
         
         ls_PeaksConfig.sub!('#{VARIABLE_MODS}', ls_VariableMods)
         ls_PeaksConfig.sub!('#{ENZYME}', readData('enzyme_' + @param[:enzyme]).strip)
+        ls_PeaksConfig.sub!('#{PRECURSOR_TOLERANCE}', @param[:precursorIonTolerance])
+        ls_PeaksConfig.sub!('#{PRODUCT_TOLERANCE}', @param[:productIonTolerance])
         
         # no empty lines allowed in PEAKS config
         ls_PeaksConfig.sub!("\n\n", "\n")
@@ -108,10 +110,10 @@ __CONFIG__
 <delete_temp>1</delete_temp>
 <max_charge>2</max_charge>
 <enzyme>Trypsin with Phosphorylation</enzyme>
-<frag_tol>1</frag_tol>
+<frag_tol>#{PRODUCT_TOLERANCE}</frag_tol>
 <instrument>-i</instrument>
 <output_num>10</output_num>
-<par_tol>1.5</par_tol>
+<par_tol>#{PRECURSOR_TOLERANCE}</par_tol>
 <user_residue_list version="1.0">
 <res_ptm_set name="Proteomatic resptm">
 #{ENZYME}
