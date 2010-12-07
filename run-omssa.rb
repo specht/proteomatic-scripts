@@ -115,7 +115,12 @@ class RunOmssa < ProteomaticScript
             File::open(ls_DatabasePath, 'w') do |lk_OutFile|
                 @input[:databases].each do |ls_Path|
                     next unless fileMatchesFormat(ls_Path, 'fasta')
-                    File::open(ls_Path, 'r') { |lk_InFile| lk_OutFile.puts(lk_InFile.read) }
+                    File::open(ls_Path, 'r') do |lk_InFile|
+                        while !lk_InFile.eof?
+                            block = lk_InFile.read(1024 * 1024)
+                            lk_OutFile.write(block)
+                        end
+                    end
                 end
             end
             
