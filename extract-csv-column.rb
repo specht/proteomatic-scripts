@@ -26,11 +26,14 @@ class ExtractCsvColumn < ProteomaticScript
     def run()
         column = stripCsvHeader(@param[:column])
         items = Array.new
+        lineCount = 0
         @input[:in].each do |path|
             File::open(path, 'r') do |f|
                 header = mapCsvHeader(f.readline)
                 if header.include?(column)
                     f.each_line do |line|
+                        print "\rReading #{lineCount} lines..." if lineCount % 1000 == 0
+                        lineCount += 1
                         lineArray = line.parse_csv()
                         items << lineArray[header[column]]
                     end
@@ -39,6 +42,7 @@ class ExtractCsvColumn < ProteomaticScript
                 end
             end
         end
+        puts "\rReading #{lineCount} lines... done."
         if @param[:upcase]
             items.collect! { |x| x.upcase }
         end
