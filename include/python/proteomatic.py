@@ -75,42 +75,43 @@ class ProteomaticScript(object):
         os.system(command)
         
         responseFile = open(responseFilePath)
+        self.anyLanguageHubResponse = {}
         try:
             self.anyLanguageHubResponse = json.load(responseFile)           
-            if 'run' in self.anyLanguageHubResponse.keys():
-                if self.anyLanguageHubResponse['run'] == 'run':
-                    outputFile = open(outputFilePath,'w',0)
-                    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-                    os.dup2(sys.stdout.fileno(),outputFile.fileno())
-                
-                    #sys.stdout = outputFile
-                    self.param  = self.anyLanguageHubResponse['param']
-                    self.input  = self.anyLanguageHubResponse['input']
-                    self.output = self.anyLanguageHubResponse['output']
-
-                    self.run()
-                    outputFile.close()
-                
-                    with open(controlFilePath,'w') as cf:
-                        cf.write('action: finish\n')
-                        cf.write('pathToYamlDescription: "{0}"\n'.format(pathToYamlDescription.replace("\\","\\\\")))
-                        cf.write('responseFilePath: "{0}"\n'.format(responseFilePath.replace("\\","\\\\")))
-                        cf.write('responseFormat: json\n')
-                        cf.write('arguments:\n{0}'.format(argString))
-                        cf.write('outputFilePath: "{0}"\n'.format(outputFilePath.replace("\\","\\\\")))
-                        cf.write('startTime: {0}\n'.format(self.anyLanguageHubResponse['startTime']))
-                    
-                    command = "{0} {1} {2}".format(
-                        quote(pathToRuby),
-                        quote(hubPath),
-                        quote(controlFilePath)
-                    )
-                    
-                    os.system( command )
-            else:
-                pass
         except:
-            pass #print("Something went senf-py-bogo ...")
+            pass
+        if 'run' in self.anyLanguageHubResponse.keys():
+            if self.anyLanguageHubResponse['run'] == 'run':
+                outputFile = open(outputFilePath, 'w', 0)
+                sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+                os.dup2(sys.stdout.fileno(),outputFile.fileno())
+            
+                #sys.stdout = outputFile
+                self.param  = self.anyLanguageHubResponse['param']
+                self.input  = self.anyLanguageHubResponse['input']
+                self.output = self.anyLanguageHubResponse['output']
+
+                self.run()
+                outputFile.close()
+            
+                with open(controlFilePath,'w') as cf:
+                    cf.write('action: finish\n')
+                    cf.write('pathToYamlDescription: "{0}"\n'.format(pathToYamlDescription.replace("\\","\\\\")))
+                    cf.write('responseFilePath: "{0}"\n'.format(responseFilePath.replace("\\","\\\\")))
+                    cf.write('responseFormat: json\n')
+                    cf.write('arguments:\n{0}'.format(argString))
+                    cf.write('outputFilePath: "{0}"\n'.format(outputFilePath.replace("\\","\\\\")))
+                    cf.write('startTime: {0}\n'.format(self.anyLanguageHubResponse['startTime']))
+                
+                command = "{0} {1} {2}".format(
+                    quote(pathToRuby),
+                    quote(hubPath),
+                    quote(controlFilePath)
+                )
+                
+                os.system( command )
+        else:
+            pass
         
         responseFile.close()
         os.unlink(controlFilePath)
