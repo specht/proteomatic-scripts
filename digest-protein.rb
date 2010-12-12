@@ -16,11 +16,12 @@
 # along with Proteomatic.  If not, see <http://www.gnu.org/licenses/>.
 
 require './include/ruby/proteomatic'
+require './include/ruby/fasta'
 require 'set'
 
 class DigestProtein < ProteomaticScript
-    def run()
-        protein = @param[:protein].dup
+    def digestProtein(_protein)
+        protein = _protein.dup
         # remove invalid characters
         protein.gsub!(/[^GASPVTCLINDQKEMHFRYW]/, '')
         # insert spaces at tryptic cleavage sites
@@ -34,7 +35,28 @@ class DigestProtein < ProteomaticScript
                 peptides << parts[offset, length + 1].join()
             end
         end
-        puts peptides.to_a.sort.join("\n")
+        return peptides
+    end
+
+    def run()
+        peptides = Set.new
+        unless @param[:protein].empty?
+            peptides |= digestProtein(@param[:protein])
+        end
+        @input[:sequences].each do |path|
+            File::open(path, 'r') do |f|
+                fastaIterator(f) do |id, sequence|
+                    peptides |= digestProtein(sequence)
+                end
+            end
+        end
+        if peptides.size == 0
+            puts "No resulting peptides."
+        elsif peptides.size <= 200
+            puts peptides.to_a.sort.join("\n")
+        else
+            puts "Got #{peptides.size} peptides."
+        end
         # also write peptides to output file if requested
         if @output[:results]
             File::open(@output[:results], 'w') do |f|

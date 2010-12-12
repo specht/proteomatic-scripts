@@ -8,6 +8,13 @@ description: >
 
 type: processor
 
+input:
+  - key: sequences
+    format: fasta
+    label: FASTA database
+
+defaultOutputDirectory: sequences
+
 output:
   - key: results
     format: txt
