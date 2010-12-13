@@ -29,3 +29,19 @@ output:
     format: csv
     filename: "sanitized.csv"
     default: yes
+
+parameters:
+  - key: threshold
+    type: float
+    default: 2.0
+    decimals: 2
+    min: 0.0
+    label: Hit distinctiveness threshold
+    step: 0.1
+  - key: upcasePeptides
+    type: flag
+    default: true
+    label: Treat modified residues unmodified
+    description: >
+      If this flag is activated, peptides will be converted to upper case, 
+      thereby removing PTM information while filtering.

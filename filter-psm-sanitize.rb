@@ -59,7 +59,8 @@ class FilterPsmSanitize < ProteomaticScript
                 fin.each_line do |line|
                     lineArray = line.parse_csv()
                     scanId = lineArray[filenameidIndex]
-                    peptide = lineArray[peptideIndex]
+                    peptide = lineArray[peptideIndex].dup
+                    peptide.upcase! if @param[:upcasePeptides]
                     evalue = BigDecimal.new(lineArray[evalueIndex])
                     scanHash[scanId] ||= Hash.new
                     scanHash[scanId][peptide] ||= evalue
@@ -97,11 +98,14 @@ class FilterPsmSanitize < ProteomaticScript
                     totalRowCount += 1
                     lineArray = line.parse_csv()
                     scanId = lineArray[filenameidIndex]
-                    peptide = lineArray[peptideIndex]
+                    peptide = lineArray[peptideIndex].dup
+                    peptide.upcase! if @param[:upcasePeptides]
 #                         evalue = BigDecimal.new(lineArray[evalueIndex])
                     if bestPeptideForScan[scanId] == peptide
-                        outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
-                        printedRowCount += 1
+                        if secondBestHitRatios[scanId].to_f >= @param[:threshold]
+                            outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
+                            printedRowCount += 1
+                        end
                     end
                 end
             end
