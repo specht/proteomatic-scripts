@@ -31,6 +31,18 @@ class FilterPsmSanitize < ProteomaticScript
         printedRowCount = 0
         puts "Reading PSM list files..."
         log10 = Math::log(10.0)
+        allHeader = nil
+        wroteHeader = false
+        @input[:omssaResults].each do |inPath|
+            File::open(inPath) do |f|
+                header = mapCsvHeader(f.readline)
+                allHeader ||= header
+                if (header != allHeader)
+                    puts "Error: The CSV header is not the same in all input files."
+                    exit 1
+                end
+            end
+        end
         @input[:omssaResults].each do |inPath|
             puts File::basename(inPath)
             scanHash = Hash.new
@@ -39,7 +51,10 @@ class FilterPsmSanitize < ProteomaticScript
             evalueIndex = nil
             File::open(inPath, 'r') do |fin|
                 headerLine = fin.readline
-                outFile.puts headerLine.strip + ',Hit distinctiveness' if outFile
+                unless wroteHeader
+                    outFile.puts headerLine.strip + ',Hit distinctiveness' if outFile
+                    wroteHeader = true
+                end
                 header = mapCsvHeader(headerLine)
                 filenameidIndex = header['filenameid']
                 unless filenameidIndex
