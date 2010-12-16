@@ -31,3 +31,8 @@ parameters:
     label: Missed cleavage sites
     min: 0
     default: 1
+  - key: minLength
+    type: int
+    label: Minimum peptide length
+    min: 0
+    default: 0

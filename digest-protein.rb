@@ -32,7 +32,8 @@ class DigestProtein < ProteomaticScript
         peptides = Set.new
         (0..@param[:mc]).each do |length|
             (0...parts.size-length).each do |offset|
-                peptides << parts[offset, length + 1].join()
+                peptide = parts[offset, length + 1].join()
+                peptides << peptide if peptide.size >= @param[:minLength]
             end
         end
         return peptides
@@ -43,13 +44,17 @@ class DigestProtein < ProteomaticScript
         unless @param[:protein].empty?
             peptides |= digestProtein(@param[:protein])
         end
+        count = 0
         @input[:sequences].each do |path|
             File::open(path, 'r') do |f|
                 fastaIterator(f) do |id, sequence|
+                    count += 1
                     peptides |= digestProtein(sequence)
+                    print "\rDigesting #{count} sequences, got #{peptides.size} peptides..."
                 end
             end
         end
+        puts "\rDigesting #{count} sequences, got #{peptides.size} peptides..."
         if peptides.size == 0
             puts "No resulting peptides."
         elsif peptides.size <= 200
