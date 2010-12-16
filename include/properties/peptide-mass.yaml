@@ -1,0 +1,26 @@
+group: Proteomics/Miscellaneous
+
+title: Calculate peptide mass
+
+description: >
+  Calculate precursor m/z values for a list of peptides.
+
+type: processor
+
+input:
+  - key: peptides
+    label: peptide list
+    formats: [txt]
+    min: 1
+    
+parameters:
+  - key: minCharge
+    label: Minimum charge
+    type: int
+    default: 1
+    min: 1
+  - key: maxCharge
+    label: Maximum charge
+    type: int
+    default: 3
+    min: 1
