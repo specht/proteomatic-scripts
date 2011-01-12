@@ -1,0 +1,26 @@
+group: Proteomics/Protein databases
+
+title: Unwrap FASTA database
+
+type: converter
+
+description: >
+  This script removes returns (also calles newlines) from the sequences in FASTA databases.
+
+input:
+  - key: fasta
+    label: fasta
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - fasta
+
+defaultOutputDirectory: fasta
+
+output:
+  - key: fasta
+    label: unwrapped FASTA
+    format: fasta
+    filename: "#{basename}-unwrapped.fasta"
+    default: yes
