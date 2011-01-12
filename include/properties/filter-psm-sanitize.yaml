@@ -3,15 +3,9 @@ group: Proteomics/Identification/OMSSA/2. Filter PSM
 title: Sanitize PSM
 
 description: >
-  <p><b>Synopsis</b></p>
   Analyze PSM lists and remove hits to scans for which another hit with a 
   better score exists. In addition, hits to a scan with the same score but
   with contradicting peptides are discarded.
-  <p><b>Background</b></p>
-  In some cases, OMSSA may report multiple hits for a
-  scan with slightly different scores and different peptides. By sanitizing
-  PSM lists, you can be sure that no contradicting identifications remain
-  and identified peptides and proteins can simply be extracted from the file.
 
 type: processor
 

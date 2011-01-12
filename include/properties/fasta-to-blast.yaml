@@ -16,7 +16,7 @@ defaultOutputDirectory: databases
 
 output:
   - key: databases
-    label: BLAST formatted database files
+    label: BLAST formatted database
     format: blastdb
     filename: '#{filename}.phr'
 
