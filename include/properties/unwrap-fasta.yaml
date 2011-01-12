@@ -5,7 +5,7 @@ title: Unwrap FASTA database
 type: converter
 
 description: >
-  This script removes returns (also calles newlines) from the sequences in FASTA databases.
+  This script removes returns (also called newlines) from the sequences in FASTA databases.
 
 input:
   - key: fasta
