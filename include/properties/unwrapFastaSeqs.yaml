@@ -1,0 +1,26 @@
+group: Proteomics/Protein databases
+
+title: remove returns from fasta Sequences .py
+
+type: converter
+
+description: >
+  This script removes returns from fasta sequences
+
+input:
+  - key: fasta
+    label: fasta
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - fasta
+
+defaultOutputDirectory: fasta
+
+output:
+  - key: fasta
+    label: unwrap fastaseqs
+    format: fasta
+    filename: unwrapped.fasta
+    default: yes
