@@ -27,8 +27,6 @@ results = Hash.new
 puts "Caching ---yamlInfo --short for #{allScripts.size} scripts..."
 
 allScripts.each_with_index do |script, index|
-    next unless script.include?('run-omssa')
-    puts "ATTENTION: OMSSA SELECTION!!!"
     next if script.include?('.defunct.')
     pathParts = script.split('.')
     descriptionPath = "./include/properties/#{pathParts[0, pathParts.size - 1].join('.')}.yaml"
