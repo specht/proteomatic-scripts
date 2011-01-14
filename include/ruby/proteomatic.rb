@@ -306,7 +306,7 @@ class ProteomaticScript
         end
     end
     
-    def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false, as_ControlFilePath = nil)
+    def initialize(as_DescriptionPath = nil, ab_GetInfoOnly = false, as_ControlFilePath = nil, ab_GetLongInfo = false)
         
         control = nil
         @mk_Arguments = ARGV.dup
@@ -320,6 +320,7 @@ class ProteomaticScript
         
         @mb_GetInfoOnly = ab_GetInfoOnly
         @mb_GetInfoOnlyFailed = false
+        @mb_GetLongInfo = ab_GetLongInfo
     
         @mk_TempFiles = Array.new
     
@@ -922,7 +923,7 @@ class ProteomaticScript
                     lk_Properties = YAML::load_file("include/cli-tools-atlas/packages/ext.#{ls_ExtTool}.yaml")
                     lk_Properties['parameters'].each do |lk_Parameter| 
                         lk_Parameter['key'] = ls_ExtTool + '.' + lk_Parameter['key']
-                        result = @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool, @mb_GetInfoOnly)
+                        result = @mk_Parameters.addParameter(lk_Parameter, ls_ExtTool, @mb_GetInfoOnly & (!@mb_GetLongInfo))
                         if @mb_GetInfoOnly && (!result)
                             @mb_GetInfoOnlyFailed = true
                         end
