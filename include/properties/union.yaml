@@ -3,7 +3,13 @@ group: Miscellaneous/Sets
 title: Union (OR)
 
 description: >
-  Creates the union of several sets.
+  <p>
+  Creates the union (OR) of two or more sets.
+  </p>
+  <p>
+  Each line in the input text files is treated as an item.
+  Items are case- and whitespace-sensitive.
+  </p>
 
 type: processor
 
@@ -21,4 +27,3 @@ output:
     format: txt
     filename: union.txt
     default: no
-

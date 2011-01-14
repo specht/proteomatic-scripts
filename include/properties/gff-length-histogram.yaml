@@ -9,7 +9,7 @@ description: >
 
 input:
   - key: input
-    label: gff
+    label: GFF
     formats: [gff]
     min: 1
     

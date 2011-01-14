@@ -3,7 +3,13 @@ group: Miscellaneous/Sets
 title: Exclusion (XOR)
 
 description: >
-  Creates the exclusion (XOR) of two or more sets.
+  <p>
+  Creates the mutual exclusion (XOR) of two or more sets.
+  </p>
+  <p>
+  Each line in the input text files is treated as an item.
+  Items are case- and whitespace-sensitive.
+  </p>
 
 type: processor
 

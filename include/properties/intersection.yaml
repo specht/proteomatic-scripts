@@ -3,7 +3,13 @@ group: Miscellaneous/Sets
 title: Intersection (AND)
 
 description: >
-  Creates the intersection of several sets.
+  <p>
+  Creates the intersection (AND) of two or more sets.
+  </p>
+  <p>
+  Each line in the input text files is treated as an item.
+  Items are case- and whitespace-sensitive.
+  </p>
 
 type: processor
 
