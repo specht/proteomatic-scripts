@@ -319,6 +319,7 @@ class ProteomaticScript
         end
         
         @mb_GetInfoOnly = ab_GetInfoOnly
+        @mb_GetInfoOnlyFailed = false
     
         @mk_TempFiles = Array.new
     
