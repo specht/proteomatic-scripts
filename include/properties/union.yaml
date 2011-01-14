@@ -4,7 +4,7 @@ title: Union (OR)
 
 description: >
   <p>
-  Creates the union (OR) of two or more sets.
+  Create the union (OR) of two or more sets.
   </p>
   <p>
   Each line in the input text files is treated as an item.

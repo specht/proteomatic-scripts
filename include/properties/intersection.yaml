@@ -4,7 +4,7 @@ title: Intersection (AND)
 
 description: >
   <p>
-  Creates the intersection (AND) of two or more sets.
+  Create the intersection (AND) of two or more sets.
   </p>
   <p>
   Each line in the input text files is treated as an item.

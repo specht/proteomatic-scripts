@@ -4,7 +4,7 @@ title: Difference
 
 description: >
   <p>
-  Creates the difference of two sets A and B (set A - set B).
+  Create the difference of two sets A and B (set A - set B).
   </p>
   <p>
   Each line in the input text files is treated as an item.
