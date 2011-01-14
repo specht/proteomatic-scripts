@@ -11,6 +11,7 @@ description: >
   Items are case- and whitespace-sensitive.
   If more than one input file is specified for A or B, their
   entries are unified first.
+  The order of items is not maintained.
   </p>
 
 type: processor

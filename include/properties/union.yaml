@@ -9,6 +9,7 @@ description: >
   <p>
   Each line in the input text files is treated as an item.
   Items are case- and whitespace-sensitive.
+  The order of items is not maintained.
   </p>
 
 type: processor

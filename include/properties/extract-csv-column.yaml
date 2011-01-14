@@ -3,9 +3,13 @@ group: Miscellaneous
 title: Extract CSV column
 
 description: >
-  This script extracts all entries from a user-defined CSV column in the
-  given CSV input files. Entries may be sorted, duplicates can be removed,
+  <p>
+  Extract all entries from a user-specified column in the given CSV input files. 
+  </p>
+  <p>
+  Entries may be sorted and converted to uppercase. Duplicates can be removed,
   and the results can be written to a text file.
+  </p>
 
 type: processor
 

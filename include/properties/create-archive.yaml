@@ -5,7 +5,9 @@ title: Create archive
 type: processor
 
 description: >
+  <p>
   Create an archive from a set of input files (e.g. archive.zip)
+  </p>
 
 input:
   - key: files
@@ -33,7 +35,6 @@ parameters:
       - "7z": "7z"
       - "tar": "tar"
     default: zip
-    description: Choose the archive type.
   - key: level
     label: Compression level
     type: enum
