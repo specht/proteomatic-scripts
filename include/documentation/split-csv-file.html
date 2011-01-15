@@ -1,1 +1,37 @@
+<h2>Example</h2>
+
+<p>
+Using the following table as input:
+</p>
+
+<table>
+<tr><th>Item</th><th>Cost</th></tr>
+<tr><td>Apple</td><td style='text-align: right'>0.25</td></tr>
+<tr><td>Banana</td><td style='text-align: right'>0.25</td></tr>
+<tr><td>Orange</td><td style='text-align: right'>0.40</td></tr>
+<tr><td>Fruit hip holster</td><td style='text-align: right'>10.00</td></tr>
+</table>
+
+<p>
+Specifying 'item' as column (or 'Item' since this is case-insensitve), 
+'contains' as operator and 'a' as value, the following rows will be accepted:
+</p>
+
+<table>
+<tr><th>Item</th><th>Cost</th></tr>
+<tr><td>B<span style='background-color: #fce94f;'>a</span>n<span style='background-color: #fce94f;'>a</span>n<span style='background-color: #fce94f;'>a</span></td><td style='text-align: right'>0.25</td></tr>
+<tr><td>Or<span style='background-color: #fce94f;'>a</span>nge</td><td style='text-align: right'>0.40</td></tr>
+</table>
+
+<p>
+Or, if case sensitivity is disabled:
+</p>
+
+<table>
+<tr><th>Item</th><th>Cost</th></tr>
+<tr><td><span style='background-color: #fce94f;'>A</span>pple</td><td style='text-align: right'>0.25</td></tr>
+<tr><td>B<span style='background-color: #fce94f;'>a</span>n<span style='background-color: #fce94f;'>a</span>n<span style='background-color: #fce94f;'>a</span></td><td style='text-align: right'>0.25</td></tr>
+<tr><td>Or<span style='background-color: #fce94f;'>a</span>nge</td><td style='text-align: right'>0.40</td></tr>
+</table>
+
 <!-- include(snippet-common-csv-problems.html) -->

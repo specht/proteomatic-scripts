@@ -20,7 +20,7 @@ defaultOutputDirectory: input
 
 output:
   - key: input
-    label: highlighted files
+    label: highlighted HTML
     format: html
     filename: '#{basename}-highlighted.#{extension}'
 

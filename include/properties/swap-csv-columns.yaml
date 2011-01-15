@@ -17,7 +17,7 @@ defaultOutputDirectory: in
 
 output:
   - key: in
-    label: Swapped results
+    label: swapped results
     format: csv
     filename: swapped.csv
     default: yes

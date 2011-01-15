@@ -3,15 +3,18 @@ group: Miscellaneous
 title: Split CSV file
 
 description: >
+  <p>
   Split a CSV file in two parts, one containing all entries conforming
-  to defined constraints, the other containing all remaining entries.
+  to user-defined constraints, the other containing all remaining entries.
   For each line, a decision is made whether it should be accepted or
-  rejected, based on the condition parameters. <br />
-  If multiple possible 
-  values should be specified instead of only one, an input text file can be
-  specified. Each line from the input file is treated as a possible value in 
-  addition to the value specified in the value field, empty values are
-  ignored.
+  rejected, based on the condition parameters.
+  </p>
+  <p>
+  It is possible to check against multiple values by specifying an input
+  file containing all possible values in addition to the value specified
+  via the 'value' parameter. If the test for a CSV row succeeds 
+  for at least one of the specified values, the row is accepted.
+  </p>
 
 type: processor
 
