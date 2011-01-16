@@ -1,5 +1,6 @@
 require 'socket'
 require 'filetrackerhub'
+require 'fileutils'
 # require 'mysql'
 require 'thread'
 require 'monitor'
@@ -7,11 +8,11 @@ require 'timeout'
 
 
 # check whether gzip is there
-gzipVersion = `gzip -V`
-unless gzipVersion.index('gzip') == 0
-	puts "Error: gzip is not installed."
-	exit(1)
-end
+# gzipVersion = `gzip -V`
+# unless gzipVersion.index('gzip') == 0
+# 	puts "Error: gzip is not installed."
+# 	exit(1)
+# end
 
 conn = nil
 
@@ -30,6 +31,8 @@ serverPort = ARGV[1].to_i if ARGV[1]
 
 puts "Starting server at #{serverHost}:#{serverPort}..."
 server = TCPServer.new(serverHost, serverPort);
+
+FileUtils::mkdir('archive') unless File::directory?('archive')
 
 # $databaseMutex = Mutex.new
 # $fileMutex = Mutex.new
@@ -134,7 +137,6 @@ while (newSession = server.accept)
 				timestamp = Time.now.strftime("%Y-%m")
 				currentArchiveFilename = "filetracker-reports-#{timestamp}.yaml"
 				$fileMonitor.synchronize do
-					FileUtils::mkdir('archive') unless File::exists?('archive')
 					File.open("archive/#{currentArchiveFilename}", "a") do |f|
 						f.puts yamlReport
 					end

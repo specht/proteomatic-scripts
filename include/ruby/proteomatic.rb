@@ -524,10 +524,13 @@ class ProteomaticScript
         ls_Result += "Usage:\n    ruby #{$0} [options/parameters]"
         ls_Result += " [input files]" unless @mk_Input['groupOrder'].empty?
         ls_Result += "\n\n"
+#         ls_Result += indent(wordwrap("Options:\n--help\n     print this help\n\n" +
+#             "--proposePrefix\n     propose a prefix depending on the input files specified\n\n" +
+#             "--useFileTracker [host:port]\n     specify a filetracker, this overrides filetracker.conf.yaml\n\n" +
+#             "--daemon [port]\n     run this script as a daemon, default port is #{DEFAULT_DAEMON_PORT}"), 4, false)
         ls_Result += indent(wordwrap("Options:\n--help\n     print this help\n\n" +
             "--proposePrefix\n     propose a prefix depending on the input files specified\n\n" +
-            "--useFileTracker [host:port]\n     specify a filetracker, this overrides filetracker.conf.yaml\n\n" +
-            "--daemon [port]\n     run this script as a daemon, default port is #{DEFAULT_DAEMON_PORT}"), 4, false)
+            "--useFileTracker [host:port]\n     specify a filetracker, this overrides filetracker.conf.yaml"), 4, false)
         ls_Result += "\n"
         ls_Result += @mk_Parameters.helpString()
         if @mk_Input
@@ -676,11 +679,11 @@ class ProteomaticScript
     end
     
     def handleArguments()
-        if @mk_Arguments.first == '--daemon'
-            @mb_Daemon = true
-            @mi_DaemonPort = DEFAULT_DAEMON_PORT
-            @mi_DaemonPort = @mk_Arguments[1].to_i if @mk_Arguments.size > 1
-        end
+#         if @mk_Arguments.first == '--daemon'
+#             @mb_Daemon = true
+#             @mi_DaemonPort = DEFAULT_DAEMON_PORT
+#             @mi_DaemonPort = @mk_Arguments[1].to_i if @mk_Arguments.size > 1
+#         end
         if @mk_Arguments.first == '---yamlInfo'
             puts yamlInfo(@mk_Arguments.include?('--short'))
             exit 0
@@ -1211,6 +1214,10 @@ class ProteomaticScript
         end
         
         if lb_ProposePrefix
+            if @mk_Output.empty?
+                puts "Error: This script produces no output files, and no output prefix is required."
+                exit 1
+            end
             lk_Prefix = Array.new
             @mk_ScriptProperties['proposePrefix'].each do |ls_Group|
                 lk_PrefixFiles = @input[ls_Group.intern]
@@ -1225,8 +1232,8 @@ class ProteomaticScript
             lk_Prefix.reject! { |x| x.strip.empty? }
             ls_Prefix = lk_Prefix.join('-')
             ls_Prefix << '-' unless ls_Prefix.empty?
-            puts '--proposePrefix'
-            puts ls_Prefix
+            puts "The proposed prefix is: '#{ls_Prefix}'. Use the following option to specify it:"
+            puts "-outputPrefix \"#{ls_Prefix}\""
             exit 0
         end
         
