@@ -1,3 +1,4 @@
+#! /usr/bin/env ruby
 # Copyright (c) 2010 Till Bald
 # 
 # This file is part of Proteomatic.

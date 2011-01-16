@@ -1,3 +1,4 @@
+#! /usr/bin/env ruby
 # Copyright (c) 2007-2008 Michael Specht
 # 
 # This file is part of Proteomatic.

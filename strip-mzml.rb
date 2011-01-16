@@ -1,3 +1,4 @@
+#! /usr/bin/env ruby
 require './include/ruby/proteomatic'
 require './include/ruby/evaluate-omssa-helper'
 require 'fileutils'

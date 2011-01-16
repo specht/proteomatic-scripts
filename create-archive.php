@@ -1,3 +1,4 @@
+#! /usr/bin/env php
 <?php
 /*
 Copyright (c) 2010 Sebastian Kuhlgert and Michael Specht
