@@ -18,6 +18,7 @@ input:
   - key: files
     label: input
     min: 1
+    formats: [any]
 
 parameters:
   - key: assertMd5
