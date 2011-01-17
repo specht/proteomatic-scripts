@@ -279,8 +279,15 @@ class AnalyzePsm < ProteomaticScript
                             li_TargetCount += 1
                         end
                         lf_TotalCount = lf_DecoyCount + li_TargetCount
-                        lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
-                         lf_Fpr *= 0.5
+                        lf_Fpr = 2.0
+                        if @param[:fprCalculation] == 'd_t'
+                            if li_TargetCount > 0
+                                lf_Fpr = li_DecoyCountUnweighted.to_f / li_TargetCount 
+                            end
+                        else
+                            lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
+                        end
+                        lf_Fpr *= 0.5
                         lk_Histogram << {:fpr => lf_Fpr, :score => lk_Psm[:score], :decoyCount => lf_DecoyCount / lk_SortedByScore.size, :targetCount => (lf_TotalCount - lf_DecoyCount).to_f / lk_SortedByScore.size }
                     end
                     

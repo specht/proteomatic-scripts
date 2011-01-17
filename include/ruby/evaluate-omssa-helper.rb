@@ -36,7 +36,7 @@ class String
 end
 
 
-def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_', ai_DecoyAmount = 1)
+def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetPrefix = '__td__target_', as_DecoyPrefix = '__td__decoy_', ai_DecoyAmount = 1, ab_UseNewMethod = false)
 	lk_ScanHash = Hash.new
 	#MT_HydACPAN_25_020507:
 	#  MT_HydACPAN_25_020507.1058.1058.2.dta:
@@ -194,9 +194,14 @@ def cropPsm(ak_Files, af_TargetFpr, ab_DetermineGlobalScoreThreshold, as_TargetP
             end
             
             lf_TotalCount = lf_DecoyCount + li_TargetCount
-			lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
+            lf_Fpr = 0.0
+            if ab_UseNewMethod
+                lf_Fpr = li_DecoyCountUnweighted.to_f / li_TargetCount
+            else
+                lf_Fpr = lf_DecoyCount * 2.0 / lf_TotalCount
+            end
             
-			if (li_DecoyCountUnweighted > 0)
+			if (li_DecoyCountUnweighted > 0 && li_TargetCount > 0)
 				if (lb_FoundValidFpr)
 					# search for the global maximum FPR that is <= target FPR
 					if ((lf_Fpr > lk_ActualFpr[ls_Spot]) && (lf_Fpr <= af_TargetFpr))

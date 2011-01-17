@@ -46,7 +46,7 @@ class FilterPsmByFpr < ProteomaticScript
         end
 
         lk_Result = Hash.new
-        lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global', @param[:targetPrefix], @param[:decoyPrefix], @param[:decoyAmount])
+        lk_Result = cropPsm(@input[:omssaResults], @param[:targetFpr] / 100.0, @param[:scoreThresholdScope] == 'global', @param[:targetPrefix], @param[:decoyPrefix], @param[:decoyAmount], @param[:fprCalculation] == 'd_t')
         
         puts 'Warning: No PSM remaining.' if (lk_Result[:scoreThresholds].empty?)
         

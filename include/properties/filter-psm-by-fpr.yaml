@@ -23,6 +23,13 @@ output:
     default: yes
 
 parameters:
+  - key: fprCalculation
+    label: FPR calculation
+    type: enum
+    choices:
+      - {"2d_dt": "2 * decoys / (decoys + targets))"}
+      - {"d_t": "decoys / targets"}
+    default: "2d_dt"
   - key: targetFpr
     label: Target FPR
     enabled: scoreThresholdType == 'fpr'

@@ -23,6 +23,13 @@ input:
     min: 1
 
 parameters:
+  - key: fprCalculation
+    label: FPR calculation
+    type: enum
+    choices:
+      - {"2d_dt": "2 * decoys / (decoys + targets))"}
+      - {"d_t": "decoys / targets"}
+    default: "2d_dt"
   - key: targetEntryPrefix
     group: Tweaks
     label: Target entry prefix
