@@ -908,12 +908,7 @@ class ProteomaticScript
                 end
             end
         end
-        
-        # check whether we have prefix proposal settings, if not, generate one
-        if (!@mk_ScriptProperties.has_key?('proposePrefix')) || (@mk_ScriptProperties['proposePrefix'].empty?)
-            @mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
-        end
-            
+
         raise ProteomaticArgumentException, "Error#{lk_Errors.size > 1 ? "s:\n": ": "}" + lk_Errors.join("\n") unless lk_Errors.empty?
         lk_Errors = Array.new
         
@@ -996,6 +991,20 @@ class ProteomaticScript
         @mk_Input['ambiguousFormats'] = lk_AmbiguousFormats
         @mk_Input.freeze
 
+        # check whether we have a default output path, if not, create one
+        unless @mk_Input['groups'].empty?
+            if @mk_ScriptProperties.has_key?('output')
+                if !@mk_ScriptProperties.has_key?('defaultOutputDirectory')
+                    @mk_ScriptProperties['defaultOutputDirectory'] = @mk_Input['groupOrder'].first
+                end
+            end
+        end
+        
+        # check whether we have prefix proposal settings, if not, generate one
+        if (!@mk_ScriptProperties.has_key?('proposePrefix')) || (@mk_ScriptProperties['proposePrefix'].empty?)
+            @mk_ScriptProperties['proposePrefix'] = [@mk_ScriptProperties['defaultOutputDirectory']]
+        end
+            
         # handle output files
         #if @mk_ScriptProperties.has_key?('output')
             lk_Directory = {'group' => 'Output files', 'key' => 'outputDirectory', 
