@@ -992,13 +992,15 @@ class ProteomaticScript
         @mk_Input.freeze
 
         # check whether we have a default output path, if not, create one
-        unless @mk_Input['groups'].empty?
-            if @mk_ScriptProperties.has_key?('output')
-                if !@mk_ScriptProperties.has_key?('defaultOutputDirectory')
-                    @mk_ScriptProperties['defaultOutputDirectory'] = @mk_Input['groupOrder'].first
-                end
-            end
-        end
+        # no don't do this because we do not know whether input files have been 
+        # actually specified for that group
+#         unless @mk_Input['groups'].empty?
+#             if @mk_ScriptProperties.has_key?('output')
+#                 if !@mk_ScriptProperties.has_key?('defaultOutputDirectory')
+#                     @mk_ScriptProperties['defaultOutputDirectory'] = @mk_Input['groupOrder'].first
+#                 end
+#             end
+#         end
         
         # check whether we have prefix proposal settings, if not, generate one
         if (!@mk_ScriptProperties.has_key?('proposePrefix')) || (@mk_ScriptProperties['proposePrefix'].empty?)
