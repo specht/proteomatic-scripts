@@ -36,5 +36,3 @@ class unwrapFastaSeqs(proteomatic.ProteomaticScript):
         
 if __name__ == '__main__':
     script = unwrapFastaSeqs()
-
-

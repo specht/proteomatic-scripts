@@ -13,6 +13,8 @@ input:
     format: fasta
     label: FASTA database
 
+defaultOutputDirectory: sequences
+
 output:
   - key: results
     format: txt
