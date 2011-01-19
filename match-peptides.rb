@@ -120,7 +120,7 @@ class MatchPeptides < ProteomaticScript
     end
 end
 
-lk_Object = MatchPeptides.new
+script = MatchPeptides.new
 
 __END__
 <style type='text/css'>

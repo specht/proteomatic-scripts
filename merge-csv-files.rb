@@ -124,4 +124,4 @@ class MergeCsvFiles < ProteomaticScript
     end
 end
 
-lk_Object = MergeCsvFiles.new
+script = MergeCsvFiles.new

@@ -113,4 +113,4 @@ class CompareQuantitationRatios < ProteomaticScript
 end
 
 
-lk_Object = CompareQuantitationRatios.new
+script = CompareQuantitationRatios.new

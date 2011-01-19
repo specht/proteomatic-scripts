@@ -83,4 +83,4 @@ class QTraceCropXhtmlReport < ProteomaticScript
     end
 end
 
-lk_Object = QTraceCropXhtmlReport.new
+script = QTraceCropXhtmlReport.new

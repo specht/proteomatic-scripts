@@ -221,4 +221,4 @@ class CompareOmssa < ProteomaticScript
     end
 end
 
-lk_Object = CompareOmssa.new
+script = CompareOmssa.new

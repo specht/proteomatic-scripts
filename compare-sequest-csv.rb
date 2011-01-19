@@ -117,4 +117,4 @@ class CompareSequestCsv < ProteomaticScript
     end
 end
 
-lk_Object = CompareSequestCsv.new()
+script = CompareSequestCsv.new()

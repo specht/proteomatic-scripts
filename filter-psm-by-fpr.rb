@@ -89,4 +89,4 @@ class FilterPsmByFpr < ProteomaticScript
     end
 end
 
-lk_Object = FilterPsmByFpr.new
+script = FilterPsmByFpr.new

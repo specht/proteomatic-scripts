@@ -34,4 +34,4 @@ class TransposeDna < ProteomaticScript
     end
 end
 
-lk_Object = TransposeDna.new
+script = TransposeDna.new

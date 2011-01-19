@@ -37,4 +37,4 @@ class Intersection < ProteomaticScript
     end
 end
 
-lk_Object = Intersection.new
+script = Intersection.new

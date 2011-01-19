@@ -100,7 +100,7 @@ class RunPeaks < ProteomaticScript
     end
 end
 
-lk_Object = RunPeaks.new
+script = RunPeaks.new
 
 __END__
 

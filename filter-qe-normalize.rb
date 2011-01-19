@@ -69,4 +69,4 @@ class NormalizeProteinLevels < ProteomaticScript
     end
 end
 
-lk_Object = NormalizeProteinLevels.new
+script = NormalizeProteinLevels.new

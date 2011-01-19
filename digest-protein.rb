@@ -72,4 +72,4 @@ class DigestProtein < ProteomaticScript
     end
 end
 
-lk_Object = DigestProtein.new
+script = DigestProtein.new

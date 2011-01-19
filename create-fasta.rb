@@ -38,4 +38,4 @@ class CreateFasta < ProteomaticScript
     end
 end
 
-lk_Object = CreateFasta.new
+script = CreateFasta.new

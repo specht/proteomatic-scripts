@@ -67,4 +67,4 @@ class PeaksResultsToCsv < ProteomaticScript
     end
 end
 
-lk_Object = PeaksResultsToCsv.new
+script = PeaksResultsToCsv.new

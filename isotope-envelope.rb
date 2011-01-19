@@ -183,4 +183,4 @@ class IsotopeEnvelope < ProteomaticScript
     end
 end
 
-lk_Object = IsotopeEnvelope.new
+script = IsotopeEnvelope.new

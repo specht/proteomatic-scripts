@@ -43,4 +43,4 @@ class PsmExtractIdentifications < ProteomaticScript
     end
 end
 
-lk_Object = PsmExtractIdentifications.new
+script = PsmExtractIdentifications.new

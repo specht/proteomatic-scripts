@@ -120,4 +120,4 @@ class MassCalc < ProteomaticScript
     end
 end
 
-lk_Object = MassCalc.new
+script = MassCalc.new

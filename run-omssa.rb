@@ -204,4 +204,4 @@ class RunOmssa < ProteomaticScript
     end
 end
 
-lk_Object = RunOmssa.new
+script = RunOmssa.new

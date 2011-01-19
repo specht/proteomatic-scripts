@@ -136,4 +136,4 @@ class RunGpf < ProteomaticScript
     end
 end
 
-lk_Object = RunGpf.new
+script = RunGpf.new

@@ -28,4 +28,4 @@ class CheckSpectra < ProteomaticScript
     end
 end
 
-lk_Object = CheckSpectra.new
+script = CheckSpectra.new

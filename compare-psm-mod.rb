@@ -464,7 +464,7 @@ class ComparePsmMod < ProteomaticScript
 end
 
 
-lk_Object = ComparePsmMod.new()
+script = ComparePsmMod.new()
 
 
 __END__

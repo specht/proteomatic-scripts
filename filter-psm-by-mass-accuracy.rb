@@ -77,4 +77,4 @@ class CropPsmByMassAccuracy < ProteomaticScript
     end
 end
 
-lk_Object = CropPsmByMassAccuracy.new
+script = CropPsmByMassAccuracy.new

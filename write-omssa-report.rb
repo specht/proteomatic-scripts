@@ -498,4 +498,4 @@ class WriteOmssaReport < ProteomaticScript
     end
 end
 
-lk_Object = WriteOmssaReport.new
+script = WriteOmssaReport.new

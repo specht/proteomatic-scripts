@@ -118,4 +118,4 @@ class QuantitationAddProteins < ProteomaticScript
     end
 end
 
-lk_Object = QuantitationAddProteins.new
+script = QuantitationAddProteins.new

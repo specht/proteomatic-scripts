@@ -118,4 +118,4 @@ class ExtractSequestResults < ProteomaticScript
     end
 end
 
-lk_Object = ExtractSequestResults.new
+script = ExtractSequestResults.new

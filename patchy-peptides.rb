@@ -235,4 +235,4 @@ class PatchyPeptides < ProteomaticScript
     end
 end
 
-lk_Object = PatchyPeptides.new
+script = PatchyPeptides.new

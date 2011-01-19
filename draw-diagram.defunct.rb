@@ -294,4 +294,4 @@ class DrawDiagram < ProteomaticScript
     end
 end
 
-lk_Object = DrawDiagram.new
+script = DrawDiagram.new

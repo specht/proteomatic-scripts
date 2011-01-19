@@ -97,4 +97,4 @@ class XQuestXmlToCsv < ProteomaticScript
     end
 end
 
-lk_Object = XQuestXmlToCsv.new
+script = XQuestXmlToCsv.new

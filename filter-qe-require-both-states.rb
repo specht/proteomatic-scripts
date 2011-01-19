@@ -71,4 +71,4 @@ class RequireBothStates < ProteomaticScript
     end
 end
 
-lk_Object = RequireBothStates.new
+script = RequireBothStates.new

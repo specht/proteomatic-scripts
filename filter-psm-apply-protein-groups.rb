@@ -89,4 +89,4 @@ class ApplyProteinGroups < ProteomaticScript
     end
 end
 
-lk_Object = ApplyProteinGroups.new
+script = ApplyProteinGroups.new

@@ -88,4 +88,4 @@ class Raw2MzML < ProteomaticScript
     end
 end
 
-lk_Object = Raw2MzML.new
+script = Raw2MzML.new

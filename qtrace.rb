@@ -200,5 +200,5 @@ class QTrace < ProteomaticScript
     end
 end
 
-lk_Object = QTrace.new
+script = QTrace.new
 

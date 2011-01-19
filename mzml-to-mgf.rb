@@ -28,4 +28,4 @@ class MzmltoMgf < ProteomaticScript
     end
 end
 
-lk_Object = MzmltoMgf.new
+script = MzmltoMgf.new

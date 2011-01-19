@@ -112,4 +112,4 @@ class YamlReport < ProteomaticScript
     end
 end
 
-lk_Object = YamlReport.new
+script = YamlReport.new

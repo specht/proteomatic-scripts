@@ -80,4 +80,4 @@ class ExtractGpfPeptides < ProteomaticScript
 end
 
 
-lk_Object = ExtractGpfPeptides.new
+script = ExtractGpfPeptides.new

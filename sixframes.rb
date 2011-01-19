@@ -54,4 +54,4 @@ class SixFrames < ProteomaticScript
     end
 end
 
-lk_Object = SixFrames.new
+script = SixFrames.new

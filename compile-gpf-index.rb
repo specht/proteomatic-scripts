@@ -35,4 +35,4 @@ class CompileGpfIndex < ProteomaticScript
     end
 end
 
-lk_Object = CompileGpfIndex.new
+script = CompileGpfIndex.new

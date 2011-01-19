@@ -91,4 +91,4 @@ class FilterPsmByThreshold < ProteomaticScript
     end
 end
 
-lk_Object = FilterPsmByThreshold.new
+script = FilterPsmByThreshold.new

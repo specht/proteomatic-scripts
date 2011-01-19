@@ -83,4 +83,4 @@ class SubtractPsmScansFromXQuest < ProteomaticScript
     end
 end
 
-lk_Object = SubtractPsmScansFromXQuest.new
+script = SubtractPsmScansFromXQuest.new

@@ -58,4 +58,4 @@ class ExtractCsvColumn < ProteomaticScript
     end
 end
 
-lk_Object = ExtractCsvColumn.new
+script = ExtractCsvColumn.new

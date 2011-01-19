@@ -309,4 +309,4 @@ class CheckMod < ProteomaticScript
     end
 end
 
-lk_Object = CheckMod.new
+script = CheckMod.new

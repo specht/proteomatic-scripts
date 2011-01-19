@@ -40,4 +40,4 @@ class Exclusion < ProteomaticScript
     end
 end
 
-lk_Object = Exclusion.new
+script = Exclusion.new

@@ -42,4 +42,4 @@ class Difference < ProteomaticScript
     end
 end
 
-lk_Object = Difference.new
+script = Difference.new

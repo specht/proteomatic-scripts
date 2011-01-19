@@ -44,4 +44,4 @@ class MergeFasta < ProteomaticScript
     end
 end
 
-lk_Object = MergeFasta.new
+script = MergeFasta.new

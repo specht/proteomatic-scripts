@@ -382,4 +382,4 @@ class CompareOmssaSimQuant < ProteomaticScript
     end
 end
 
-lk_Object = CompareOmssaSimQuant.new
+script = CompareOmssaSimQuant.new

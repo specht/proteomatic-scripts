@@ -218,4 +218,4 @@ class CombinePbc < ProteomaticScript
     end
 end
 
-lk_Object = CombinePbc.new
+script = CombinePbc.new

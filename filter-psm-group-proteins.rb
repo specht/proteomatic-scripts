@@ -67,4 +67,4 @@ class FilterPsmGroupProteins < ProteomaticScript
     end
 end
 
-lk_Object = FilterPsmGroupProteins.new
+script = FilterPsmGroupProteins.new

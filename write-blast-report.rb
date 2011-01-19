@@ -197,4 +197,4 @@ EOF
     end
 end
 
-lk_Object = WriteBlastReport.new
+script = WriteBlastReport.new

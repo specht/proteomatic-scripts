@@ -182,4 +182,4 @@ class RunBlast < ProteomaticScript
     end
 end
 
-lk_Object = RunBlast.new
+script = RunBlast.new

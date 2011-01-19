@@ -36,4 +36,4 @@ class Union < ProteomaticScript
     end
 end
 
-lk_Object = Union.new
+script = Union.new

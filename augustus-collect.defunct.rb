@@ -433,4 +433,4 @@ class AugustusCollect < ProteomaticScript
     end
 end
 
-lk_Object = AugustusCollect.new
+script = AugustusCollect.new

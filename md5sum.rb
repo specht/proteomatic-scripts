@@ -50,4 +50,4 @@ class Md5Sum < ProteomaticScript
     end
 end
 
-lk_Object = Md5Sum.new
+script = Md5Sum.new

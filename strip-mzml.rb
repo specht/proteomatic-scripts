@@ -81,4 +81,4 @@ class StripMs1Scans < ProteomaticScript
     end
 end
 
-lk_Object = StripMs1Scans.new
+script = StripMs1Scans.new

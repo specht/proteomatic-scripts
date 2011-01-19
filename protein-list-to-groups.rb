@@ -73,4 +73,4 @@ class ProteinListToGroups < ProteomaticScript
     end
 end
 
-lk_Object = ProteinListToGroups.new
+script = ProteinListToGroups.new

@@ -103,4 +103,4 @@ class RequireMs2Event < ProteomaticScript
     end
 end
 
-lk_Object = RequireMs2Event.new
+script = RequireMs2Event.new

@@ -29,4 +29,4 @@ class IndirectQuantitation < ProteomaticScript
     end
 end
 
-lk_Object = IndirectQuantitation.new
+script = IndirectQuantitation.new

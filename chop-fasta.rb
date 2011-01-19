@@ -45,4 +45,4 @@ class ChopFasta < ProteomaticScript
     end
 end
 
-lk_Object = ChopFasta.new
+script = ChopFasta.new

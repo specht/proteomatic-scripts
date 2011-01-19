@@ -70,4 +70,4 @@ class GffLengthHistogram < ProteomaticScript
 end
 
 
-lk_Object = GffLengthHistogram.new
+script = GffLengthHistogram.new

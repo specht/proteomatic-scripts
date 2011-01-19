@@ -33,4 +33,4 @@ class DecoyFasta < ProteomaticScript
     end
 end
 
-lk_Object = DecoyFasta.new
+script = DecoyFasta.new

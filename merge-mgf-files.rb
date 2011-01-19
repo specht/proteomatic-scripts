@@ -51,4 +51,4 @@ class MergeMgfFiles < ProteomaticScript
     end
 end
 
-lk_Object = MergeMgfFiles.new
+script = MergeMgfFiles.new

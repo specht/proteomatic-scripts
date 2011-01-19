@@ -65,4 +65,4 @@ class MergeSequestCsv < ProteomaticScript
 end
 
 
-lk_Object = MergeSequestCsv.new()
+script = MergeSequestCsv.new()

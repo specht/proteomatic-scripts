@@ -37,4 +37,4 @@ class FastaToBlast < ProteomaticScript
     end
 end
 
-lk_Object = FastaToBlast.new
+script = FastaToBlast.new

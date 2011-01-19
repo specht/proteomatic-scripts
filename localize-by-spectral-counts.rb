@@ -67,4 +67,4 @@ class LocalizeBySpectralCounts < ProteomaticScript
     end
 end
 
-lk_Object = LocalizeBySpectralCounts.new
+script = LocalizeBySpectralCounts.new

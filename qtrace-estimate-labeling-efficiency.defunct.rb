@@ -90,4 +90,4 @@ class QTraceEstimateLabelingEfficiency < ProteomaticScript
     end
 end
 
-lk_Object = QTraceEstimateLabelingEfficiency.new
+script = QTraceEstimateLabelingEfficiency.new

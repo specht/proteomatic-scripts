@@ -68,4 +68,4 @@ class ExtractOmssaResults < ProteomaticScript
     end
 end
 
-lk_Object = ExtractOmssaResults.new
+script = ExtractOmssaResults.new

@@ -253,4 +253,4 @@ class FilterQuantitationEventsByBand < ProteomaticScript
     end
 end
 
-lk_Object = FilterQuantitationEventsByBand.new
+script = FilterQuantitationEventsByBand.new

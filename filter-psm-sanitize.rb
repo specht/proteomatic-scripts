@@ -131,4 +131,4 @@ class FilterPsmSanitize < ProteomaticScript
     end
 end
 
-lk_Object = FilterPsmSanitize.new
+script = FilterPsmSanitize.new

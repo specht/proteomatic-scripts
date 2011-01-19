@@ -61,4 +61,4 @@ class Highlight < ProteomaticScript
     end
 end
 
-lk_Object = Highlight.new
+script = Highlight.new

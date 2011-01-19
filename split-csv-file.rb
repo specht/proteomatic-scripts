@@ -117,4 +117,4 @@ class SplitCsvFile < ProteomaticScript
     end
 end
 
-lk_Object = SplitCsvFile.new
+script = SplitCsvFile.new

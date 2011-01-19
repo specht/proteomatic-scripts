@@ -408,4 +408,4 @@ class AnalyzePsm < ProteomaticScript
     end
 end
 
-lk_Object = AnalyzePsm.new
+script = AnalyzePsm.new

@@ -54,4 +54,4 @@ class SwapCsvColumns < ProteomaticScript
     end
 end
 
-lk_Object = SwapCsvColumns.new
+script = SwapCsvColumns.new

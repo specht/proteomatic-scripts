@@ -58,4 +58,4 @@ class AnalyzeProteinGroups < ProteomaticScript
     end
 end
 
-lk_Object = AnalyzeProteinGroups.new
+script = AnalyzeProteinGroups.new

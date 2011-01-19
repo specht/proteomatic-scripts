@@ -120,4 +120,4 @@ class ExportPsmToAms < ProteomaticScript
     end
 end
 
-lk_Object = ExportPsmToAms.new
+script = ExportPsmToAms.new

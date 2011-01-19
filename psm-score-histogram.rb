@@ -129,4 +129,4 @@ class PsmScoreHistogram < ProteomaticScript
     end
 end
 
-lk_Object = PsmScoreHistogram.new
+script = PsmScoreHistogram.new

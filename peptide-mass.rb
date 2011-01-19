@@ -42,4 +42,4 @@ class PeptideMass < ProteomaticScript
     end
 end
 
-lk_Object = PeptideMass.new
+script = PeptideMass.new

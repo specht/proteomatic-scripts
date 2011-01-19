@@ -228,4 +228,4 @@ class CheckFasta < ProteomaticScript
     end
 end
 
-lk_Object = CheckFasta.new
+script = CheckFasta.new

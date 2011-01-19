@@ -90,4 +90,4 @@ class MatchPeaks < ProteomaticScript
     end
 end
 
-lk_Object = MatchPeaks.new
+script = MatchPeaks.new

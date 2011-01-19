@@ -105,4 +105,4 @@ class CrossLinkMassCalc < ProteomaticScript
     end
 end
 
-lk_Object = CrossLinkMassCalc.new
+script = CrossLinkMassCalc.new
