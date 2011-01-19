@@ -1258,7 +1258,21 @@ class ProteomaticScript
         end
 
         if ls_OutputDirectory == nil && !@mk_Output.empty?
-            lk_Errors.push("Unable to determine output directory.")
+            # only complain if output files have actually been requested
+            if (@ms_ScriptType == 'processor')
+                anyOutputFilesRequested = false
+                @mk_Output.each do |ls_Key, lk_OutputFile|
+                    ls_FirstUpKey = ls_Key.dup
+                    ls_FirstUpKey[0, 1] = ls_FirstUpKey[0, 1].upcase
+                    if @param["outputWrite#{ls_FirstUpKey}".intern]
+                        anyOutputFilesRequested = true
+                        break
+                    end
+                end
+                if anyOutputFilesRequested
+                    lk_Errors.push("Unable to determine output directory. Please specify one with -outputDirectory [path].")
+                end
+            end
         else
             if (@ms_ScriptType == 'processor')
                 @mk_Output.each do |ls_Key, lk_OutputFile|
