@@ -68,3 +68,4 @@ class CreateArchive extends ProteomaticScript
 }
 
 $script = new CreateArchive();
+?>

@@ -26,7 +26,7 @@ class TransposeDna < ProteomaticScript
         dna.gsub!(/[^CGAT]/, '')
         # reverse sequence
         dna.reverse!
-        # replace nucleotides with
+        # replace nucleotides
         dna.tr!('ACGT', 'TGCA')
         # output transposed DNA
         puts dna
