@@ -31,7 +31,7 @@ class Raw2MzML < ProteomaticScript
             print "#{File.basename(ls_InPath)}: "
             
             # call msconvert
-            ls_Command = "#{ExternalTools::binaryPath('pwiz.msconvert')} #{@mk_Parameters.commandLineFor('pwiz.msconvert')} \"#{ls_InPath}\" -o \"#{ls_TempOutPath}\""
+            ls_Command = "\"#{ExternalTools::binaryPath('pwiz.msconvert')}\" #{@mk_Parameters.commandLineFor('pwiz.msconvert')} \"#{ls_InPath}\" -o \"#{ls_TempOutPath}\""
 
             print 'converting'
             $stdout.flush
@@ -53,7 +53,7 @@ class Raw2MzML < ProteomaticScript
                 
                 # strip mzML file
                 lk_Files = Dir['*']
-                ls_Command = "#{ls_StripScansPath} \"#{lk_Files.first}\""
+                ls_Command = "\"#{ls_StripScansPath}\" \"#{lk_Files.first}\""
                 runCommand(ls_Command)
                 FileUtils::rm_f(lk_Files.first)
                 
@@ -71,7 +71,7 @@ class Raw2MzML < ProteomaticScript
                 
                 # zip mzML file
                 lk_Files = Dir['*']
-                ls_Command = "#{ls_7ZipPath} a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} \"#{lk_Files.first + @param[:compression]}\" \"#{lk_Files.first}\" -mx5"
+                ls_Command = "\"#{ls_7ZipPath}\" a -t#{@param[:compression] == '.gz' ? 'gzip' : 'bzip2'} \"#{lk_Files.first + @param[:compression]}\" \"#{lk_Files.first}\" -mx5"
                 runCommand(ls_Command)
                 FileUtils::rm_f(lk_Files.first)
                 
