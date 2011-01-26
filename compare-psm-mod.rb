@@ -98,7 +98,7 @@ class ComparePsmMod < ProteomaticScript
                         ls_ModPeptide = ls_Peptide
                         # if there's a modification, update ls_ModPeptide
                         unless lk_Results[:scanHash][ls_Scan][:mods].empty?
-                            ls_ModPeptide = lk_Results[:scanHash][ls_Scan][:mods].collect { |x| x[:peptide] }.sort.join(' / ')
+                            ls_ModPeptide = Set.new(lk_Results[:scanHash][ls_Scan][:mods].collect { |x| x[:peptide] }).to_a.sort.join(' / ')
                         end
                         lk_AllResults[ls_Protein] ||= Hash.new
                         lk_AllResults[ls_Protein][ls_ModPeptide] ||= Hash.new
