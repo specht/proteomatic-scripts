@@ -107,15 +107,15 @@ class ExternalTools
 			puts "Error: This package (#{ak_PackageDescription['title']}) is not available for this platform (#{@@ms_Platform})."
 			return
 		end
-		as_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
+		as_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version'], ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
 		puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
 		ls_Uri = ak_PackageDescription['download'][@@ms_Platform]
 		lk_Uri = URI::parse(ls_Uri)
 		ls_OutFile = File::basename(lk_Uri.path)
 		
 		FileUtils::rm_rf(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform))
-		FileUtils::mkpath(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform))
-		ls_OutPath = File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ls_OutFile)
+		FileUtils::mkpath(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version']))
+		ls_OutPath = File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version'], ls_OutFile)
 		
 		puts "Downloading #{ls_OutFile}..."
 
@@ -144,7 +144,7 @@ class ExternalTools
 		puts 
 		
 		puts "Unpacking..."
-		FileUtils::chdir(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform))
+		FileUtils::chdir(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version']))
 		unpack(ls_OutFile)
 		FileUtils::chdir(File.join('..', '..', '..'))
 		FileUtils::remove_file(ls_OutPath, true)
@@ -163,7 +163,7 @@ class ExternalTools
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
-		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
+		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
         unless File::exists?(ls_Path)
             if (installIfNotThere)
                 install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) 
@@ -185,7 +185,7 @@ class ExternalTools
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/#{as_Package}.yaml"))
 		ls_Package = as_Package.sub('ext.', '')
 		begin
-			return File::directory?(File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['path'][@@ms_Platform]))
+			return File::directory?(File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
 		rescue 
 			return false
 		end
