@@ -272,7 +272,7 @@ class ComparePsmMod < ProteomaticScript
                 f.puts "Protein,Peptide(s),#{lk_Ids.collect { |x| '"' + x + '",mod,' }.join('')}Union,Intersection"
                 lk_AllResults.keys.sort { |a, b| lk_ProteinInterestingnessScores[b] <=> lk_ProteinInterestingnessScores[a] }.each do |ls_Protein|
                     lk_AllResults[ls_Protein].keys.sort { |a, b| lk_ModPeptideInterestingnessScores[ls_Protein + '/' + b] <=> lk_ModPeptideInterestingnessScores[ls_Protein + '/' + a] }.each do |ls_ModPeptide|
-                        f.print "\"#{ls_Protein}\","
+                        f.print "\"#{fullProteinForProteinId[ls_Protein].to_a.first}\","
                         lb_IsModified = ls_ModPeptide.index(/[a-z]/)
                         ls_UnmodClass = ''
                         if lb_IsModified
