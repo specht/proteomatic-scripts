@@ -100,9 +100,9 @@ class ExternalTools
 		exit 1
 	end
 	
-	def self.install(as_Package, ak_Description = nil, as_ResultFilePath = nil, ak_PackageDescription = nil)
+	def self.install(as_Package, ak_Description = nil, as_ResultFilePath = nil, ak_PackageDescription = nil, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
 		ls_Package = as_Package.sub('ext.', '')
-		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml")) unless ak_PackageDescription
+		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml")) unless ak_PackageDescription
 		unless ak_PackageDescription['download'][@@ms_Platform]
 			puts "Error: This package (#{ak_PackageDescription['title']}) is not available for this platform (#{@@ms_Platform})."
 			return
@@ -159,10 +159,10 @@ class ExternalTools
 		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
-	def self.binaryPath(as_Tool, installIfNotThere = true)
-		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Tool}.yaml"))
+	def self.binaryPath(as_Tool, installIfNotThere = true, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
+		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Tool}.yaml"))
 		ls_Package = as_Tool.split('.').first
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml"))
 		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
         unless File::exists?(ls_Path)
             if (installIfNotThere)
@@ -174,15 +174,15 @@ class ExternalTools
 		return ls_Path
 	end
     
-    def self.toolsForPackage(as_Package)
-        return Dir[File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{as_Package}.*.yaml")].collect do |x|
+    def self.toolsForPackage(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
+        return Dir[File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Package}.*.yaml")].collect do |x|
             File::basename(x).sub('ext.', '').sub('.yaml', '')
         end
     end
 	
-	def self.installed?(as_Package)
+	def self.installed?(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/')
 		lb_Ok = true
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/#{as_Package}.yaml"))
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Package}.yaml"))
 		ls_Package = as_Package.sub('ext.', '')
 		begin
 			return File::directory?(File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
@@ -191,9 +191,9 @@ class ExternalTools
 		end
 	end
 	
-	def self.packageTitle(as_Package)
+	def self.packageTitle(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
 		ls_Package = as_Package.sub('ext.', '')
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "include/cli-tools-atlas/packages/ext.#{ls_Package}.yaml"))
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml"))
 		return "#{lk_PackageDescription['title']} #{lk_PackageDescription['version']}"
 	end
 end

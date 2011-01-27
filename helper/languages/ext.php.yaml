@@ -1,0 +1,13 @@
+title: PHP
+
+version: 5.3.5
+
+download:
+  linux: ''
+  macx: ''
+  win32: 'http://www.uni-muenster.de/hippler/proteomatic/download/languages/php-5.3.5-Win32-VC6-x86.zip'
+
+path:
+  linux: ''
+  macx: ''
+  win32: ''

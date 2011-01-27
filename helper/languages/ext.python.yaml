@@ -1,0 +1,13 @@
+title: Python
+
+version: 2.7.1
+
+download:
+  linux: 'http://www.uni-muenster.de/hippler/proteomatic/download/languages/python-spoof.tar.bz2'
+  macx: ''
+  win32: 'http://www.uni-muenster.de/hippler/proteomatic/download/languages/python-2.7-win32.zip'
+
+path:
+  linux: 'python-spoof'
+  macx: ''
+  win32: 'Python27'
