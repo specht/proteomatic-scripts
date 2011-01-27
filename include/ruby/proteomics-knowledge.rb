@@ -18,6 +18,8 @@
 require './include/ruby/misc'
 require 'yaml'
 
+$PROTON_MASS = 1.00727646677
+
 $proteomicsKnowledge = Hash.new
 
 File::open('include/proteomics-knowledge-base/amino-acids.csv', 'r') do |f|
