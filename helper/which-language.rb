@@ -16,9 +16,7 @@ if deps.include?('--extToolsPath')
 end
 
 deps.each do |dep|
-    if dep[0, 5] == 'lang.'
-        ExternalTools::install(dep, nil, nil, nil, 'helper/languages/lang.') unless ExternalTools::installed?(dep, 'helper/languages/')
-    else
-        ExternalTools::install(dep) unless ExternalTools::installed?(dep)
+    if ExternalTools::installed?(dep, 'helper/languages/')
+        puts ExternalTools::binaryPath(dep.split('.').last + '.' + dep.split('.').last, false, 'helper/languages/lang.')
     end
 end

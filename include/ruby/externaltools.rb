@@ -101,7 +101,8 @@ class ExternalTools
 	end
 	
 	def self.install(as_Package, ak_Description = nil, as_ResultFilePath = nil, ak_PackageDescription = nil, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
-		ls_Package = as_Package.sub('ext.', '')
+        ls_Package = as_Package.sub('ext.', '')
+        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
 		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml")) unless ak_PackageDescription
 		unless ak_PackageDescription['download'][@@ms_Platform]
 			puts "Error: This package (#{ak_PackageDescription['title']}) is not available for this platform (#{@@ms_Platform})."
@@ -184,6 +185,7 @@ class ExternalTools
 		lb_Ok = true
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Package}.yaml"))
 		ls_Package = as_Package.sub('ext.', '')
+        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
 		begin
 			return File::directory?(File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
 		rescue 
@@ -193,6 +195,7 @@ class ExternalTools
 	
 	def self.packageTitle(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
 		ls_Package = as_Package.sub('ext.', '')
+        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml"))
 		return "#{lk_PackageDescription['title']} #{lk_PackageDescription['version']}"
 	end
