@@ -1,0 +1,175 @@
+*
+{
+    font-size: 11pt;    
+}
+
+table
+{
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #000;
+}
+
+th, td
+{
+    text-align: left;
+    vertical-align: top;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+table {
+    -moz-box-shadow: 2px 2px 8px #aaa;
+    -webkit-box-shadow: 2px 2px 8px #aaa;
+    box-shadow: 2px 2px 8px #aaa;
+}
+
+p
+{
+    margin-bottom: 1.0em;
+}
+
+h2,h3,h4,h5,h6
+{
+    margin-bottom: 1em;
+}
+
+dl
+{
+    margin-bottom: 1.5em;
+}
+
+ul
+{
+    margin-bottom: 1.5em;
+    padding-left: 1em;
+}
+
+blockquote
+{
+    padding: 1em;
+    margin-bottom: 1.5em;
+    background-color: #FFFCD8;
+    background-image: url('images/a5.png');
+    background-repeat: no-repeat;
+    background-position: top left;
+    border: dotted 1px #DFD999;
+}
+
+blockquote p
+{
+    margin-bottom: 0em;
+}
+
+table
+{
+    margin-bottom: 1.5em;
+    border-collapse: collapse;
+    /*border: 1px solid #ddd;*/
+}
+
+table th
+{
+    text-align: left;
+    font-weight: bold;
+    padding: 0.2em 0.8em 0.2em 0.8em;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+}
+
+table th.nobold
+{
+    font-weight: normal;
+}
+
+table td
+{
+    padding: 0.2em 0.8em 0.2em 0.8em;
+/*  background-color: #f8f8f8; */
+    border: 1px solid #ddd;
+}
+
+table tr.rowA
+{
+    background-color: #EAEFE0;
+    color: inherit;
+}
+
+table tr.rowB
+{
+    background-color: #F9FFEF;
+    color: inherit;
+}
+
+.clear
+{
+    clear: both;
+}
+
+codelisting {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    display: block;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    font-size: 85%;
+    margin-bottom: 1em;
+    line-height: 120%;
+}
+
+.box {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    display: block;
+    margin-bottom: 1em;
+    padding: 1em;
+/*     line-height: 120%; */
+}
+
+
+tt {
+    font-family: monospace;
+    font-size: 85%;
+}
+
+code {
+    font-family: monospace;
+    font-size: 85%;
+}
+
+a img {
+    border: none;
+}
+
+dd {
+    margin-left: 2em;
+}
+
+.featured-begin
+{
+}
+
+.featured-end
+{
+}
+
+.download-comment
+{
+    font-size: 85%;
+    color: #888;
+}
+
+dt {
+    font-weight: bold;
+}
+
+.highlight {
+    background-color: #fce94f;
+}
+
