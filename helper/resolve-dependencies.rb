@@ -15,10 +15,19 @@ if deps.include?('--extToolsPath')
     deps.delete_at(i)
 end
 
+hasErrors = false
+
 deps.each do |dep|
-    if dep[0, 5] == 'lang.'
-        ExternalTools::install(dep, nil, nil, nil, 'helper/languages/lang.') unless ExternalTools::installed?(dep, 'helper/languages/')
-    else
-        ExternalTools::install(dep) unless ExternalTools::installed?(dep)
+    begin
+        if dep[0, 5] == 'lang.'
+            ExternalTools::install(dep, nil, nil, nil, 'helper/languages/lang.') unless ExternalTools::installed?(dep, 'helper/languages/')
+        else
+            ExternalTools::install(dep) unless ExternalTools::installed?(dep)
+        end
+    rescue
+        puts "There was an error while trying to install the external tool."
+        hasErrors = true
     end
 end
+
+exit(1) if hasErrors

@@ -110,7 +110,11 @@ class ExternalTools
 		end
 		as_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version'], ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
 		puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
-		ls_Uri = ak_PackageDescription['download'][@@ms_Platform]
+		ls_Uri = ak_PackageDescription['download'][@@ms_Platform].strip
+        ls_Uri = nil if ls_Uri.class != String || ls_Uri.empty?
+        unless ls_Uri
+            puts "Error: This program is not available for your platform (#{@@ms_Platform})."
+        end
 		lk_Uri = URI::parse(ls_Uri)
 		ls_OutFile = File::basename(lk_Uri.path)
 		
