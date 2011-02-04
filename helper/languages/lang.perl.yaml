@@ -1,0 +1,13 @@
+title: Perl
+
+version: 5.12.2
+
+download:
+  linux: ''
+  macx: ''
+  win32: 'http://strawberryperl.com/download/5.12.2.0/strawberry-perl-5.12.2.0-portable.zip'
+
+path:
+  linux: ''
+  macx: ''
+  win32: ''
