@@ -21,6 +21,9 @@ require 'uri'
 require 'yaml'
 require 'fileutils'
 require 'net/ftp'
+require 'net/http'
+
+MAX_REDIRECT = 10
 
 
 class ExternalTools
@@ -282,4 +285,52 @@ class ExternalTools
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPathPrefix(as_Package)}#{ls_PackageStripped}.yaml"))
 		return "#{lk_PackageDescription['title']} #{lk_PackageDescription['version']}"
 	end
+    
+    def self.checkAllDownloads(as_Package)
+        ['win32', 'macx', 'linux'].each do |platform|
+            ls_PackageStripped = stripItem(as_Package)
+            ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml")) unless ak_PackageDescription
+            
+            if ak_PackageDescription['download'][platform].class == String && ak_PackageDescription['download'][platform].strip.empty?
+                ak_PackageDescription['download'][platform] = nil
+            end
+            next unless ak_PackageDescription['download'][platform]
+            
+            ls_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_PackageStripped, platform, ak_PackageDescription['version'], ak_PackageDescription['path'][platform])
+            ls_Uri = ak_PackageDescription['download'][platform].strip
+            lk_Uri = URI::parse(ls_Uri)
+            
+            li_BlockSize = 16384
+            if (ls_Uri[0, 6] == 'ftp://')
+                Net::FTP.open(lk_Uri.host) do |lk_Ftp|
+                    lk_Ftp.passive = true 
+                    lk_Ftp.login
+                    li_Size = lk_Ftp.size(lk_Uri.path)
+                    puts "GOOD => #{li_Size} #{ls_Uri}"
+                end
+            else
+                maxRedirect = MAX_REDIRECT
+                while true
+                    maxRedirect -= 1
+                    redirectFlag = false
+                    break if maxRedirect <= 0
+                    Net::HTTP.start(lk_Uri.host, lk_Uri.port) do |http|
+                        response = http.request_head(ls_Uri)
+    #                     puts response.code
+                        if response.code == '200' # OK
+                            li_Size = response['content-length']
+                            puts "GOOD => #{li_Size} #{ls_Uri}"
+                        elsif response.code == '302' # HTTP_FOUND (redirect?)
+                            ls_Uri = response['location']
+                            lk_Uri = URI::parse(ls_Uri)
+                            redirectFlag = true
+                        else
+                            puts "#{response.code} #{ls_Uri}"
+                        end
+                    end
+                    break unless redirectFlag
+                end
+            end
+        end
+    end
 end
