@@ -1,4 +1,4 @@
 binary:
   win32: php.exe
-  linux: ''
-  macx: ''
+  linux: php
+  macx: php

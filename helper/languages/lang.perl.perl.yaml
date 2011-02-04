@@ -1,4 +1,4 @@
 binary:
-  win32: perl/bin/perl.exe
-  linux: ''
-  macx: ''
+  win32: perl.exe
+  linux: perl
+  macx: perl

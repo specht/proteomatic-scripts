@@ -16,5 +16,5 @@ if deps.include?('--extToolsPath')
 end
 
 deps.each do |dep|
-    ExternalTools::install(dep, nil, nil, nil, 'helper/languages/ext.') unless ExternalTools::installed?(dep, 'helper/languages/')
+    ExternalTools::install(dep)
 end

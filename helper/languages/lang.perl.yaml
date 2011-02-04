@@ -10,4 +10,9 @@ download:
 path:
   linux: ''
   macx: ''
-  win32: ''
+  win32: 'perl/bin/'
+
+help:
+  linux: |
+    On Ubuntu, try this in a terminal:
+    $ sudo apt-get install perl

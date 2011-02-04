@@ -11,3 +11,8 @@ path:
   linux: ''
   macx: ''
   win32: ''
+
+help:
+  linux: |
+    On Ubuntu, try this in a terminal:
+    $ sudo apt-get install php5-cli

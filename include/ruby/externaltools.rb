@@ -33,8 +33,40 @@ class ExternalTools
         @@ms_ExtToolsPath = as_Path
     end
 	
-	def initialize()
-	end
+    def self.itemPath(as_Tool)
+        as_Tool = as_Tool.split('.')[0, 2].join('.')
+        if as_Tool[0, 4] == 'ext.'
+            return 'include/cli-tools-atlas/packages/'
+        elsif as_Tool[0, 5] == 'lang.'
+            return 'helper/languages/'
+        else
+            raise "Internal error: Invalid item requested in ExternalTools (#{as_Tool})"
+        end
+    end
+    
+    def self.itemPathPrefix(as_Tool)
+        as_Tool = as_Tool.split('.')[0, 2].join('.')
+        if as_Tool[0, 4] == 'ext.'
+            return 'include/cli-tools-atlas/packages/ext.'
+        elsif as_Tool[0, 5] == 'lang.'
+            return 'helper/languages/lang.'
+        else
+            puts "Internal error: Invalid item requested in ExternalTools (#{as_Tool})"
+            exit 1
+        end
+    end
+
+    # removes .lang or .ext prefix
+    def self.stripItem(as_Tool)
+        if as_Tool[0, 4] == 'ext.'
+            return as_Tool.sub('ext.', '')
+        elsif as_Tool[0, 5] == 'lang.'
+            return as_Tool.sub('lang.', '')
+        else
+            puts "Internal error: Invalid item requested in ExternalTools (#{as_Tool})"
+            exit 1
+        end
+    end
 	
 	def self.unpack(as_Path)
 		# Note: we should already be in the correct directory.
@@ -100,16 +132,27 @@ class ExternalTools
 		exit 1
 	end
 	
-	def self.install(as_Package, ak_Description = nil, as_ResultFilePath = nil, ak_PackageDescription = nil, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
-        ls_Package = as_Package.sub('ext.', '')
-        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
-		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml")) unless ak_PackageDescription
+    # as_Package is for example:
+    # - lang.python
+    # - ext.omssa
+	def self.install(as_Package)
+        # don't install again if it's already installed
+        return if self.installed?(as_Package)
+        
+        ls_PackageStripped = stripItem(as_Package)
+		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml")) unless ak_PackageDescription
+        puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
+        
+        if ak_PackageDescription['download'][@@ms_Platform].class == String && ak_PackageDescription['download'][@@ms_Platform].strip.empty?
+            ak_PackageDescription['download'][@@ms_Platform] = nil
+        end
 		unless ak_PackageDescription['download'][@@ms_Platform]
-			puts "Error: This package (#{ak_PackageDescription['title']}) is not available for this platform (#{@@ms_Platform})."
+			puts "Error: #{ak_PackageDescription['title']} is not available for this platform (#{@@ms_Platform})."
+            puts "Please try to install #{ak_PackageDescription['title']} manually."
+            puts ak_PackageDescription['help'][@@ms_Platform] if ak_PackageDescription['help'][@@ms_Platform]
 			return
 		end
-		as_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version'], ak_PackageDescription['path'][@@ms_Platform]) unless as_ResultFilePath
-		puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
+		ls_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform, ak_PackageDescription['version'], ak_PackageDescription['path'][@@ms_Platform])
 		ls_Uri = ak_PackageDescription['download'][@@ms_Platform].strip
         ls_Uri = nil if ls_Uri.class != String || ls_Uri.empty?
         unless ls_Uri
@@ -118,9 +161,9 @@ class ExternalTools
 		lk_Uri = URI::parse(ls_Uri)
 		ls_OutFile = File::basename(lk_Uri.path)
 		
-		FileUtils::rm_rf(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform))
-		FileUtils::mkpath(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version']))
-		ls_OutPath = File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version'], ls_OutFile)
+		FileUtils::rm_rf(File.join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform))
+		FileUtils::mkpath(File.join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform, ak_PackageDescription['version']))
+		ls_OutPath = File.join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform, ak_PackageDescription['version'], ls_OutFile)
 		
 		puts "Downloading #{ls_OutFile}..."
 
@@ -149,11 +192,11 @@ class ExternalTools
 		puts 
 		
 		puts "Unpacking..."
-		FileUtils::chdir(File.join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, ak_PackageDescription['version']))
+		FileUtils::chdir(File.join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform, ak_PackageDescription['version']))
 		unpack(ls_OutFile)
 		FileUtils::chdir(File.join('..', '..', '..'))
 		FileUtils::remove_file(ls_OutPath, true)
-		unless File::exists?(as_ResultFilePath)
+		unless File::exists?(ls_ResultFilePath)
 			puts "Installation of #{ak_PackageDescription['title']} failed."
 			puts "Please try again or download and unpack the tool manually:"
 			puts "Source: #{ls_Uri}"
@@ -164,43 +207,79 @@ class ExternalTools
 		puts "#{ak_PackageDescription['title']} #{ak_PackageDescription['version']} successfully installed."
 	end
 	
-	def self.binaryPath(as_Tool, installIfNotThere = true, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
-		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Tool}.yaml"))
-		ls_Package = as_Tool.split('.').first
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml"))
+    # as_Tool is for example:
+    # - lang.perl.perl
+    # - ext.omssa.omssacl
+	def self.binaryPath(as_Tool, installIfNotThere = true)
+        unless as_Tool[0, 4] == 'ext.' || as_Tool[0, 5] == 'lang.'
+            # if not given, prepend 'ext.' by default
+            as_Tool = 'ext.' + as_Tool
+        end
+		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Tool)}#{as_Tool}.yaml"))
+		ls_Package = as_Tool.split('.')[1]
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPathPrefix(as_Tool)}#{ls_Package}.yaml"))
 		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
         unless File::exists?(ls_Path)
             if (installIfNotThere)
-                install(ls_Package, lk_ToolDescription, ls_Path, lk_PackageDescription) 
+                install(as_Tool.split('.')[0, 2].join('.'))
+                if (!File::exists?(ls_Path)) && (as_Tool[0, 5] == 'lang.')
+                    return languageBinary(as_Tool.split('.')[1])
+                end
             else
                 return nil
             end
         end
 		return ls_Path
 	end
-    
-    def self.toolsForPackage(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
-        return Dir[File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Package}.*.yaml")].collect do |x|
+
+    def self.toolsForPackage(as_Package)
+        return Dir[File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.*.yaml")].collect do |x|
             File::basename(x).sub('ext.', '').sub('.yaml', '')
         end
     end
-	
-	def self.installed?(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/')
+
+    # as_Package is for example:
+    # - lang.python
+    # - ext.omssa
+	def self.installed?(as_Package)
 		lb_Ok = true
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{as_Package}.yaml"))
-		ls_Package = as_Package.sub('ext.', '')
-        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml"))
+        lb_Result = false
 		begin
-			return File::directory?(File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
+			lb_Result = File::directory?(File::join(@@ms_ExtToolsPath, stripItem(as_Package), @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
 		rescue 
-			return false
+			lb_Result = false
 		end
+        # if it's not installed, see whether it's a language which might be globally available
+        if (!lb_Result) && (as_Package[0, 5] == 'lang.')
+            language = stripItem(as_Package)
+            binaryName = languageBinary(language)
+            version = `\"#{binaryName}\" --version 2>&1`
+            version.strip!
+            version.downcase!
+            if language == 'perl'
+                version.gsub!('this is', '')
+                version.strip!
+            end
+            if version.index(language.downcase) == 0
+                # we cannot install the language, but it's already installed on the computer!
+                lb_Result = true 
+            end
+        end
+        return lb_Result
 	end
+    
+    def self.languageBinary(language)
+        # :ATTENTION: SECURITY CHECK HERE, WE DON'T WANT TO CALL SOMETHING ELSE ALRIGHT
+        unless ['perl', 'python', 'php'].include?(language)
+            raise "Invalid language binary requested (#{language})."
+        end
+        binaryName = YAML::load_file(File::join(@@ms_RootPath, "#{itemPathPrefix('lang.' + language)}#{language}.#{language}.yaml"))['binary'][@@ms_Platform]
+    end
 	
-	def self.packageTitle(as_Package, as_PathPrefix = 'include/cli-tools-atlas/packages/ext.')
-		ls_Package = as_Package.sub('ext.', '')
-        ls_Package = ls_Package.sub('lang.', '') if as_Package[0, 5] == 'lang.'
-		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{as_PathPrefix}#{ls_Package}.yaml"))
+	def self.packageTitle(as_Package)
+		ls_PackageStripped = stripItem(as_Package)
+		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPathPrefix(as_Package)}#{ls_PackageStripped}.yaml"))
 		return "#{lk_PackageDescription['title']} #{lk_PackageDescription['version']}"
 	end
 end

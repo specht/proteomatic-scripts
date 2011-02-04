@@ -470,8 +470,7 @@ class ProteomaticScript
                     if @mk_ScriptProperties.include?('needs')
                         @mk_ScriptProperties['needs'].each do |ls_ExtTool|
                             # skip if 'config' and not a proper 'package.program' tool
-                            next unless ls_ExtTool[0, 4] == 'ext.'
-                            ls_ExtTool.sub!('ext.', '')
+                            next unless ls_ExtTool[0, 4] == 'ext.' || ls_ExtTool[0, 5] == 'lang.'
                             response['binaryPath'] ||= Hash.new
                             ExternalTools::toolsForPackage(ls_ExtTool).each do |x|
                                 path = binaryPath(x, false)
@@ -699,8 +698,8 @@ class ProteomaticScript
         if @mk_ScriptProperties.include?('needs')
             @mk_ScriptProperties['needs'].each do |ls_ExtTool|
                 # skip if 'config' and not a proper 'package.program' tool
-                next unless ls_ExtTool[0, 4] == 'ext.'
-                ExternalTools::install(ls_ExtTool) unless ExternalTools::installed?(ls_ExtTool)
+                next unless ls_ExtTool[0, 4] == 'ext.' || ls_ExtTool[0, 4] == 'lang.'
+                ExternalTools::install(ls_ExtTool)
             end
         end
     end
@@ -877,7 +876,7 @@ class ProteomaticScript
         result = Hash.new
         if @mk_ScriptProperties.has_key?('needs')
             @mk_ScriptProperties['needs'].each do |ls_ExtTool|
-                next unless ls_ExtTool[0, 4] == 'ext.'
+                next unless ls_ExtTool[0, 4] == 'ext.' || ls_ExtTool[0, 5] == 'lang.'
                 result[ls_ExtTool] = ExternalTools::packageTitle(ls_ExtTool)
             end
         end
@@ -898,7 +897,7 @@ class ProteomaticScript
             if (@mk_Arguments.first == '---yamlInfo') && (!@mk_Arguments.include?('--short'))
                 ls_Response = ''
                 @mk_ScriptProperties['needs'].each do |ls_ExtTool|
-                    next unless ls_ExtTool[0, 4] == 'ext.'
+                    next unless ls_ExtTool[0, 4] == 'ext.' || ls_ExtTool[0, 5] == 'lang.'
                     ls_Response << "#{ExternalTools::packageTitle(ls_ExtTool)}\n" unless ExternalTools::installed?(ls_ExtTool)
                 end
                 unless ls_Response.empty?

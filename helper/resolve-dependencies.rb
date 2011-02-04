@@ -19,15 +19,14 @@ hasErrors = false
 
 deps.each do |dep|
     begin
-        if dep[0, 5] == 'lang.'
-            ExternalTools::install(dep, nil, nil, nil, 'helper/languages/lang.') unless ExternalTools::installed?(dep, 'helper/languages/')
-        else
-            ExternalTools::install(dep) unless ExternalTools::installed?(dep)
-        end
+        ExternalTools::install(dep)
     rescue
         puts "There was an error while trying to install the external tool."
         hasErrors = true
     end
 end
+
+$stdout.flush
+$stderr.flush
 
 exit(1) if hasErrors

@@ -11,3 +11,8 @@ path:
   linux: ''
   macx: ''
   win32: 'portable-python-2.6.1'
+
+help:
+  linux: |
+    On Ubuntu, try this in a terminal:
+    $ sudo apt-get install python
