@@ -23,7 +23,8 @@ class CsvToMzIdentML < ProteomaticScript
     def run()
         @output.each do |ls_InPath, ls_OutPath|
             puts "Converting #{ls_InPath} to #{ls_OutPath}..."
-            puts ExternalTools::binaryPath('lang.perl.perl')
+            command = "\"#{ExternalTools::binaryPath('lang.perl.perl')}\" \"#{ExternalTools::binaryPath('ext.web-based-multiplesearch.csv2mzidentml')}\""
+            system(command)
         end
     end
 end
