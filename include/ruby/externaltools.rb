@@ -299,6 +299,7 @@ class ExternalTools
             ls_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_PackageStripped, platform, ak_PackageDescription['version'], ak_PackageDescription['path'][platform])
             ls_Uri = ak_PackageDescription['download'][platform].strip
             lk_Uri = URI::parse(ls_Uri)
+            ls_OriginalUri = ls_Uri.dup
             
             li_BlockSize = 16384
             if (ls_Uri[0, 6] == 'ftp://')
@@ -323,6 +324,7 @@ class ExternalTools
                         elsif response.code == '302' # HTTP_FOUND (redirect?)
                             ls_Uri = response['location']
                             lk_Uri = URI::parse(ls_Uri)
+                            puts "REDIRECT #{ls_OriginalUri} to #{ls_Uri}"
                             redirectFlag = true
                         else
                             puts "#{response.code} #{ls_Uri}"
