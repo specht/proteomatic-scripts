@@ -1,0 +1,25 @@
+group: Proteomics/Identification/OMSSA/Miscellaneous
+
+title: Convert OMSSA CSV to mzIdentML
+
+description: >
+  Convert OMSSA CSV output files to the mzIdentML file format.
+
+type: converter
+
+input:
+  - key: csvFiles
+    label: OMSSA PSM
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: csvFiles
+
+output:
+  - key: csvFiles
+    label: mzIdentML files
+    format: xml-mzidentml
+    filename: '#{basename}.mzid'
+
+needs:
+  - lang.perl
