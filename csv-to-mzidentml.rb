@@ -47,7 +47,9 @@ class CsvToMzIdentML < ProteomaticScript
                 f.puts "Spectrum ID format,multiple peak list nativeID format,MS:1000774,N/A,,"
             end
             
-            command = "\"#{ExternalTools::binaryPath('lang.perl.perl')}\" \"#{ExternalTools::binaryPath('ext.web-based-multiplesearch.csv2mzidentml')}\" \"#{inPath}\" \"#{paramFilePath}\" \"#{tempFilePath}\""
+            command = "\"#{ExternalTools::binaryPath('lang.perl.perl')}\" " + 
+                    "\"#{ExternalTools::binaryPath('ext.web-based-multiplesearch.csv2mzidentml')}\" " +
+                    "\"#{inPath}\" \"#{paramFilePath}\" \"#{tempFilePath}\""
             runCommand(command)
             
             # now remove some information from the input file which we cannot provide at this point
