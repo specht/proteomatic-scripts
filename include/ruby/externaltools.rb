@@ -146,13 +146,21 @@ class ExternalTools
 		ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml")) unless ak_PackageDescription
         puts "Installing #{ak_PackageDescription['title']} #{ak_PackageDescription['version']}..."
         
+        # promote to current platform if none given
+        ['download', 'path', 'help'].each do |key|
+            next unless ak_PackageDescription[key]
+            if ak_PackageDescription[key].class != Hash
+                ak_PackageDescription[key] = {@@ms_Platform => ak_PackageDescription[key]}
+            end
+        end
+        
         if ak_PackageDescription['download'][@@ms_Platform].class == String && ak_PackageDescription['download'][@@ms_Platform].strip.empty?
             ak_PackageDescription['download'][@@ms_Platform] = nil
         end
 		unless ak_PackageDescription['download'][@@ms_Platform]
 			puts "Error: #{ak_PackageDescription['title']} is not available for this platform (#{@@ms_Platform})."
             puts "Please try to install #{ak_PackageDescription['title']} manually."
-            puts ak_PackageDescription['help'][@@ms_Platform] if ak_PackageDescription['help'][@@ms_Platform]
+            puts ak_PackageDescription['help'][@@ms_Platform] if ak_PackageDescription['help'] && ak_PackageDescription['help'][@@ms_Platform]
 			return
 		end
 		ls_ResultFilePath = File::join(@@ms_ExtToolsPath, ls_PackageStripped, @@ms_Platform, ak_PackageDescription['version'], ak_PackageDescription['path'][@@ms_Platform])
@@ -219,8 +227,26 @@ class ExternalTools
             as_Tool = 'ext.' + as_Tool
         end
 		lk_ToolDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Tool)}#{as_Tool}.yaml"))
+        
+        # promote to current platform if none given
+        ['binary'].each do |key|
+            next unless lk_ToolDescription[key]
+            if lk_ToolDescription[key].class != Hash
+                lk_ToolDescription[key] = {@@ms_Platform => lk_ToolDescription[key]}
+            end
+        end        
+        
 		ls_Package = as_Tool.split('.')[1]
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPathPrefix(as_Tool)}#{ls_Package}.yaml"))
+        
+        # promote to current platform if none given
+        ['path'].each do |key|
+            next unless lk_PackageDescription[key]
+            if lk_PackageDescription[key].class != Hash
+                lk_PackageDescription[key] = {@@ms_Platform => lk_PackageDescription[key]}
+            end
+        end        
+        
 		ls_Path = File::join(@@ms_ExtToolsPath, ls_Package, @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform], lk_ToolDescription['binary'][@@ms_Platform])
         unless File::exists?(ls_Path)
             if (installIfNotThere)
@@ -247,6 +273,15 @@ class ExternalTools
 	def self.installed?(as_Package)
 		lb_Ok = true
 		lk_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml"))
+        
+        # promote to current platform if none given
+        ['path'].each do |key|
+            next unless lk_PackageDescription[key]
+            if lk_PackageDescription[key].class != Hash
+                lk_PackageDescription[key] = {@@ms_Platform => lk_PackageDescription[key]}
+            end
+        end        
+        
         lb_Result = false
 		begin
 			lb_Result = File::directory?(File::join(@@ms_ExtToolsPath, stripItem(as_Package), @@ms_Platform, lk_PackageDescription['version'], lk_PackageDescription['path'][@@ms_Platform]))
@@ -290,6 +325,15 @@ class ExternalTools
         ['win32', 'macx', 'linux'].each do |platform|
             ls_PackageStripped = stripItem(as_Package)
             ak_PackageDescription = YAML::load_file(File::join(@@ms_RootPath, "#{itemPath(as_Package)}#{as_Package}.yaml")) unless ak_PackageDescription
+            
+        
+            # promote to current platform if none given
+            ['download', 'path'].each do |key|
+                next unless ak_PackageDescription[key]
+                if ak_PackageDescription[key].class != Hash
+                    ak_PackageDescription[key] = {@@ms_Platform => ak_PackageDescription[key]}
+                end
+            end
             
             if ak_PackageDescription['download'][platform].class == String && ak_PackageDescription['download'][platform].strip.empty?
                 ak_PackageDescription['download'][platform] = nil
