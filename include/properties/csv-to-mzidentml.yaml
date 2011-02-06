@@ -3,7 +3,10 @@ group: Proteomics/Identification/OMSSA/Miscellaneous
 title: Convert OMSSA CSV to mzIdentML
 
 description: >
-  Convert OMSSA CSV output files to the mzIdentML file format.
+  Convert OMSSA CSV output files to the mzIdentML file format. 
+  <b>Attention:</b> Only peptide identifications are reported in the output
+  file, details about the database search (mass tolerances, enzyme, ...) are
+  not saved.
 
 type: converter
 
