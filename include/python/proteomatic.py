@@ -82,8 +82,9 @@ class ProteomaticScript(object):
             pass
         if 'run' in self.anyLanguageHubResponse.keys():
             if self.anyLanguageHubResponse['run'] == 'run':
-                outputFile = open(outputFilePath, 'w', 0)
-                sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+                # removed 0 to make it Python 3 compatible
+                outputFile = open(outputFilePath, 'w')#, 0)
+                sys.stdout = os.fdopen(sys.stdout.fileno(), 'w')#, 0)
                 os.dup2(sys.stdout.fileno(),outputFile.fileno())
             
                 #sys.stdout = outputFile
@@ -124,4 +125,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
