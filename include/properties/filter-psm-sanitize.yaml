@@ -23,6 +23,11 @@ output:
     format: csv
     filename: "sanitized.csv"
     default: yes
+  - key: discarded
+    label: discarded PSM list
+    format: csv
+    filename: "discarded.csv"
+    default: no
 
 parameters:
   - key: threshold

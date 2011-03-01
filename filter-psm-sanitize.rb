@@ -28,6 +28,8 @@ class FilterPsmSanitize < ProteomaticScript
     def run()
         outFile = nil
         outFile = File::open(@output[:results], 'w') if @output[:results]
+        discardFile = nil
+        discardFile = File::open(@output[:discarded], 'w') if @output[:discarded]
         totalRowCount = 0
         printedRowCount = 0
         puts "Reading PSM list files..."
@@ -54,6 +56,7 @@ class FilterPsmSanitize < ProteomaticScript
                 headerLine = fin.readline
                 unless wroteHeader
                     outFile.puts headerLine.strip + ',Hit distinctiveness' if outFile
+                    discardFile.puts headerLine.strip + ',Hit distinctiveness' if discardFile
                     wroteHeader = true
                 end
                 header = mapCsvHeader(headerLine)
@@ -117,17 +120,23 @@ class FilterPsmSanitize < ProteomaticScript
                     peptide = lineArray[peptideIndex].dup
                     peptide.upcase! if @param[:upcasePeptides]
 #                         evalue = BigDecimal.new(lineArray[evalueIndex])
+                    printedIt = false
                     if bestPeptideForScan[scanId] == peptide
                         if secondBestHitRatios[scanId].to_f >= @param[:threshold]
                             outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
                             printedRowCount += 1
+                            printedIt = true
                         end
+                    end
+                    unless printedIt
+                        discardFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if discardFile
                     end
                 end
             end
         end
         puts "Removed #{totalRowCount - printedRowCount} of #{totalRowCount} rows."
         outFile.close if outFile
+        discardFile.close if discardFile
     end
 end
 
