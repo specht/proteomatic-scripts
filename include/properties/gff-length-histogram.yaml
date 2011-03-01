@@ -26,7 +26,28 @@ output:
     default: yes
 
 parameters:
+  - key: property
+    type: string
+    default: ''
+    label: Property
+    examples:
+      - intron
+      - exon
+      - gene
+      - mRNA
+      - CDS
+    description: 'Choose which property to extract from the GFF file. If left empty, all properties will be extracted.'
   - key: binSize
-    type: int
-    default: 10
+    type: float
+    decimals: 2
+    default: 10.0
     label: Bin size
+  - key: logarithmic
+    type: flag
+    default: no
+    label: Use logarithmic bins
+  - key: splitSources
+    type: flag
+    default: no
+    label: Split different sources
+    description: Create a histogram for all individual sequence sources as described by the first GFF field

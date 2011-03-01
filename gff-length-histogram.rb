@@ -1,5 +1,5 @@
 #! /usr/bin/env ruby
-# Copyright (c) 2010 Michael Specht
+# Copyright (c) 2010-2011 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -26,6 +26,9 @@ class GffLengthHistogram < ProteomaticScript
     def run()
         histogram = Hash.new
         maxBin = 0
+        extractProperty = @param[:property].strip
+        extractProperty = nil if extractProperty.empty?
+        log2 = Math::log(2.0)
         @input[:input].each do |path|
             File::open(path) do |f|
                 lineCounter = 0
@@ -41,10 +44,15 @@ class GffLengthHistogram < ProteomaticScript
                         exit(1)
                     end
                     type = lineArray[2]
+                    next if extractProperty && (type != extractProperty)
+                    if @param[:splitSources]
+                        type = "#{lineArray[0]} #{type}"
+                    end
                     start = lineArray[3].to_i
                     stop = lineArray[4].to_i
-                    length = stop - start + 1
-                    bin = (length / @param[:binSize]).to_i * @param[:binSize]
+                    length = (stop - start + 1).to_f
+                    length = Math::log(length) / log2 if @param[:logarithmic]
+                    bin = (length / @param[:binSize]).to_i
                     maxBin = bin if bin > maxBin
                     histogram[type] ||= Hash.new
                     histogram[type] ||= Hash.new
@@ -61,8 +69,9 @@ class GffLengthHistogram < ProteomaticScript
                 fout.puts("Length bin," + columns.collect { |x| '"' + x + '"' }.join(','))
                 bin = 0
                 while bin <= maxBin
-                    fout.puts("#{bin}," + columns.collect { |x| histogram[x].include?(bin) ? histogram[x][bin].to_s : '0' }.join(','))
-                    bin += @param[:binSize]
+                    fout.puts("#{bin.to_f * @param[:binSize]}," + columns.collect { |x| histogram[x].include?(bin) ? histogram[x][bin].to_s : '0' }.join(','))
+                    bin += 1
+#                     bin += @param[:binSize]
                 end
             end
         end
