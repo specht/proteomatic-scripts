@@ -1,0 +1,31 @@
+group: Proteomics/Protein databases
+
+title: Prefix FASTA database
+
+type: processor
+
+description: >
+  This script prepends a prefix to each entry in a set of FASTA databases.
+
+input:
+  - key: fasta
+    label: fasta
+    formats: [fasta]
+    min: 1
+
+proposePrefix:
+  - fasta
+
+defaultOutputDirectory: fasta
+
+output:
+  - key: prefixed
+    label: prefixed FASTA
+    format: fasta
+    filename: "prefixed.fasta"
+    default: yes
+
+parameters:
+  - key: prefix
+    label: Prefix
+    type: string
