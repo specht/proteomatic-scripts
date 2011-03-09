@@ -505,8 +505,8 @@ def loadPsm(as_Path, ak_Options = {})
 				lk_PeptideHash[ls_Peptide][:found][:sixframes] = true 
 			else
 				lk_PeptideHash[ls_Peptide][:found][:models] = true 
-				lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
 			end
+            lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
 		end
 	end
 	
