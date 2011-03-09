@@ -499,13 +499,23 @@ def loadPsm(as_Path, ak_Options = {})
 			lk_PeptideHash[ls_Peptide][:mods][lk_Mod[:peptide]][ls_Description][ls_Spot].push(ls_Scan)
 		end
 		lk_ScanHash[ls_Scan][:deflines].each do |ls_DefLine|
-			if (ls_DefLine.index(ak_Options[:putativePrefix] + 'gpf_') == 0)
-				lk_PeptideHash[ls_Peptide][:found][:gpf] = true 
-			elsif (ls_DefLine.index(ak_Options[:putativePrefix] + 'orf_') == 0)
-				lk_PeptideHash[ls_Peptide][:found][:sixframes] = true 
-			else
-				lk_PeptideHash[ls_Peptide][:found][:models] = true 
-			end
+            checkDeflines = []
+            if ls_DefLine.index('__group__') == 0
+                ls_DefLine.sub('__group__', '').split("\x01").each do |x|
+                    checkDeflines << x
+                end
+            else
+                checkDeflines = [ls_DefLine]
+            end
+            checkDeflines.each do |x|
+                if (x.index(ak_Options[:putativePrefix] + 'gpf_') == 0)
+                    lk_PeptideHash[ls_Peptide][:found][:gpf] = true
+                elsif (x.index(ak_Options[:putativePrefix] + 'orf_') == 0)
+                    lk_PeptideHash[ls_Peptide][:found][:sixframes] = true
+                else
+                    lk_PeptideHash[ls_Peptide][:found][:models] = true
+                end
+            end
             lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
 		end
 	end
