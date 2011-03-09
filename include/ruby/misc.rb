@@ -49,6 +49,20 @@ def meanAndSd(ak_Values)
 end
 
 
+def median(ak_Values)
+    if ak_Values.size == 0
+        raise StandardError("Cannot determine median of zero values.")
+    end
+    if ak_Values.size % 2 == 0
+        # even number of values
+        return (ak_Values[ak_Values.size / 2 - 1] + ak_Values[ak_Values.size / 2]) * 0.5
+    else
+        # odd number of values
+        return ak_Values[ak_Values.size / 2]
+    end
+end
+
+
 def stddev(ak_Values)
     mean, sd = meanAndSd(ak_Values)
     return sd
