@@ -49,23 +49,43 @@ def meanAndSd(ak_Values)
 end
 
 
-def median(ak_Values)
-    if ak_Values.size == 0
-        raise StandardError("Cannot determine median of zero values.")
-    end
-    if ak_Values.size % 2 == 0
-        # even number of values
-        return (ak_Values[ak_Values.size / 2 - 1] + ak_Values[ak_Values.size / 2]) * 0.5
-    else
-        # odd number of values
-        return ak_Values[ak_Values.size / 2]
-    end
-end
-
-
 def stddev(ak_Values)
     mean, sd = meanAndSd(ak_Values)
     return sd
+end
+
+
+# calculates median of values
+def median(ak_Values)
+    median, iqr = medianAndIqr(ak_Values)
+    return median
+end
+
+
+# calculates median of values
+def medianAndIqr(ak_Values)
+    if ak_Values.size == 0
+        raise StandardError("Cannot determine median of empty set of values.")
+    end
+    ak_Values.sort!
+    p = [1, 2, 3].collect do |x|
+        r = (x.to_f / 4.0) * (ak_Values.size - 1)
+        (ak_Values[r.floor] + ak_Values[r.ceil]) * 0.5
+    end
+    return p[1], p[2] - p[0]
+end
+
+
+# calculates median of values
+def quartiles(ak_Values)
+    if ak_Values.size == 0
+        raise StandardError("Cannot determine median of empty set of values.")
+    end
+    ak_Values.sort!
+    return [1, 2, 3].collect do |x|
+        r = (x.to_f / 4.0) * (ak_Values.size - 1)
+        (ak_Values[r.floor] + ak_Values[r.ceil]) * 0.5
+    end
 end
 
 
