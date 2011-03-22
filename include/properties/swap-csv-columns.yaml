@@ -19,7 +19,7 @@ output:
   - key: in
     label: swapped results
     format: csv
-    filename: swapped.csv
+    filename: '#{basename}-swapped.#{extension}'
     default: yes
     
 
