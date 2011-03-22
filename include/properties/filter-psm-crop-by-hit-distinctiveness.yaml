@@ -1,0 +1,39 @@
+group: Proteomics/Identification/OMSSA/2. Filter PSM
+
+title: Crop PSM list by hit distinctiveness
+
+description: >
+  Scan PSM lists and remote all hits to a spectrum which are further away from 
+  the best to that spectrum than a user-defined threshold.
+  
+
+type: processor
+
+input:
+  - key: omssaResults
+    label: OMSSA results
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: omssaResults
+
+output:
+  - key: results
+    label: cropped PSM list
+    format: csv
+    filename: "cropped.csv"
+    default: yes
+  - key: discarded
+    label: discarded PSM list
+    format: csv
+    filename: "discarded.csv"
+    default: no
+
+parameters:
+  - key: threshold
+    type: float
+    default: 2.0
+    decimals: 2
+    min: 0.0
+    label: Hit distinctiveness threshold
+    step: 0.1
