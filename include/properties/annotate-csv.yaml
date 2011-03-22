@@ -1,0 +1,58 @@
+group: Miscellaneous
+
+title: Annotate CSV rows
+
+description: >
+    Annotate rows in a CSV file by adding a new column which reflects information
+    from another file. This is similar to joining tables.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+  - key: annotation
+    label: annotation
+    formats: [csv]
+    min: 1
+    max: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: result
+    label: annotated CSV file
+    format: csv
+    filename: annotated.csv
+    default: yes
+    
+
+parameters:
+  - key: keyInput
+    type: string
+    default: ''
+    label: 'Key column (input file)'
+  - key: keyAnnotation
+    type: string
+    default: ''
+    label: 'Key column (annotation file)'
+  - key: valueAnnotation
+    type: string
+    default: ''
+    label: 'Annotation column (annotation file)'
+  - key: newColumnName
+    type: string
+    default: ''
+    label: 'New column name (input file)'
+  - key: stripLookupValue
+    type: flag
+    group: Lookup value tweaks
+    default: yes
+    label: Strip whitespace
+  - key: downcaseLookupValue
+    type: flag
+    group: Lookup value tweaks
+    default: yes
+    label: Be case-sensitive

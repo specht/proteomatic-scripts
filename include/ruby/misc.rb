@@ -313,3 +313,24 @@ def readData(id = nil)
 	return '' unless endIndex
 	return s[startIndex + id.size + 4, endIndex - startIndex - id.size - 4]
 end
+
+
+# Returns distinct ordered CSV headers from all CSV files in fileList.
+# By default, headers are stripped and simplified before comparison
+def allCsvHeaders(fileList, useStrippedHeader = true)
+    distinctHeaderLists = Set.new
+    fileList.each do |path|
+        File::open(path, 'r') do |f|
+            headerLine = f.readline
+            headerList = headerLine.parse_csv()
+            thisColumns = []
+            if useStrippedHeader
+                headerList.each { |x| thisColumns << stripCsvHeader(x) }
+            else
+                headerList.each { |x| thisColumns << x }
+            end
+            distinctHeaderLists << thisColumns
+        end
+    end
+    return distinctHeaderLists
+end
