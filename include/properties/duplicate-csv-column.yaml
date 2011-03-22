@@ -1,0 +1,36 @@
+group: Miscellaneous
+
+title: Duplicate CSV column
+
+description: >
+    Duplicate a CSV column (A) and insert it under a new column name (B).
+
+type: converter
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: in
+    label: duplicated results
+    format: csv
+    filename: '#{basename}-duplicated.#{extension}'
+    default: yes
+    
+
+parameters:
+  - key: columnA
+    label: Column A
+    default: 'peptide'
+    examples: ['Amount light', 'Amount heavy', 'peptide', 'protein', 'defline', 'scan count', 'PBC count', 'Ratio mean', 'Ratio SD', 'Ratio RSD', 'charge', 'filename']
+    type: string
+  - key: columnB
+    label: Column B
+    default: 'protein'
+    examples: ['Amount light', 'Amount heavy', 'peptide', 'protein', 'defline', 'scan count', 'PBC count', 'Ratio mean', 'Ratio SD', 'Ratio RSD', 'charge', 'filename']
+    type: string
