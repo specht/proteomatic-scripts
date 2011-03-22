@@ -1,0 +1,40 @@
+group: Miscellaneous
+
+title: Join CSV tables
+
+description: >
+    Join CSV tables based on a common column.
+
+type: processor
+
+input:
+  - key: in
+    label: input
+    formats: [csv]
+    min: 1
+
+defaultOutputDirectory: in
+
+output:
+  - key: result
+    label: joined CSV file
+    format: csv
+    filename: joined.csv
+    default: yes
+    
+
+parameters:
+  - key: keyColumn
+    type: string
+    default: ''
+    label: 'Key column'
+#   - key: stripLookupValue
+#     type: flag
+#     group: Lookup value tweaks
+#     default: yes
+#     label: Strip whitespace
+#   - key: downcaseLookupValue
+#     type: flag
+#     group: Lookup value tweaks
+#     default: yes
+#     label: Be case-sensitive
