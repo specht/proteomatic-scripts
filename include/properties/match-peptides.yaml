@@ -24,11 +24,16 @@ output:
     format: html
     filename: matched-peptides.html
     default: no
+  - key: csvResults
+    label: CSV results
+    format: csv
+    filename: matched-peptides.csv
+    default: yes
   - key: yamlResults
     label: YAML results
     format: yaml
     filename: matched-peptides.yaml
-    default: yes
+    default: no
 
 needs:
   - ext.ptb

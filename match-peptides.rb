@@ -81,6 +81,20 @@ class MatchPeptides < ProteomaticScript
                 f.puts "</html>"
             end
         end
+        if @output[:csvResults]
+            File::open(@output[:csvResults], 'w') do |f|
+                f.puts "Peptide,Protein"
+                peptides.to_a.sort.each do |peptide|
+                    @input[:databases].each do |path|
+                        if results[path][peptide]
+                            results[path][peptide].keys.each do |protein|
+                                f.puts "\"#{peptide}\",\"#{protein}\""
+                            end
+                        end
+                    end
+                end
+            end
+        end
         if @output[:yamlResults]
             File::open(@output[:yamlResults], 'w') do |f|
                 peptideList = []
