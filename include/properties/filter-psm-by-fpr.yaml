@@ -1,9 +1,9 @@
 group: Proteomics/Identification/OMSSA/2. Filter PSM
 
-title: Filter by FPR
+title: Filter by FDR
 
 description: >
-  Filter peptide-spectral matches resulting from a target-decoy search at a certain target false positive rate.
+  Filter peptide-spectral matches resulting from a target-decoy search at a certain target false discovery rate.
 
 type: processor
 
@@ -19,20 +19,19 @@ output:
   - key: croppedPsm
     label: filtered results
     format: csv
-    filename: filtered-by-fpr.csv
+    filename: filtered-by-fdr.csv
     default: yes
 
 parameters:
   - key: fprCalculation
-    label: FPR calculation
+    label: FDR calculation
     type: enum
     choices:
       - {"2d_dt": "2 * decoys / (decoys + targets))"}
       - {"d_t": "decoys / targets"}
     default: "2d_dt"
   - key: targetFpr
-    label: Target FPR
-    enabled: scoreThresholdType == 'fpr'
+    label: Target FDR
     type: float
     default: 1.0
     suffix: '%'
@@ -45,10 +44,10 @@ parameters:
     choices: [global, 'per band']
     default: global
   - key: beStrict
-    label: Be strict about target FPR
+    label: Be strict about target FDR
     type: flag
     default: yes
-    description: Be strict about the target FPR.
+    description: Be strict about the target FDR.
   - key: targetPrefix
     label: Target entry prefix
     type: string
