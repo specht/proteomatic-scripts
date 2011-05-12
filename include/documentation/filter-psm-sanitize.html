@@ -1,0 +1,51 @@
+<h2>Synopsis</h2>
+
+<p>
+This script addresses the problem of ambiguous MS/MS scan identifications where
+multiple, different peptides are assigned to one MS/MS scan. 
+As a result, individual peptide/spectral matches can get discarded for the
+following three reasons.
+</p>
+
+<h3>1. A better-scoring peptide has been identified</h3>
+
+<p>
+In the following example, two different peptides have been identified in the
+same MS/MS scan:
+</p>
+
+<table>
+<tr><th>Row</th><th>Scan</th><th>Peptide</th><th>E-value</th></tr>
+<tr><td>1</td><td>example.1000.1000.2</td><td>GDDLGGNAAMSVYTK</td><td>2.6e-9</td></tr>
+<tr><td>2</td><td>example.1000.1000.2</td><td>GDDLGGNAVCSVYTK</td><td>7.2e-3</td></tr>
+</table>
+
+<p>
+Here, peptide 2 gets discarded because peptide 1 has a better score and
+is therefore more likely to be the correct explanation for the MS/MS scan.
+</p>
+
+<h3>2. Low hit distinctiveness</h3>
+
+<p>
+In the following example, two different peptides have been identified in the
+same MS/MS scan. 
+The score of peptide 2 is worse but almost as good as the score of peptide 1:
+</p>
+
+<table>
+<tr><th>Row</th><th>Scan</th><th>Peptide</th><th>E-value</th></tr>
+<tr><td>1</td><td>example.1000.1000.2</td><td>GDDLGGNAAMSVYTK</td><td>1.30e-9</td></tr>
+<tr><td>2</td><td>example.1000.1000.2</td><td>GDDLGGNAVCSVYTK</td><td>1.31e-9</td></tr>
+</table>
+
+<p>
+The <em>hit distinctiveness threshold</em> can be used to specify what is
+considered to be "almost as good" in terms of order of magnitude. 
+A value of 2 would correspond to a factor of 10<sup>2</sup>, thus requiring
+the score ratio P2/P1 to be &ge; 100.
+In this example, the score ratio is only 1.0077 and therefore, peptide 1
+would be discarded because its identification is not distinctive enough.
+In addition, peptide 2 would be discarded according to rule #1.
+Consequently, no identifications for this scan would remain.
+</p>
