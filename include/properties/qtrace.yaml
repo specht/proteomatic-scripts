@@ -104,7 +104,7 @@ parameters:
   - key: checkOverlappingPeaks
     group: Peak picking
     type: enum
-    default: 'yes'
+    default: 'no'
     choices: ['yes', 'no']
     label: Check overlapping peaks
   - key: absenceMassAccuracyFactor
