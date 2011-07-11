@@ -83,12 +83,14 @@ class MatchPeptides < ProteomaticScript
         end
         if @output[:csvResults]
             File::open(@output[:csvResults], 'w') do |f|
-                f.puts "Peptide,Protein"
+                f.puts "Peptide,Protein,Start,Length"
                 peptides.to_a.sort.each do |peptide|
                     @input[:databases].each do |path|
                         if results[path][peptide]
                             results[path][peptide].keys.each do |protein|
-                                f.puts "\"#{peptide}\",\"#{protein}\""
+                                results[path][peptide][protein].each do |x|
+                                    f.puts "\"#{peptide}\",\"#{protein}\",#{x['start']},#{x['length']}"
+                                end
                             end
                         end
                     end
