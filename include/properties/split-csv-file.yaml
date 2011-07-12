@@ -54,6 +54,7 @@ parameters:
     type: enum
     choices:
       - 'contains'
+      - {'startsWith': 'starts with'}
       - {'equal': 'is equal to'}
       - {'notEqual': 'is not equal to'}
       - {'less': 'is less than'}
@@ -64,6 +65,12 @@ parameters:
     group: Condition
     type: string
     label: Value
+    default: ''
+    examples:
+      - '__putative__gpf_'
+      - '__putative__orf_'
+      - '__td__target_'
+      - '__td__decoy_'
   - key: caseSensitive
     group: Condition
     type: enum

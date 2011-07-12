@@ -81,6 +81,8 @@ class SplitCsvFile < ProteomaticScript
                         thisAccept = nil
                         if @param[:operand] == 'contains'
                             thisAccept = item.include?(value)
+                        elsif @param[:operand] == 'startsWith'
+                            thisAccept = (item[0, value.size] == value)
                         elsif @param[:operand] == 'equal'
                             thisAccept = (item == value)
                         elsif @param[:operand] == 'notEqual'
