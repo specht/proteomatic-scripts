@@ -307,7 +307,7 @@ def loadPsm(as_Path, ak_Options = {})
 				unless ak_Options[:silent]
 					print 'Statistical significance: '
 					if (lb_HasFpr)
-						puts 'FPR (adaptive score threshold).'
+						puts 'FDR (adaptive score threshold).'
 					elsif (lb_HasFixedScoreThreshold)
 						puts 'fixed score threshold.'
 					else
@@ -333,7 +333,7 @@ def loadPsm(as_Path, ak_Options = {})
 			lf_RetentionTime = lk_Line[lk_HeaderMap['retentiontime']].to_f if lk_HeaderMap.include?('retentiontime')
 
 			if (ls_DefLine.include?('decoy_'))
-				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FPR' script. If you are unsatisfied with the results of the FPR filter, you can alternatively filter by a fixed score threshold."
+				puts "Error: Input file must not contain target and decoy results. Please complete the target/decoy approach first by running the 'Filter by FDR' script. If you are unsatisfied with the results of the FDR filter, you can alternatively filter by a fixed score threshold."
 				exit 1
 			end
 			
@@ -377,13 +377,13 @@ def loadPsm(as_Path, ak_Options = {})
 				lf_ThisTargetFpr = lk_Line[lk_HeaderMap['targetfpr']].to_f
 				lf_TargetFpr ||= lf_ThisTargetFpr
 				if (lf_TargetFpr != lf_ThisTargetFpr)
-					puts "Error: Target FPR is not constant throughout the whole file."
+					puts "Error: Target FDR is not constant throughout the whole file."
 					exit 1
 				end
 				lf_ThisActualFpr = lk_Line[lk_HeaderMap['actualfpr']].to_f
 				lk_ActualFpr[ls_Spot] ||= lf_ThisActualFpr
 				if (lf_ThisActualFpr != lk_ActualFpr[ls_Spot])
-					puts "Error: Actual FPR is not constant per band throughout the whole file."
+					puts "Error: Actual FDR is not constant per band throughout the whole file."
 					exit 1
 				end
 				lf_ThisScoreThreshold = BigDecimal.new(lk_Line[lk_HeaderMap['scorethreshold']])
@@ -508,18 +508,18 @@ def loadPsm(as_Path, ak_Options = {})
                 checkDeflines = [ls_DefLine]
             end
             checkDeflines.each do |x|
-                if (x.index(ak_Options[:putativePrefix] + 'gpf_') == 0)
+                if (x.index(ak_Options[:putativePrefix] + 'gpf_' + ls_Peptide) == 0)
                     lk_PeptideHash[ls_Peptide][:found][:gpf] = true
                 elsif (x.index(ak_Options[:putativePrefix] + 'orf_') == 0)
                     lk_PeptideHash[ls_Peptide][:found][:sixframes] = true
                 else
                     lk_PeptideHash[ls_Peptide][:found][:models] = true
+                    lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
                 end
             end
-            lk_PeptideHash[ls_Peptide][:proteins][ls_DefLine] = true
 		end
 	end
-	
+    
 	# sort scans in lk_PeptideHash by e-value
 	lk_PeptideHash.keys.each do |ls_Peptide|
 		lk_PeptideHash[ls_Peptide][:scans] = lk_PeptideHash[ls_Peptide][:scans].sort { |a, b| lk_ScanHash[a][:e] <=> lk_ScanHash[b][:e] }

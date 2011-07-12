@@ -28,30 +28,42 @@ class WriteOmssaReport < ProteomaticScript
     def formatProtein(protein)
         if protein[0, 9] == '__group__'
             entries = protein.sub('__group__', '').split("\01")
-            return "<b>protein group</b> (#{entries.size} proteins)<br /><ul>" + entries.collect do |x| 
-                y = ''
-                if @hasProteinGroups
-                    y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProtein[x].size > 1
-                end
-                '<li>' + x + y + '</li>'
-            end.join("\n") + '</ul>'
-        else
-            y = ''
-            if @hasProteinGroups
-                unless @proteinGroupsForProtein.include?(protein)
-                    puts "AAAAAAHH"
-                    puts protein
-                    exit
-                end
-                y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProtein[protein].size > 1
+            # remove all GPF peptides from group
+            entries = entries.select do |x|
+                x.index(@param[:putativePrefix] + 'gpf_') != 0
             end
-            return protein + y
+            if entries.size == 1
+                protein = entries.first
+                # and continue below...
+            else
+                if entries.size == 0
+                    entries = protein.sub('__group__', '').split("\01")
+                end
+                return "<b>protein group</b> (#{entries.size} proteins)<br /><ul>" + entries.collect do |x| 
+                    y = ''
+                    if @hasProteinGroups
+                        y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProteinNoPutative[x].size > 1
+                    end
+                    '<li>' + x + y + '</li>'
+                end.join("\n") + '</ul>'
+            end
         end
+        y = ''
+        if @hasProteinGroups && protein[0, 9] != '__group__'
+            unless @proteinGroupsForProteinNoPutative.include?(protein)
+                puts "AAAAAAHH"
+                puts protein
+                exit
+            end
+            y = ' <b><i>(not unique)</i></b>' if @proteinGroupsForProteinNoPutative[protein].size > 1
+        end
+        return protein + y
     end
     
     def run()
         
         @proteinGroupsForProtein = Hash.new
+        @proteinGroupsForProteinNoPutative = Hash.new
         @hasProteinGroups = false
         # merge OMSSA results
         lk_Result = loadPsm(@input[:psmFile].first, {:putativePrefix => @param[:putativePrefix]})
@@ -81,10 +93,14 @@ class WriteOmssaReport < ProteomaticScript
                     entries.each do |entry|
                         @proteinGroupsForProtein[entry] ||= Set.new
                         @proteinGroupsForProtein[entry] << protein
+                        @proteinGroupsForProteinNoPutative[entry] ||= Set.new
+                        @proteinGroupsForProteinNoPutative[entry] << protein unless protein[0, @param[:putativePrefix].size] == @param[:putativePrefix]
                     end
                 else
                     @proteinGroupsForProtein[protein] ||= Set.new
                     @proteinGroupsForProtein[protein] << protein
+                    @proteinGroupsForProteinNoPutative[protein] ||= Set.new
+                    @proteinGroupsForProteinNoPutative[protein] << protein unless protein[0, @param[:putativePrefix].size] == @param[:putativePrefix]
                 end
             end
         end
@@ -125,20 +141,19 @@ class WriteOmssaReport < ProteomaticScript
                 lk_Out.puts '<style type=\'text/css\'>'
                 lk_Out.puts 'body {font-family: Verdana; font-size: 10pt;}'
                 lk_Out.puts 'h1 {font-size: 14pt;}'
-                lk_Out.puts 'h2 {font-size: 12pt; border-top: 1px solid #888; border-bottom: 1px solid #888; padding-top: 0.2em; padding-bottom: 0.2em; background-color: #e8e8e8; }'
+                lk_Out.puts 'h2 {font-size: 12pt; border-top: 1px solid #888a85; border-bottom: 1px solid #888a85; padding-top: 0.2em; padding-bottom: 0.2em; background-color: #eeeeec; }'
                 lk_Out.puts 'h3 {font-size: 10pt; }'
                 lk_Out.puts 'h4 {font-size: 10pt; font-weight: normal;}'
                 lk_Out.puts 'ul {padding-left: 0;}'
                 lk_Out.puts 'ol {padding-left: 0;}'
                 lk_Out.puts 'li {margin-left: 2em;}'
                 lk_Out.puts '.default { }'
-                lk_Out.puts '.nonDefault { background-color: #ada;}'
                 lk_Out.puts 'table {border-collapse: collapse;} '
                 lk_Out.puts 'table tr {text-align: left; font-size: 10pt;}'
-                lk_Out.puts 'table th, td {vertical-align: top; border: 1px solid #888; padding: 0.2em;}'
+                lk_Out.puts 'table th, td {vertical-align: top; border: 1px solid #888a85; padding: 0.2em;}'
                 lk_Out.puts 'table th {font-weight: bold;}'
-                lk_Out.puts '.gpf-confirm { background-color: #aed16f; }'
-                lk_Out.puts '.toggle { cursor: pointer; text-decoration: underline; color: #aaa; }'
+                lk_Out.puts '.gpf-confirm { background-color: #a6cc82; }'
+                lk_Out.puts '.toggle { cursor: pointer; text-decoration: underline; color: #babdb6; }'
                 lk_Out.puts '.toggle:hover { color: #000; }'
                 lk_Out.puts '</style>'
                 lk_Out.puts "<script type='text/javascript'>"
@@ -191,7 +206,7 @@ class WriteOmssaReport < ProteomaticScript
                     lk_ScoreThresholds.keys.sort { |a, b| String::natcmp(a, b) }.each do |ls_Spot|
                         lb_Good = false
                         lb_Good = true if lk_ActualFpr[ls_Spot] && lk_ActualFpr[ls_Spot] <= lk_Result[:targetFpr]
-                        lk_Out.puts "<tr style='background-color: #{lb_Good ? '#bbddbb' : '#eebbbb'};'><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
+                        lk_Out.puts "<tr style='background-color: #{lb_Good ? '#a6cc82' : '#f79494'};'><td>#{ls_Spot}</td><td>#{lk_ScoreThresholds[ls_Spot] ? sprintf('%e', lk_ScoreThresholds[ls_Spot]) : 'n/a'}</td><td>#{lk_ActualFpr[ls_Spot] ? sprintf('%1.2f%%', lk_ActualFpr[ls_Spot] * 100.0) : 'n/a'}</td></tr>"
                     end
                     lk_Out.puts '</tbody>'
                     lk_Out.puts '</table>'
@@ -205,7 +220,8 @@ class WriteOmssaReport < ProteomaticScript
                     lk_Out.puts '<h3>Protein groups</h3>'
                     lk_Out.puts "These results contain protein groups."
                     notUniqueProteins = Array.new
-                    @proteinGroupsForProtein.each_pair do |protein, entries|
+                    @proteinGroupsForProteinNoPutative.each_pair do |protein, entries|
+                        next if protein.index(@param[:putativePrefix] + 'gpf_') == 0
                         notUniqueProteins << protein if entries.size > 1
                     end
                     unless notUniqueProteins.empty?
@@ -340,7 +356,7 @@ class WriteOmssaReport < ProteomaticScript
                     lk_Out.puts '</thead>'
                     lk_Out.puts '<tbody>'
                     lk_ProteinsByDistinctPeptideCount.each do |ls_Protein|
-                        lk_Out.puts "<tr><td>#{formatProtein(ls_Protein)}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.join(', ')}</td></tr>"
+                        lk_Out.puts "<tr><td>#{formatProtein(ls_Protein)}</td><td>#{lk_Proteins[ls_Protein].size}</td><td>#{lk_Proteins[ls_Protein].sort.collect { |x| '<span ' + (ls_CellStyle = lk_PeptideHash[x][:found][:gpf]? ' class=\'gpf-confirm\'' : '') + '>' + x + '</span>'}.join(', ')}</td></tr>"
                     end
                     lk_Out.puts '</tbody>'
                     lk_Out.puts '</table>'
