@@ -18,6 +18,7 @@
 
 require './include/ruby/proteomatic'
 require './include/ruby/externaltools'
+require './include/ruby/fasta'
 require 'set'
 
 
@@ -131,6 +132,105 @@ class MatchPeptides < ProteomaticScript
                     end
                 end
                 f.puts result.to_yaml
+            end
+        end
+        if @output[:sequenceCoverage]
+            File::open(@output[:sequenceCoverage], 'w') do |f|
+                f.puts "<html>"
+                f.puts "<head><title>Sequence coverage</title>"
+                f.puts DATA.read
+                f.puts "</head>"
+                f.puts "<body>"
+                @input[:databases].each do |key|
+                    sequences = {}
+                    fastaIterator(File::open(key)) do |id, seq|
+                        sequences[id] = seq
+                    end
+                    f.puts "<h1>#{File::basename(key)}</h1>"
+                    f.puts "<table>"
+                    f.puts "<thead>"
+                    f.puts "<tr style='vertical-align: top;'>"
+                    f.puts "<th>Protein</th><th>Sequence</th><th>Coverage</th><th>Peptide count</th><th>Peptides</th>"
+                    f.puts "</tr>"
+                    f.puts "</thead>"
+                    f.puts "<tbody>"
+                    proteinHash = {}
+                    # peptide:
+                    #   protein A:
+                    #     - left, right, start, length, proteinLength
+                    #     - left, right, start, length, proteinLength
+                    #   protein B:
+                    #     - left, right, start, length, proteinLength
+                    #     - left, right, start, length, proteinLength
+                    results[key].each_pair do |peptide, x|
+                        x.each_pair do |protein, matches|
+                            proteinHash[protein] ||= Hash.new
+                            proteinHash[protein][peptide] = matches
+                        end
+                    end
+                    proteinCoverage = {}
+                    proteinHash.keys.each do |protein|
+                        proteinLength = proteinHash[protein].values.first.first['proteinLength']
+                        covered = []
+                        proteinLength.times { covered << false }
+                        proteinHash[protein].each_pair do |peptide, infoList|
+                            infoList.each do |info|
+                                p = info['start']
+                                info['length'].times do 
+                                    covered[p] = true
+                                    p += 1
+                                end
+                            end
+                        end
+                        proteinCoverage[protein] = covered.count(true).to_f / proteinLength
+                    end
+                    
+                    proteinHash.keys.sort { |a, b| proteinCoverage[b] <=> proteinCoverage[a] }. each do |protein|
+                        f.puts "<tr style='vertical-align: top;'>"
+                        f.puts "<td>#{protein}</td>"
+                        proteinLength = proteinHash[protein].values.first.first['proteinLength']
+                        covered = []
+                        proteinLength.times { covered << false }
+                        proteinHash[protein].each_pair do |peptide, infoList|
+                            infoList.each do |info|
+                                p = info['start']
+                                info['length'].times do 
+                                    covered[p] = true
+                                    p += 1
+                                end
+                            end
+                        end
+                        coverage = covered.count(true).to_f / proteinLength
+                        printSequence = sequences[protein]
+                        f.puts "<td style='font-family: monospace;'>"
+                        i = 0
+                        inSpan = false
+                        while i < printSequence.size:
+                            c = printSequence[i, 1]
+                            if ((i > 0) && (covered[i] && !covered[i - 1])) || (i == 0 && covered[i])
+                                f.print("<span style='background-color: #fce94f;'>") 
+                                inSpan = true
+                            end
+                            f.print(c)
+                            if ((i < proteinLength - 1) && (covered[i] && !covered[i + 1]))
+                                f.print("</span>") 
+                                inSpan = false
+                            end
+                            f.print("<br />") if (i + 1) % 70 == 0
+                            i += 1
+                        end
+                        f.print("</span>") if inSpan
+                        f.puts "</td>"
+                        f.puts "<td>#{sprintf('%1.2f', coverage * 100)}%</td>"
+                        f.puts "<td>#{proteinHash[protein].values.size}</td>"
+                        f.puts "<td>#{proteinHash[protein].keys.join("<br />")}</td>"
+                        f.puts "</tr>"
+                    end
+                    f.puts "</tbody>"
+                    f.puts "</table>"
+                end
+                f.puts "</body>"
+                f.puts "</html>"
             end
         end
     end

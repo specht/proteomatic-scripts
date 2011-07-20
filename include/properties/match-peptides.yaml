@@ -34,6 +34,11 @@ output:
     format: yaml
     filename: matched-peptides.yaml
     default: no
+  - key: sequenceCoverage
+    label: Sequence coverage
+    format: html
+    filename: sequence-coverage.html
+    default: no
 
 needs:
   - ext.ptb
