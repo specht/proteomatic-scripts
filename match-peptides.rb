@@ -205,7 +205,7 @@ class MatchPeptides < ProteomaticScript
                         f.puts "<td style='font-family: monospace;'>"
                         i = 0
                         inSpan = false
-                        while i < printSequence.size:
+                        while i < printSequence.size
                             c = printSequence[i, 1]
                             if ((i > 0) && (covered[i] && !covered[i - 1])) || (i == 0 && covered[i])
                                 f.print("<span style='background-color: #fce94f;'>") 
