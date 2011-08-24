@@ -163,9 +163,11 @@ class MatchPeptides < ProteomaticScript
                     #     - left, right, start, length, proteinLength
                     #     - left, right, start, length, proteinLength
                     results[key].each_pair do |peptide, x|
-                        x.each_pair do |protein, matches|
-                            proteinHash[protein] ||= Hash.new
-                            proteinHash[protein][peptide] = matches
+                        if x != nil    # this is necessary for peptides which are not found in the database
+                            x.each_pair do |protein, matches|
+                                proteinHash[protein] ||= Hash.new
+                                proteinHash[protein][peptide] = matches
+                            end
                         end
                     end
                     proteinCoverage = {}
@@ -205,7 +207,7 @@ class MatchPeptides < ProteomaticScript
                         f.puts "<td style='font-family: monospace;'>"
                         i = 0
                         inSpan = false
-                        while i < printSequence.size:
+                        while i < printSequence.size
                             c = printSequence[i, 1]
                             if ((i > 0) && (covered[i] && !covered[i - 1])) || (i == 0 && covered[i])
                                 f.print("<span style='background-color: #fce94f;'>") 
