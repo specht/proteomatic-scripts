@@ -23,7 +23,7 @@ require './include/ruby/ext/fastercsv'
 require 'yaml'
 require 'fileutils'
 
-class DuplicateCsvColumn < ProteomaticScript
+class AnnotateCSV < ProteomaticScript
     def run()
         csvHeaders = allCsvHeaders(@input[:in], false)
         if csvHeaders.size > 1
@@ -87,6 +87,7 @@ class DuplicateCsvColumn < ProteomaticScript
                             end
                             lineArray = line.parse_csv()
                             lookup = lineArray[keyIndex]
+                            lookup ||= ''
                             lookup = lookup.strip if @param[:stripLookupValue]
                             lookup = lookup.downcase if @param[:downcaseLookupValue]
                             if annotation[lookup]
@@ -108,4 +109,4 @@ class DuplicateCsvColumn < ProteomaticScript
     end
 end
 
-script = DuplicateCsvColumn.new
+script = AnnotateCSV.new
