@@ -19,11 +19,12 @@
 require './include/ruby/proteomatic'
 require './include/ruby/externaltools'
 require './include/ruby/fasta'
-require './include/ruby/ext/fastercsv'
+# require './include/ruby/ext/fastercsv'
 require './include/ruby/formats'
 require './include/ruby/misc'
 require 'yaml'
 require 'fileutils'
+require 'csv'
 
 class RunOmssa < ProteomaticScript
 
@@ -59,7 +60,8 @@ class RunOmssa < ProteomaticScript
                     if (ls_Id.empty?)
                         ls_Id = File::basename(as_SpectrumFilename)
                         lk_Line[lk_HeaderMap['filenameid']] = ls_Id
-                        ls_FixedResult += FasterCSV.generate { |csv| csv << lk_Line }
+#                         ls_FixedResult += FasterCSV.generate { |csv| csv << lk_Line }
+                          ls_FixedResult += CSV.generate { |csv| csv << lk_Line }
                     else
                         ls_FixedResult += ls_Line + "\n"
                     end
