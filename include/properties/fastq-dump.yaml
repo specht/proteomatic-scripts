@@ -1,0 +1,28 @@
+group: Sequencing/SRA
+
+title: Convert SRA to FASTQ
+
+type: converter
+
+description: >
+  Convert SRA files to FASTQ.
+
+input:
+  - key: reads
+    label: reads
+    formats: [sra]
+    min: 1
+
+proposePrefix:
+  - reads
+
+defaultOutputDirectory: reads
+
+output:
+  - key: reads
+    label: FASTQ file
+    format: fastq
+    filename: "#{basename}.fastq"
+
+needs:
+  - ext.sratoolkit
