@@ -27,7 +27,7 @@ parameters:
     label: FDR calculation
     type: enum
     choices:
-      - {"2d_dt": "2 * decoys / (decoys + targets))"}
+      - {"2d_dt": "2 * decoys / (decoys + targets)"}
       - {"d_t": "decoys / targets"}
     default: "2d_dt"
   - key: targetFpr
