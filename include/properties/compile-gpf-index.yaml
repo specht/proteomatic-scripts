@@ -3,9 +3,7 @@ group: Proteomics/Identification/GPF
 title: Compile GPF index
 
 description: >
-  Compile a GPF index file from a nucleotide fasta file.
-  Currently, the default (and still fixed) options are:
-  tryptic cleavage, monoisotopic masses, no missed cleavage sites
+  Compile a GPF index file from a FASTA file containing genomic DNA.
 
 type: converter
 
@@ -21,11 +19,77 @@ output:
   - key: genome
     label: GPF index
     format: gpfindex
-    filename: '#{basename}#{extension}.trypsin-monoisotopic.gpfindex'
+    filename: '#{basename}#{extension}.gpfindex'
+
+parameters:
+  - key: tagSize
+    label: Tag size
+    type: int
+    default: 5
+    suffix: nt
+  - key: enzyme
+    label: Enzyme
+    type: string
+    default: "RK|"
+    description: |
+        Specify the enzyme for creating peptides. The | symbol denotes the
+        cleavage site. RK| means that the enzyme cleaves after R or K.
+        Inhibitory amino acids do not play a role, because missed cleavages
+        are handled by GPF.
+  - key: alloc
+    label: RAM usage
+    type: string
+    default: "512M"
+    description: |
+        Amount of RAM to allocate for the index buffer. A bigger index
+        buffer leads to faster execution of this program. The amount may
+        be specified as a number, optionally followed by any of the
+        prefixes K, M, G.
+        Please note that in addition to the index buffer, the whole DNA
+        is loaded into RAM, which uses 3/8 of the DNA input file's size.
+  - key: massPrecision
+    label: Mass precision
+    type: int
+    default: 10000
+    description: |
+        Specify the precision of masses here. A mass precision of 10000
+        corresponds to four decimal places (log(10000) / log(10) = 4).
+  - key: massBits
+    label: Mass bits
+    type: int
+    default: 27
+    description: |
+        Specify how many bits should be used to encode masses. Together
+        with the mass precision specified, this defines the highest mass
+        that can be encoded in the index file.
+  - key: geneticCode
+    label: NCBI Genetic code
+    type: enum
+    default: 1
+    description: |
+        Specify the genetic code which should be used for the provided
+        genome. Genetic codes have been fetched from NCBI.
+    choices:
+        - {1: '1 - The Standard Code'}
+        - {2: '2 - The Vertebrate Mitochondrial Code'}
+        - {3: '3 - The Yeast Mitochondrial Code'}
+        - {4: '4 - The Mold, Protozoan, Coelenterate Mito and Myco/Spiroplasma Code'}
+        - {5: '5 - The Invertebrate Mitochondrial Code'}
+        - {6: '6 - The Ciliate, Dasycladacean and Hexamita Nuclear Code'}
+        - {9: '9 - The Echinoderm and Flatworm Mitochondrial Code'}
+        - {10: '10 - The Euplotid Nuclear Code'}
+        - {11: '11 - The Bacterial, Archaeal and Plant Plastid Code'}
+        - {12: '12 - The Alternative Yeast Nuclear Code'}
+        - {13: '13 - The Ascidian Mitochondrial Code'}
+        - {14: '14 - The Alternative Flatworm Mitochondrial Code'}
+        - {15: '15 - Blepharisma Nuclear Code'}
+        - {16: '16 - Chlorophycean Mitochondrial Code'}
+        - {21: '21 - Trematode Mitochondrial Code'}
+        - {22: '22 - Scenedesmus obliquus mitochondrial Code'}
+        - {23: '23 - Thraustochytrium Mitochondrial Code'}
 
 needs:
   - ext.gpf
-  
   
 filetracker:
   - dontMd5InputFiles: [genome]

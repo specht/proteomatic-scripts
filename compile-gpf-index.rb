@@ -1,5 +1,5 @@
 #! /usr/bin/env ruby
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2012 Michael Specht
 # 
 # This file is part of Proteomatic.
 # 
@@ -28,7 +28,7 @@ require 'set'
 class CompileGpfIndex < ProteomaticScript
     def run()
         @output.each do |ls_InPath, ls_OutPath|
-            ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} #{ls_InPath} #{ls_OutPath} \"\""
+            ls_Command = "#{ExternalTools::binaryPath('gpf.gpfindex')} --tagSize #{@param[:tagSize]} --enzyme \"#{@param[:enzyme]}\" --alloc \"#{@param[:alloc]}\" --massPrecision #{@param[:massPrecision]} --massBits #{@param[:massBits]} --geneticCode #{@param[:geneticCode]} \"#{ls_InPath}\" \"#{ls_OutPath}\""
             runCommand(ls_Command, true)
         end
         
