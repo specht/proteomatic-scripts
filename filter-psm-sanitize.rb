@@ -51,6 +51,7 @@ class FilterPsmSanitize < ProteomaticScript
             scanHash = Hash.new
             filenameidIndex = nil
             peptideIndex = nil
+            deflineIndex = nil
             evalueIndex = nil
             File::open(inPath, 'r') do |fin|
                 headerLine = fin.readline
@@ -68,6 +69,11 @@ class FilterPsmSanitize < ProteomaticScript
                 peptideIndex = header['peptide']
                 unless peptideIndex
                     puts "Error: missing 'peptide' column in #{File::basename(inPath)}."
+                    exit(1)
+                end
+                deflineIndex = header['defline']
+                unless deflineIndex
+                    puts "Error: missing 'defline' column in #{File::basename(inPath)}."
                     exit(1)
                 end
                 evalueIndex = header['evalue']
@@ -119,16 +125,26 @@ class FilterPsmSanitize < ProteomaticScript
                     scanId = lineArray[filenameidIndex]
                     peptide = lineArray[peptideIndex].dup
                     peptide.upcase! if @param[:upcasePeptides]
+                    defline = lineArray[deflineIndex]
 #                         evalue = BigDecimal.new(lineArray[evalueIndex])
-                    printedIt = false
+                    keepThis = false
                     if bestPeptideForScan[scanId] == peptide
                         if secondBestHitRatios[scanId].to_f >= @param[:threshold]
-                            outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
-                            printedRowCount += 1
-                            printedIt = true
+                            keepThis = true
                         end
                     end
-                    unless printedIt
+                    
+                    if @param[:removeSimilarGpfPeptides]
+                        if defline.index('__putative__gpf_') == 0
+                            gpfPeptide = defline.sub('__putative__gpf_', '')
+                            keepThis = false if gpfPeptide != peptide
+                        end
+                    end
+                    
+                    if keepThis
+                        outFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if outFile
+                        printedRowCount += 1
+                    else
                         discardFile.puts line.strip + ",#{sprintf('%1.2f', secondBestHitRatios[scanId].to_f)}" if discardFile
                     end
                 end

@@ -1,5 +1,5 @@
 #! /usr/bin/env ruby
-# Copyright (c) 2007-2008 Michael Specht
+# Copyright (c) 2007-2012 Michael Specht, Till Bald
 # 
 # This file is part of Proteomatic.
 # 
@@ -32,7 +32,9 @@ class RunBlast < ProteomaticScript
         command = "\"#{ExternalTools::binaryPath('blast.blastall')}\" "
         command += @mk_Parameters.commandLineFor("blast.blastall") + " "
         # database file
-        command += "-d \"#{databasePath}\" "
+        # blastall seperates multiple input files via spaces, therefore the path
+        # has to be in "", just in case it contains spaces
+        command += "-d \"\\\"#{databasePath}\\\"\" "
         # input query file
         command += "-i \"#{queryBatchPath}\" "
         # XML output
@@ -104,6 +106,25 @@ class RunBlast < ProteomaticScript
             puts "Error: You cannot specify more than one database for BLAST."
             exit 1
         end
+        
+        # copy database files to temp dir on Windows
+        # blast can somehow not handle network drives ...
+        if RUBY_PLATFORM.downcase.include?("mswin")
+            print("\rCopying database files to temp directory ...")
+            tmp_dir = Dir.mktmpdir('proteomatic_blast')
+            ['.pin', '.psq', '.phr', ''].each do |filetype|
+                src_path = databases.first + filetype
+                if File.exist?(src_path)
+                    FileUtils.copy(src_path, tmp_dir)
+                end
+            end
+            database_name = databases.first.split('/').last
+            databases = Set.new
+            databases << tmp_dir + '/' + database_name
+            print("\rCopying database files to temp directory done.")
+            puts
+        end 
+        
         unless @output[:csvResults]
             puts "Notice: CSV output not activated. Skipping BLAST..."
             exit 0

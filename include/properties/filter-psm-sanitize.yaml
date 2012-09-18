@@ -44,3 +44,10 @@ parameters:
     description: >
       If this flag is activated, peptides will be converted to upper case, 
       thereby removing PTM information while filtering.
+  - key: removeSimilarGpfPeptides
+    type: flag
+    default: true
+    label: Remove similar GPF peptides
+    description: >
+      Remove all peptides identified via GPF in which a different 
+      (most probably miscleaved) peptides was identified by GPF.
